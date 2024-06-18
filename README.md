@@ -1,5 +1,5 @@
 # BIOS
-BIOS - Bareket Itai Operating System
+BIOS - ~~Basic Input/Output System~~ Bareket Itai Operating System
 
 ---
 ## Resources
