@@ -9,3 +9,4 @@ BIOS - ~~Basic Input/Output System~~ Bareket Itai Operating System
 - [Writing My Own Boot Loader](https://dev.to/frosnerd/writing-my-own-boot-loader-3mld)
 - [Building an OS (Youtube)](https://www.youtube.com/watch?v=F3XiH78erNM)
 - [r/osdev](https://www.reddit.com/r/osdev/)
+- [write your own operating system](https://www.youtube.com/playlist?list=PLHh55M_Kq4OApWScZyPl5HhgsTJS9MZ6M)
