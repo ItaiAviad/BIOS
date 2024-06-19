@@ -1,7 +1,8 @@
 # BIOS
-BIOS - ~~Basic Input/Output System~~ Bareket Itai Operating System
+### BIOS - ~~Basic Input/Output System~~ Bareket Itai Operating System
 
 ---
+
 ## Resources
 #### Links:
 - [OSDev](https://wiki.osdev.org/)
@@ -9,3 +10,9 @@ BIOS - ~~Basic Input/Output System~~ Bareket Itai Operating System
 - [Writing My Own Boot Loader](https://dev.to/frosnerd/writing-my-own-boot-loader-3mld)
 - [Building an OS (Youtube)](https://www.youtube.com/watch?v=F3XiH78erNM)
 - [r/osdev](https://www.reddit.com/r/osdev/)
+
+---
+
+## Notes
+
+- **Please ensure that all text is properly capitalized according to standard English grammar rules.**
