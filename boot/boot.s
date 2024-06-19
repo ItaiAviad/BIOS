@@ -30,6 +30,9 @@ puts:
     ret
 
 main:
+    ; clearn interrupt flag
+    cli
+
     ; setup data segment
     mov ax, 0
     mov ds, ax

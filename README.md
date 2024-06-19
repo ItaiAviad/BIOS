@@ -11,6 +11,7 @@
 - [Building an OS (Youtube)](https://www.youtube.com/watch?v=F3XiH78erNM)
 - [r/osdev](https://www.reddit.com/r/osdev/)
 - [Write your own Operating System](https://www.youtube.com/playlist?list=PLHh55M_Kq4OApWScZyPl5HhgsTJS9MZ6M)
+- [64bit OS Tutorial](https://github.com/gmarino2048/64bit-os-tutorial)
 
 ---
 
