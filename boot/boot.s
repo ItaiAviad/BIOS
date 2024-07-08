@@ -1,13 +1,13 @@
 ; Bootloader
-org 0x7C00
+org 0x7C00; The bios loads the first 512 bits (which are known by the name boot sector) of the device to the address 0X7C00
 bits 16
 
-%define ENDL 0x0D, 0x0A
+%define ENDL 0x0D, 0x0A; This defines ENDL to be a carriage return charcter followed by a line feed charcter
 
 start:
     jmp main
 
-; Print string to screen
+; Print string to screen (only works while in 16 bits real mode)
 ; @param ds:si - points to string
 puts:
     ; save regs
@@ -50,7 +50,7 @@ main:
 .hlt:
     jmp .hlt
 
-boot_msg: db 'Boot successful!', ENDL, 0
+boot_msg: db 'Successful!', ENDL, 0
 
-times 510-($-$$) db 0
-dw 0xAA55
+times 510-($-$$) db 0; This fills the space so the magic number defined below will be at addresses: [511-512]
+dw 0xAA55; This is the magic number 
