@@ -19,7 +19,7 @@ $(FLOPPY_BIN): bootloader kernel
 # Bootloader
 bootloader: $(BOOT_BIN)
 $(BOOT_BIN): always
-	nasm $(BOOT_S) -f bin -o $(BOOT_BIN)
+	nasm $(BOOT_S) -I $(BOOT_DIR) -f bin -o $(BOOT_BIN)
 
 always:
 	mkdir -p $(BUILD_DIR)
