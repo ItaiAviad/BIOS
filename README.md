@@ -25,4 +25,3 @@ To Debug `floppy.img`:
 
 ## Notes
 
-- **Please ensure that all text is properly capitalized according to standard English grammar rules.**

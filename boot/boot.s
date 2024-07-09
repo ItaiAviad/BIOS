@@ -6,8 +6,6 @@
 start:
     jmp main
 
-
-
 main:
     ; clearn interrupt flag
     cli
@@ -25,7 +23,7 @@ main:
     mov si, msg_boot
     call puts
 
-    ; Read from Disk
+    ; Read second sectro from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
     mov ax, 0x1 ; LBA = 1, second sector from disk
     mov cl, 0x1 ; Read 1 sector
@@ -40,8 +38,10 @@ main:
     cli
     jmp .hlt
 
+
 %include "print.s"
 %include "disk.s"
+%include "gdt.s"
 
 msg_boot: db 'Boot-sector successfully loaded from disk by the bios!', ENDL, 0
 
