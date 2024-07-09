@@ -56,11 +56,7 @@ disk_read_fail:
 ;   es:[bx] - where to store the read data
 disk_read:
     ; Save modified registers
-    pop ax
-    pop bx
-    pop cx
-    pop dx
-    pop di
+    pusha
 
     push cx ; Save cx (number of sectors to read)
     call lba_to_chs
@@ -86,11 +82,7 @@ disk_read:
 .done:
     popa
     ; Restore modified registers
-    pop di
-    pop dx
-    pop cx
-    pop bx
-    pop ax
+    popa
     ret
 
 
