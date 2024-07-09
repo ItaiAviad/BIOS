@@ -3,6 +3,14 @@
 
 ---
 
+### Debug:
+
+To Debug `floppy.img`:
+* Install packages: `bochs`
+* Run `make run_debug_bochs`
+
+---
+
 ## Resources
 #### Links:
 - [OSDev](https://wiki.osdev.org/)

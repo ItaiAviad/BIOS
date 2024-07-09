@@ -1,6 +1,6 @@
-[bits 16]
-
 ; Printing to screen (BIOS Printing - only works while in 16 bits real mode)
+
+[bits 16]
 
 ; Print string to screen
 ; @params
@@ -82,3 +82,6 @@ print_hex:
     pop bx
     pop ax
     ret ; Jump to calling point
+
+
+%define ENDL 0x0D, 0x0A; This defines ENDL to be a carriage return charcter followed by a line feed charcter
