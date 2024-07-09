@@ -1,10 +1,10 @@
 # GCC Cross Compiler Installation for Linux
-###### Source: [OSDev GCC Cross Compiler](https://wiki.osdev.org/GCC_Cross-Compiler)
+###### Source: [OSDev GCC Cross Compiler]
 
 Installation of the Cross Compiler is an essential step, even if a compiler is already insalled on the system.
 <br><b>Note:</b> The making process might take a while (minutes).
-<br><b>Note:</b> For Prebuilt Toolchains (including `x86_64-elf` target) see: [OSDev GCC Cross Compiler - Prebuilt Toolchains](https://wiki.osdev.org/GCC_Cross-Compiler#Prebuilt_Toolchains)
-<br><b>Note:</b> For how to use see: [OSDev GCC Cross Compiler - Using the new Compiler](https://wiki.osdev.org/GCC_Cross-Compiler#Using_the_new_Compiler)
+<br><b>Note:</b> For Prebuilt Toolchains (including `x86_64-elf` target) see: [OSDev GCC Cross Compiler - Prebuilt Toolchains]
+<br><b>Note:</b> For how to use see: [OSDev GCC Cross Compiler - Using the new Compiler] (Also for Prebuilt Toolchains)
 
 ```bash
 # Preparation
@@ -63,3 +63,6 @@ make install-target-libgcc
 ```
 
 
+[OSDev GCC Cross Compiler]: https://wiki.osdev.org/GCC_Cross-Compiler
+[OSDev GCC Cross Compiler - Prebuilt Toolchains]: https://wiki.osdev.org/GCC_Cross-Compiler#Prebuilt_Toolchains
+[OSDev GCC Cross Compiler - Using the new Compiler]: https://wiki.osdev.org/GCC_Cross-Compiler#Using_the_new_Compiler
