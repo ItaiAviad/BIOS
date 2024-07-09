@@ -6,8 +6,7 @@
 start:
     jmp main
 
-%include "print.s"
-%include "disk.s"
+
 
 main:
     ; clearn interrupt flag
@@ -41,6 +40,8 @@ main:
     cli
     jmp .hlt
 
+%include "print.s"
+%include "disk.s"
 
 msg_boot: db 'Boot-sector successfully loaded from disk by the bios!', ENDL, 0
 
