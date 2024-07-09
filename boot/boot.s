@@ -29,6 +29,10 @@ main:
     mov si, boot_msg
     call puts
 
+    ; print hex
+    mov bx, 0xABCD
+    call print_hex
+
     hlt
 
 .hlt:

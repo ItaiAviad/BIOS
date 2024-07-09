@@ -47,10 +47,10 @@ print_hex:
     ; 4 nibbles in 16-bits
     mov cx, 4
     ; Begin loop
-    print_hex_bios_loop:
+    .print_hex_bios_loop:
         ; If cx==0 goto end
         cmp cx, 0
-        je print_hex_bios_end
+        je .print_hex_bios_end
 
         push bx ; Save bx again
         shr bx, 12 ; Shift so upper four bits are lower 4 bits
