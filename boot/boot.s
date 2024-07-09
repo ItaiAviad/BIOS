@@ -51,7 +51,7 @@ times 510-($-$$) db 0; This fills the space so the magic number defined below wi
 dw 0xAA55; Magic number
 
 
-bootsector_extended:; this part will be loaded from the disk
+bootsector_extended:; This part will be loaded from the disk
 
     mov si, msg_loaded_from_disk
     call puts
