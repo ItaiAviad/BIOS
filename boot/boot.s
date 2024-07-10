@@ -1,62 +1,94 @@
 ; Bootloader
 
 [org 0x7C00]; The bios loads the first 512 bits (which are known by the name boot sector) of the device to the address 0X7C00
+
+_start:
+    jmp rm
+
+; -----------------------------------------------
+; Real Mode Sector
 [bits 16]
 
-start:
-    jmp main
-
-main:
-    ; clearn interrupt flag
+rm:
+    ; Disable Interrupts
     cli
 
-    ; setup data segment
+    ; Setup data segment
     mov ax, 0
     mov ds, ax
     mov es, ax
-    ; setup stack
+    ; Setup stack
     mov ss, ax
     mov bp, 0x7C00
     mov sp, bp
 
-    ; print boot message
-    mov si, msg_boot
+    ; Print Real Mode message
+    mov si, msg_rm_sector
     call puts
 
-    ; Read second sectro from disk
+    ; Read Protected Mode Sector from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
-    mov ax, 0x1 ;: LBA = 1, second sector from disk
+    mov ax, 0x1 ; LBA = 1, second sector from disk
     mov cl, 0x1 ; Read 1 sector
-    mov bx, bootsector_extended ; Read to 0x7E00
-
+    mov bx, pm ; Read to 0x7E00
     call disk_read
-
-    jmp bootsector_extended  
     
+    ; Print Protected Mode message
+    mov si, msg_pm_sector
+    call puts
 
+    ; Read Long Mode Sector from disk
+    mov [drive_number], dl ; BIOS should set dl to drive number
+    mov ax, 0x2 ; LBA = 2, third sector from disk
+    mov cl, 0x1 ; Read 1 sector
+    mov bx, lm ; Read to 0x7E00
+    call disk_read
+    
+    ; Print Long Mode message
+    mov si, msg_lm_sector
+    call puts
 
-
-%include "print.s"
-%include "disk.s"
-%include "gdt.s"
-
+    ; Elevate to Protected Mode
+    call elevate_pm
+    
 hlt:
   cli
   jmp $
 
-msg_boot: db 'Boot-sector successfully loaded from disk by the bios!', ENDL, 0
 
+%include "print16.s"
+%include "disk.s"
 
-times 510-($-$$) db 0; This fills the space so the magic number defined below will be at addresses: [511-512]
+msg_rm_sector: db PREFIX, 'RM Sector loaded!', ENDL, 0
+msg_pm_sector: db PREFIX, 'PM Sector loaded!', ENDL, 0
+msg_lm_sector: db PREFIX, 'LM Sector loaded!', ENDL, 0
+
+times 510-($-$$) db 0; Fill up space so that Magic Number will be at addresses: [511-512]
 dw 0xAA55; Magic number
 
 
-bootsector_extended:; This part will be loaded from the disk
+; -----------------------------------------------
+; Protected Mode Sector
+[bits 32]
 
-    mov si, msg_loaded_from_disk
-    call puts
+pm:
+    mov eax, 0xDEAD
     jmp hlt
 
 
-msg_loaded_from_disk: db 'Loaded second part of boot loader from disk', ENDL, 0
-times 512 - ($ - bootsector_extended) db 0x00
+%include "gdt.s"
+%include "A20.s"
+%include "ms.s"
+
+times 512-($-pm) db 0x00
+
+
+; -----------------------------------------------
+; Long Mode Sector
+; [bits 64]
+
+lm: ; TODO
+    jmp hlt
+
+
+times 512-($-lm) db 0x00

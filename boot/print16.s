@@ -85,3 +85,4 @@ print_hex:
 
 
 %define ENDL 0x0D, 0x0A; This defines ENDL to be a carriage return charcter followed by a line feed charcter
+%define PREFIX "[*] "
