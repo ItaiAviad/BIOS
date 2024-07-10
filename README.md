@@ -7,7 +7,7 @@
 
 To Debug `floppy.img`:
 * Install packages: `bochs`
-* Run `make run_debug_bochs`
+* Run `make` and `make run_debug_bochs`
 
 ---
 
