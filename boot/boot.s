@@ -2,6 +2,8 @@
 
 [org 0x7C00]; The bios loads the first 512 bits (which are known by the name boot sector) of the device to the address 0X7C00
 
+sector_size: equ 512d
+
 _start:
     jmp rm
 
@@ -28,9 +30,9 @@ rm:
 
     ; Read Protected Mode Sector from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
-    mov ax, 0x1 ; LBA = 1, second sector from disk
-    mov cl, 0x1 ; Read 1 sector
-    mov bx, pm ; Read to 0x7E00
+    mov ax, (pm - _start) / sector_size
+    mov cl, (pm_end - pm) / sector_size
+    mov bx, pm
     call disk_read
     
     ; Print Protected Mode message
@@ -39,9 +41,9 @@ rm:
 
     ; Read Long Mode Sector from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
-    mov ax, 0x2 ; LBA = 2, third sector from disk
-    mov cl, 0x1 ; Read 1 sector
-    mov bx, lm ; Read to 0x7E00
+    mov ax, (lm - _start) / sector_size
+    mov cl, (lm_end - lm) / sector_size
+    mov bx, lm
     call disk_read
     
     ; Print Long Mode message
@@ -72,16 +74,23 @@ dw 0xAA55; Magic number
 [bits 32]
 
 pm:
-    mov eax, 0xDEAD
+    mov esi, msg_pm_switch_success; Print a message for showing that we are running in 32bit protected mode
+    call clear_protected
+    call print_protected
     jmp hlt
 
 
+msg_pm_switch_success: dw 'Switched to protected mode successfully', ENDL, 0
+
+vga_start:  equ 0x000B8000
+
+%include "vga_functions.s"
 %include "gdt.s"
 %include "A20.s"
 %include "ms.s"
 
 times 512-($-pm) db 0x00
-
+pm_end:
 
 ; -----------------------------------------------
 ; Long Mode Sector
@@ -92,3 +101,4 @@ lm: ; TODO
 
 
 times 512-($-lm) db 0x00
+lm_end:
