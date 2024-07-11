@@ -1,12 +1,11 @@
+; 64bit Long Mode VGA Functions
 
 [bits 64]
 
 ; Clear the VGA memory. (AKA write blank spaces to every character slot)
 ; @parms:
 ;   ds:edi - style of text
-clear_long:
-    ; The pusha command stores the values of all
-    ; registers so we don't have to worry about them
+clear64:
     push rdi
     push rax
     push rcx
@@ -26,56 +25,39 @@ clear_long:
     pop rdi
     ret
 
-
-space_char:                     equ ` `
-
-
-
-; Print in 32 bit protected mode using vga
+; Print in 64bit Long Mode using vga
 ; @parms:
 ;   ds:esi - pointer to the string
 ;   ds:edi - style of text
-print_long:
-    ; The pusha command stores the values of all
-    ; registers so we don't have to worry about them
-    push rax
-    push rdx
+puts64:
     push rdi
-    push rsi
+    push rax
+    push rcx
 
     mov rdx, vga_start
     shl rdi, 8
-
-    ; Do main loop
-    print_long_loop:
+    .puts64_loop:
         ; If char == \0, string is done
         cmp byte[rsi], 0
-        je  print_long_done
+        je .puts64_done
 
         ; Handle strings that are too long
         cmp rdx, vga_start + vga_extent
-        je print_long_done
+        je .puts64_done
 
         ; Move character to al, style to ah
         mov rax, rdi
         mov al, byte[rsi]
 
-        ; Print character to vga memory location
-        mov word[rdx], ax
+        mov word[rdx], ax ; Print character to vga memory location
 
         ; Increment counter registers
         add rsi, 1
         add rdx, 2
 
-        ; Redo loop
-        jmp print_long_loop
-
-print_long_done:
-    ; Popa does the opposite of pusha, and restores all of
-    ; the registers
-    pop rsi
-    pop rdi
-    pop rdx
+        jmp .puts64_loop
+.puts64_done:
+    pop rcx
     pop rax
-
+    pop rdi
     ret
