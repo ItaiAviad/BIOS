@@ -39,7 +39,7 @@ lba_to_chs:
 ; Disk Read Failure
 disk_read_fail:
     mov si, msg_disk_read_failed
-    call puts
+    call puts16
 
     ; Wait for a key press
     mov ah, 0x0

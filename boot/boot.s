@@ -26,7 +26,7 @@ rm:
 
     ; Print Real Mode message
     mov si, msg_rm_sector
-    call puts
+    call puts16
 
     ; Read Protected Mode Sector from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
@@ -37,7 +37,7 @@ rm:
     
     ; Print Protected Mode message
     mov si, msg_pm_sector
-    call puts
+    call puts16
 
     ; Read Long Mode Sector from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
@@ -48,7 +48,7 @@ rm:
     
     ; Print Long Mode message
     mov si, msg_lm_sector
-    call puts
+    call puts16
 
     ; Elevate to Protected Mode
     call elevate_pm
@@ -74,20 +74,62 @@ dw 0xAA55; Magic number
 [bits 32]
 
 pm:
-    call clear_protected
+    call clear32
     mov esi, msg_pm_switch_success ; 32bit Protected Mode success message
-    call print_protected
-    call detect_lm_protected; Check if the cpu supports 64 bits
-    mov esi, msg_lm_supported
-    call print_protected
-    call init_paging_protected
+    call puts32
 
+    ; Detect Long Mode support
+    detect_long_mode:
+        jmp .detect_cpuid
+        .lm_not_supported:
+            call clear32
+            mov esi, msg_lm_not_supported
+            call puts32
+            jmp hlt
+        .detect_cpuid:
+            ; Detect CPUID support
+            pushfd ; Push EFLAGS stack
+            pop eax ; Copy EFLAGS to eax
+            mov ecx, eax ; Save to ecx for comparison later
+            xor eax, 1 << 21 ; Flip ID bit (21st bit of EFLAGS)
+            ; Write to EFLAGS
+            push eax
+            popfd
+            ; Read from EFLAGS again
+            pushfd
+            pop eax
+            ; Restore EFLAGS to the older version saved in ecx
+            push ecx
+            popfd
+            ; Compare eax and ecx (before and after)
+            ; If equal then the bit got flipped back during copy -> CPUID not supported
+            cmp eax, ecx
+            jne .detect_cpuid_extended
+            ; CPUID is supported
+            call clear32
+            mov esi, msg_cpuid_not_supported
+            call puts32
+            jmp hlt
+        .detect_cpuid_extended:
+            mov eax, 0x80000000    ; Set the A-register to 0x80000000.
+            cpuid                  ; CPU identification.
+            cmp eax, 0x80000001    ; Compare the A-register with 0x80000001.
+            jb .lm_not_supported   ; It is less, there is no long mode.
+        
+        ; Check if Long Mode is supported
+        mov eax, 0x80000001    ; Set the A-register to 0x80000001.
+        cpuid                  ; CPU identification.
+        test edx, 1 << 29      ; Test if the LM-bit, which is bit 29, is set in the D-register.
+        jz .lm_not_supported   ; They aren't, there is no long mode.
+    
+    ; Elevate to Long Mode
+    ; TODO
 
     jmp hlt
 
-
-msg_pm_switch_success: dw 'Protected Mode!', ENDL, 0
-msg_lm_supported: dw "This cpu supports 64 bit", ENDL, 0
+msg_pm_switch_success: dw PREFIX, 'Protected Mode!', ENDL, 0
+msg_cpuid_not_supported: dw PREFIX, 'CPUID not supported!', ENDL, 0
+msg_lm_not_supported: dw PREFIX, 'LM not supported!', ENDL, 0
 
 %include "vga_functions.s"
 %include "gdt.s"

@@ -31,6 +31,9 @@ elevate_pm:
         jmp pm
 
 ; Elevate to Long Mode - TODO
-init_long:
+elevate_lm:
+    ; TODO
 
+    init_lm:
+    
 

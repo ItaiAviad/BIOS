@@ -29,12 +29,12 @@ a20_activated:
 
 a20_ns:
     mov si, msg_a20_ns
-    call puts
+    call puts16
     jmp hlt
 
 a20_failed:
     mov si, msg_a20_failed
-    call puts
+    call puts16
     jmp hlt
 
 

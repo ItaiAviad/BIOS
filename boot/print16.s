@@ -5,7 +5,7 @@
 ; Print string to screen
 ; @params
 ;   ds:si - points to string
-puts:
+puts16:
     ; save regs
     push si
     push ax
@@ -29,7 +29,7 @@ puts:
 ; Print hex number to screen
 ; @params:
 ;   bx - number
-print_hex:
+print_hex16:
     ; Save state
     push ax
     push bx
