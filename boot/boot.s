@@ -135,7 +135,6 @@ msg_lm_not_supported: dw PREFIX, 'LM not supported!', ENDL, 0
 %include "gdt.s"
 %include "A20.s"
 %include "ms.s"
-%include "detect_lm.s"
 %include "init_paging.s"
 
 times (sector_size - (($-pm) % sector_size)) db 0x00
