@@ -77,20 +77,24 @@ pm:
     call clear_protected
     mov esi, msg_pm_switch_success ; 32bit Protected Mode success message
     call print_protected
-
+    call detect_lm_protected; Check if the cpu supports 64 bits
+    mov esi, msg_lm_supported
+    call print_protected
 
 
     jmp hlt
 
 
 msg_pm_switch_success: dw 'Protected Mode!', ENDL, 0
+msg_lm_supported: dw "This cpu supports 64 bit", ENDL, 0
 
 %include "vga_functions.s"
 %include "gdt.s"
 %include "A20.s"
 %include "ms.s"
+%include "detect_lm.s"
 
-times 512-($-pm) db 0x00
+times (sector_size - (($-pm) % sector_size)) db 0x00
 pm_end:
 
 ; -----------------------------------------------
@@ -101,5 +105,5 @@ lm: ; TODO
     jmp hlt
 
 
-times 512-($-lm) db 0x00
+times (sector_size - (($-lm) % sector_size)) db 0x00
 lm_end:
