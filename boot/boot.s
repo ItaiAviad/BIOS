@@ -123,6 +123,7 @@ pm:
         jz .lm_not_supported   ; They aren't, there is no long mode.
     
     ; Elevate to Long Mode
+    call elevate_lm
     ; TODO
 
     jmp hlt
@@ -135,7 +136,6 @@ msg_lm_not_supported: dw PREFIX, 'LM not supported!', ENDL, 0
 %include "gdt.s"
 %include "A20.s"
 %include "ms.s"
-%include "init_paging.s"
 
 times (sector_size - (($-pm) % sector_size)) db 0x00
 pm_end:
@@ -145,8 +145,10 @@ pm_end:
 ; [bits 64]
 
 lm: ; TODO
+    
     jmp hlt
 
+%include "init_paging.s"
 
 times (sector_size - (($-lm) % sector_size)) db 0x00
 lm_end:
