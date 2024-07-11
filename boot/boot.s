@@ -80,6 +80,7 @@ pm:
     call detect_lm_protected; Check if the cpu supports 64 bits
     mov esi, msg_lm_supported
     call print_protected
+    call init_paging_protected
 
 
     jmp hlt
@@ -93,6 +94,7 @@ msg_lm_supported: dw "This cpu supports 64 bit", ENDL, 0
 %include "A20.s"
 %include "ms.s"
 %include "detect_lm.s"
+%include "init_paging.s"
 
 times (sector_size - (($-pm) % sector_size)) db 0x00
 pm_end:
