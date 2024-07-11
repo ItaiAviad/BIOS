@@ -30,11 +30,33 @@ elevate_pm:
 
         jmp pm
 
-; Elevate to Long Mode - TODO
-elevate_lm:
-    ; TODO
-    init_paging
-    
-    init_lm:
-        
+; Elevate to Long mode
+long_mode_msr_number: equ 0xC0000080 
 
+[bits 32]
+elevate_lm:
+    call init_paging
+    
+    mov ecx, long_mode_msr_number ; Setting ecx to the MSR number required to switch into long mode
+    rdmsr; Read the msr register
+    or eax, 1 << 8; Enable 64 bit by changing the value to be written into the MSR
+    wrmsr; Write to the MSR register
+    
+    ; Enable paging 
+    mov eax, cr0
+    or eax, 1 << 31
+    mov cr0, eax
+    
+    lgdt [gdt_64_descriptor]
+    jmp code_seg_64:init_lm
+    
+[bits 64]
+init_lm:
+    cli
+    mov ax, data_seg_64           ; Set the A-register to the data descriptor.
+    mov ds, ax                    ; Set the data segment to the A-register.
+    mov es, ax                    ; Set the extra segment to the A-register.
+    mov fs, ax                    ; Set the F-segment to the A-register.
+    mov gs, ax                    ; Set the G-segment to the A-register.
+    mov ss, ax                    ; Set the stack segment to the A-register.
+    jmp lm

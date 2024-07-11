@@ -124,31 +124,47 @@ pm:
     
     ; Elevate to Long Mode
     call elevate_lm
-    ; TODO
 
-    jmp hlt
+; Constants
+space_char:   equ ` `
+vga_start:    equ 0x000B8000
+vga_extent:   equ 80 * 25 * 2 ; VGA Memory is 80 chars wide by 25 chars tall (one char is 2 bytes)
+style_wb:     equ 0x0A
 
 msg_pm_switch_success: dw PREFIX, 'Protected Mode!', ENDL, 0
 msg_cpuid_not_supported: dw PREFIX, 'CPUID not supported!', ENDL, 0
 msg_lm_not_supported: dw PREFIX, 'LM not supported!', ENDL, 0
+
+
 
 %include "vga_functions.s"
 %include "gdt.s"
 %include "A20.s"
 %include "ms.s"
 
+
 times (sector_size - (($-pm) % sector_size)) db 0x00
 pm_end:
 
 ; -----------------------------------------------
 ; Long Mode Sector
-; [bits 64]
+[bits 64]
 
-lm: ; TODO
-    
+lm:
+    mov rdi, style_blue
+    mov rsi, long_mode_msg
+    call clear_long
+    call print_long
     jmp hlt
 
 %include "init_paging.s"
+%include "gdt64.s"
+%include "vga_functions64.s"
+
+; Constants
+style_blue:   equ 0x1F
+
+long_mode_msg: db "Successfully switched to 64 bit long mode!", ENDL, 0
 
 times (sector_size - (($-lm) % sector_size)) db 0x00
 lm_end:
