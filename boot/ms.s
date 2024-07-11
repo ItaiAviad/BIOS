@@ -13,7 +13,7 @@ elevate_pm:
     mov eax, cr0
     or eax, 0x1
     mov cr0, eax
-    jmp CODE_SEG:init_pm ; Far jump to protected mode the far jump is necessary to clean the pipline from previous 16 bits commands
+    jmp CODE_SEG:init_pm ; Far jump to protected mode (to clean the pipline from previous 16bit commands)
 
     [bits 32]
     init_pm:
