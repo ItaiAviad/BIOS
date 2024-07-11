@@ -33,7 +33,8 @@ elevate_pm:
 ; Elevate to Long Mode - TODO
 elevate_lm:
     ; TODO
-
-    init_lm:
+    init_paging
     
+    init_lm:
+        
 
