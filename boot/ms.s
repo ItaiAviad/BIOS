@@ -41,9 +41,10 @@ elevate_pm:
 ; Elevate to Long mode
 [bits 32]
 elevate_lm:
+
     ; Set up paging
     call init_paging
-    
+    xchg bx, bx
     ; Set LME bit in MSR (EFER) (Long Mode Enable)
     mov ecx, 0xC0000080
     rdmsr ; Read MSR specified by ecx into edx:eax
@@ -63,6 +64,7 @@ elevate_lm:
     
     [bits 64]
     init_lm:
+        
         cli ; Disable Interrupts
 
         ; Set up segment registers

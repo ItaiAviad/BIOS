@@ -220,11 +220,12 @@ rcf/
 AppPackages/
 BundleArtifacts/
 Package.StoreAssociation.xml
+temp_files/
 _pkginfo.txt
 *.appx
 *.appxbundle
 *.appxupload
-
+*.img
 # Visual Studio cache files
 # files ending in .cache can be ignored
 *.[Cc]ache

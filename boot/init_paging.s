@@ -1,22 +1,22 @@
 
-; Page Tables Setup (32bit)
+; Page Tables Setup (64bit level 4) - Identity maps the first 2MB of memory
 
-; PML4T -> 0x1000 (Page Map Level 4 Table)
-; PDPT  -> 0x2000 (Page Directory Pointer Table)
-; PDT   -> 0x3000 (Page Directory Table)
-; PT    -> 0x4000 (Page table)
+;  Paging tables locations:
+;   PML4T -> 0x1000 (Page Map Level 4 Table)
+;   PDPT  -> 0x2000 (Page Directory Pointer Table)
+;   PDT   -> 0x3000 (Page Directory Table)
+;   PT    -> 0x4000 (Page table)
 
 ; Source: https://wiki.osdev.org/Paging
 ; Source: https://wiki.osdev.org/Setting_Up_Paging
 ; Source: https://wiki.osdev.org/Identity_Paging
 ; Source: https://wiki.osdev.org/Setting_Up_Paging_With_PAE
 
+
 [bits 32]
 
 init_paging:
-    ; Identity Paging lowest 2MB of Physical Memory into Virtual Memory
     pushad
-
     ; Clear the memory area using rep stosd
     mov edi, 0x1000
     mov cr3, edi ; Save PML4T start address in cr3

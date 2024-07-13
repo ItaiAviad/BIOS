@@ -1,8 +1,7 @@
 ; Bootloader
+; The SECTOR_SIZE, KERNEL_SIZE_IN_SECTORS, KERNEL_LOAD_ADDR are set in assembly time and provided to nasm via the -D option
 
 [org 0x7C00]; BIOS loads the first 512 bits (boot sector) of the device to address 0x7C00
-
-sector_size: equ 512d
 
 _start:
     jmp rm
@@ -28,27 +27,40 @@ rm:
     mov si, msg_rm_sector
     call puts16
 
-    ; Read Protected Mode Sector from disk
+    ; Read Protected Mode Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
-    mov ax, (pm - _start) / sector_size ; LBA (sector address/offset)
-    mov cl, (pm_end - pm) / sector_size ; # of sectors to read
+    mov ax, (pm - _start) / SECTOR_SIZE ; LBA (sector address/offset)
+    mov cl, (pm_end - pm) / SECTOR_SIZE ; # of sectors to read
     mov bx, pm ; Destination address
     call disk_read
     
-    ; Print Protected Mode Sector message
+    ; Print Protected Mode Sectors message
     mov si, msg_pm_sector
     call puts16
 
-    ; Read Long Mode Sector from disk
+    ; Read Long Mode Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
-    mov ax, (lm - _start) / sector_size ; LBA (sector address/offset)
-    mov cl, (lm_end - lm) / sector_size ; # of sectors to read
+    mov ax, (lm - _start) / SECTOR_SIZE ; LBA (sector address/offset)
+    mov cl, (lm_end - lm) / SECTOR_SIZE ; # of sectors to read
     mov bx, lm ; Destination address
     call disk_read
     
-    ; Print Long Mode Sector message
+    ; Print Long Mode Sectors message
     mov si, msg_lm_sector
     call puts16
+
+    ; Read Kernel Sectors from disk
+    mov [drive_number], dl ; BIOS should set dl to drive number
+    mov ax, (bootloader_end - _start) / SECTOR_SIZE ; LBA (sector address/offset)
+    mov cl, KERNEL_SIZE_IN_SECTORS ; # of sectors to read
+    mov bx, (KERNEL_LOAD_ADDR) ; Destination address
+    call disk_read
+
+    ;Print Kernel Sectors message
+    mov si, msg_kernel_sector
+    call puts16
+
+
 
     ; Print Initializing Mode Switching message
     mov si, msg_init_ms
@@ -68,6 +80,7 @@ hlt:
 msg_rm_sector: db PREFIX, 'RM Sector loaded!', ENDL, 0
 msg_pm_sector: db PREFIX, 'PM Sector loaded!', ENDL, 0
 msg_lm_sector: db PREFIX, 'LM Sector loaded!', ENDL, 0
+msg_kernel_sector: db PREFIX, 'Kernel Sector loaded!', ENDL, 0
 msg_init_ms: db PREFIX, 'Initializing Mode Switching...', ENDL, 0
 
 times 510-($-$$) db 0; Fill up space so that Magic Number will be at addresses: [511-512]
@@ -79,17 +92,17 @@ dw 0xAA55; Magic number
 [bits 32]
 
 pm:
-    ; call clear32
-    ; mov esi, msg_pm_success ; 32bit Protected Mode success message
-    ; call puts32
+    call clear32
+    mov esi, msg_pm_success ; 32bit Protected Mode success message
+    call puts32
 
     ; Detect Long Mode support
     detect_long_mode:
         jmp .detect_cpuid
         .lm_not_supported:
-            ; call clear32
-            ; mov esi, msg_lm_not_supported
-            ; call puts32
+            call clear32
+            mov esi, msg_lm_not_supported
+            call puts32
             jmp hlt
         .detect_cpuid:
             ; Detect CPUID support
@@ -111,9 +124,9 @@ pm:
             cmp eax, ecx
             jne .detect_cpuid_extended
             ; CPUID is supported
-            ; call clear32
-            ; mov esi, msg_cpuid_not_supported
-            ; call puts32
+            call clear32
+            mov esi, msg_cpuid_not_supported
+            call puts32
             jmp hlt
         .detect_cpuid_extended:
             mov eax, 0x80000000    ; Set the A-register to 0x80000000.
@@ -140,12 +153,12 @@ msg_pm_success: dw PREFIX, '32bit Protected Mode!', ENDL, 0
 msg_cpuid_not_supported: dw PREFIX, 'CPUID not supported!', ENDL, 0
 msg_lm_not_supported: dw PREFIX, 'LM not supported!', ENDL, 0
 
-; %include "vga32.s"
+%include "vga32.s"
 %include "gdt32.s"
 %include "A20.s"
 %include "ms.s"
 
-times (sector_size - (($-pm) % sector_size)) db 0x00
+times (SECTOR_SIZE - (($-pm) % SECTOR_SIZE)) db 0x00
 pm_end:
 
 ; -----------------------------------------------
@@ -157,7 +170,7 @@ lm:
     mov rdi, style_blue
     mov rsi, msg_lm_success
     call puts64
-    jmp hlt
+    jmp KERNEL_LOAD_ADDR
 
 ; Constants
 style_blue:   equ 0x1F
@@ -168,5 +181,6 @@ msg_lm_success: db PREFIX, "64bit Long Mode!", 0
 %include "init_paging.s"
 %include "vga64.s"
 
-times (sector_size - (($-lm) % sector_size)) db 0x00
+times (SECTOR_SIZE - (($-lm) % SECTOR_SIZE)) db 0x00
 lm_end:
+bootloader_end:

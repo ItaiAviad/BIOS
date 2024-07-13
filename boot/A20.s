@@ -1,4 +1,6 @@
-; Enable the A20 Line (via BIOS function)
+; Enable the A20 address line (via BIOS function)
+;
+; The A20 address line is turned off by default (for compatibility with older platforms) and to be able to use higher addresses it must be turned on. 
 
 [bits 16]
 
