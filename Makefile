@@ -106,3 +106,4 @@ run_debug_bochs:
 
 clean:
 	rm -rf $(BUILD_DIR)/*
+	rm *_temp
