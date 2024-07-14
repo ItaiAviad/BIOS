@@ -20,6 +20,7 @@ To Debug `floppy.img`:
 - [r/osdev](https://www.reddit.com/r/osdev/)
 - [Write your own Operating System (Youtube)](https://www.youtube.com/playlist?list=PLHh55M_Kq4OApWScZyPl5HhgsTJS9MZ6M)
 - [64bit OS Tutorial](https://github.com/gmarino2048/64bit-os-tutorial)
+- [Version 0.01 of The Linux kernel](https://github.com/zavg/linux-0.01)
 
 ---
 

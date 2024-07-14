@@ -1,3 +1,5 @@
 floppya: 2_88=build/bios.img, status=inserted
 boot: floppy
+mouse: enabled=0
+magic_break: enabled=1
 display_library: x, options="gui_debug"

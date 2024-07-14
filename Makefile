@@ -1,3 +1,6 @@
+# Project's make file
+
+SECTOR_SIZE = 512
 
 # Directories
 BOOT_DIR := boot
@@ -17,8 +20,9 @@ KERNEL_BIN := $(BUILD_DIR)/kernel.bin
 FLOPPY_BIN := $(BUILD_DIR)/bios.img
 
 # Constants
+SHELL = /bin/bash
 CC := x86_64-elf-gcc
-CFLAGS := -ffreestanding
+CFLAGS := -ffreestanding -m64 -masm=intel
 DD := dd
 NASM := nasm
 LD := x86_64-elf-ld
@@ -27,8 +31,16 @@ LDFLAGS := -T $(KERNEL_LD)
 SRC_S := $(KERNEL_S)
 SRC_C := $(KERNEL_C)
 
+# KERNEL_SOURCES_ASM = $(KERNEL_DIR)/entry.s 
+# KERNEL_SOURCES_CPP = $(wildcard $(KERNEL_DIR)/*.cpp) # Can be replaced with file1.cpp file2.cpp ...
+# KERNEL_SOURCES = $(KERNEL_SOURCES_ASM) $(KERNEL_SOURCES_CPP)
+# KERNEL_OBJECTS_CPP = $(patsubst $(KERNEL_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(KERNEL_SOURCES_CPP))
+# KERNEL_OBJECTS_ASM = $(patsubst $(KERNEL_DIR)/%.s,$(BUILD_DIR)/%.o,$(KERNEL_SOURCES_ASM))
+
 # Objects (example: kernel/kernel_entry.s -> build/obj/kernel/kernel_entry.o)
 OBJ := $(patsubst %, $(OBJ_DIR)/%, $(SRC_S:.s=.o)) $(patsubst %, $(OBJ_DIR)/%, $(SRC_C:.c=.o))
+
+KERNEL_MEM_ADDR = 0x8C00
 
 # -----------------------------------------------
 
@@ -46,7 +58,11 @@ $(FLOPPY_BIN): boot kernel
 # Bootloader
 boot: $(BOOT_BIN)
 $(BOOT_BIN): always
-	$(NASM) $(BOOT_S) -I $(BOOT_DIR) -f bin -o $@
+	$(ASM) $(BOOT_S) -I $(BOOT_DIR)  \
+		-DSECTOR_SIZE=$(SECTOR_SIZE) \
+		-DKERNEL_SIZE_IN_SECTORS=$(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s ./build/kernel.bin) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))') \
+		-DKERNEL_LOAD_ADDR=$(KERNEL_MEM_ADDR) \
+		-f bin -o $@
 
 # Kernel
 kernel: $(KERNEL_BIN)

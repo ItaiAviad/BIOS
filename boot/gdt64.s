@@ -1,4 +1,5 @@
-; GDT (Global Descriptor Table) 64bit
+; GDT (Global Descriptor Table) 64bit - Flat Mode Setup
+; (The Flat Mode GDT table allows us to read and write code anywhere, without restriction)
 
 ; References:
 ; GDT - https://wiki.osdev.org/Global_Descriptor_Table
