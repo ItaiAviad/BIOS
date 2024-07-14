@@ -1,5 +1,5 @@
 megs: 128
-floppya: 1_44=$(FLOPPY_BIN), status=inserted
+floppya: 1_44=bios.img, status=inserted
 boot: floppy
 mouse: enabled=0
 display_library: x, options="gui_debug"

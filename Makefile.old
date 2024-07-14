@@ -1,9 +1,4 @@
-# Project's Makefile
-
-# Now our Makefile is silent without repeating @ before commands
-ifndef VERBOSE
-.SILENT:
-endif
+# Project's make file
 
 SECTOR_SIZE := 512
 
@@ -23,14 +18,14 @@ KERNEL_LD_ORG := $(KERNEL_DIR)/klink.ld
 KERNEL_LD := $(BUILD_DIR)/klink.ld
 KERNEL_BIN := $(BUILD_DIR)/kernel.bin
 
-FLOPPY_BIN := bios.img
+FLOPPY_BIN := ./bios.img
 
 # Constants
 SHELL := /bin/bash
 CC := x86_64-elf-gcc
 CFLAGS := -ffreestanding -m64 -masm=intel
 DD := dd
-NASM := nasm
+NASM := @nasm
 LD := x86_64-elf-ld
 LDFLAGS := -T $(KERNEL_LD)
 
@@ -42,10 +37,12 @@ OBJ := $(patsubst %, $(OBJ_DIR)/%, $(SRC_S:.s=.o)) $(patsubst %, $(OBJ_DIR)/%, $
 
 KERNEL_LOAD_ADDR := 0x8C00
 
-BOCHS_CONFIG_ORG = ./bochs_config
-BOCHS_CONFIG = ./bochs_config_temp
+BOCHS_CONFIG_ORG = bochs_config
+BOCHS_CONFIG = bochs_config_temp
 
-
+ifndef VERBOSE
+.SILENT:
+endif
 
 # -----------------------------------------------
 
@@ -75,34 +72,31 @@ $(BOOT_BIN): always kernel
 # Kernel
 kernel: $(KERNEL_BIN)
 $(KERNEL_BIN): always $(OBJ)
-	sed 's/$$(KERNEL_LOAD_ADDR)/$(KERNEL_LOAD_ADDR)/g' $(KERNEL_LD_ORG) > $(KERNEL_LD)
+	@sed 's/$$(KERNEL_LOAD_ADDR)/$(KERNEL_LOAD_ADDR)/g' $(KERNEL_LD_ORG) > $(KERNEL_LD)
 	$(LD) $(LDFLAGS) $(OBJ) -o $@
-	rm $(KERNEL_LD) 
 
 # Objects (Assembling)
 $(OBJ_DIR)/%.o: %.s
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(NASM) $< -f elf64 -o $@
 
 # Objects (Compiling)
 $(OBJ_DIR)/%.o: %.c
-	mkdir -p $(dir $@)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # ------------------------------------------------
 
 always:
-	mkdir -p $(BUILD_DIR)
-	mkdir -p $(OBJ_DIR)
-	mkdir -p $(OBJ_DIR)/kernel
+	@mkdir -p $(BUILD_DIR)
+	@mkdir -p $(OBJ_DIR)
+	@mkdir -p $(OBJ_DIR)/kernel
 
 run:
-	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN)
+	@qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN)
 
 run_debug_bochs:
-	sed 's/$$(FLOPPY_BIN)/$(FLOPPY_BIN)/g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG)
-	bochs -qf $(BOCHS_CONFIG)
-	rm $(BOCHS_CONFIG)
+	@bochs -qf bochs_config
 
 clean:
-	rm -rf $(BUILD_DIR)/*
+	@rm -rf $(BUILD_DIR)/*
