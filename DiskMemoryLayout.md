@@ -1,4 +1,4 @@
-# Floppy Image Memory Layout
+# Disk Memory Layout
 
 |Name|Size (bytes)|Base Address|Loaded Base Address|
 |--|--|--|--|
