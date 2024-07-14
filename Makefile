@@ -50,17 +50,17 @@ all: build
 
 # Build Disk (Floppy Image)
 build: $(FLOPPY_BIN)
-$(FLOPPY_BIN): boot kernel
+$(FLOPPY_BIN): kernel boot
 	$(DD) conv=notrunc bs=512 seek=0 of=$@ if=/dev/zero count=5620
 	$(DD) conv=notrunc bs=512 seek=0 of=$@ if=$(BOOT_BIN)
 	$(DD) conv=notrunc bs=512 seek=3 of=$@ if=$(KERNEL_BIN) count=1
 
 # Bootloader
 boot: $(BOOT_BIN)
-$(BOOT_BIN): always
+$(BOOT_BIN): always kernel
 	$(ASM) $(BOOT_S) -I $(BOOT_DIR)  \
 		-DSECTOR_SIZE=$(SECTOR_SIZE) \
-		-DKERNEL_SIZE_IN_SECTORS=$(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s ./build/kernel.bin) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))') \
+		-DKERNEL_SIZE_IN_SECTORS=$(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s .$(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))') \
 		-DKERNEL_LOAD_ADDR=$(KERNEL_MEM_ADDR) \
 		-f bin -o $@
 
