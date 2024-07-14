@@ -1,6 +1,6 @@
 ; Bootloader
 
-[org 0x7C00]; BIOS loads the first 512 bits (boot sector) of the device to address 0x7C00
+[org 0x7C00] ; BIOS loads the first 512 bits (boot sector) of the device to address 0x7C00
 
 sector_size: equ 512d
 
@@ -45,10 +45,17 @@ rm:
     mov cl, (lm_end - lm) / sector_size ; # of sectors to read
     mov bx, lm ; Destination address
     call disk_read
-    
+
     ; Print Long Mode Sector message
     mov si, msg_lm_sector
     call puts16
+
+    ; Read Kernel Sector
+    mov [drive_number], dl ; BIOS should set dl to drive number
+    mov ax, 0x3 ; LBA (sector address/offset)
+    mov cl, 1d ; # of sectors to read
+    mov bx, KERNEL_ENTRY_BASE ; Destination address
+    call disk_read
 
     ; Print Initializing Mode Switching message
     mov si, msg_init_ms
@@ -135,6 +142,7 @@ space_char:   equ ` `
 vga_start:    equ 0x000B8000
 vga_extent:   equ 80 * 25 * 2 ; VGA Memory is 80 chars wide by 25 chars tall (one char is 2 bytes)
 style_wb:     equ 0x0A
+style_blue:   equ 0x1F
 
 msg_pm_success: dw PREFIX, '32bit Protected Mode!', ENDL, 0
 msg_cpuid_not_supported: dw PREFIX, 'CPUID not supported!', ENDL, 0
@@ -153,14 +161,16 @@ pm_end:
 [bits 64]
 
 lm:
-    ; call clear64
     mov rdi, style_blue
     mov rsi, msg_lm_success
     call puts64
+
+    jmp KERNEL_ENTRY_BASE
     jmp hlt
 
 ; Constants
-style_blue:   equ 0x1F
+KERNEL_ENTRY_BASE: equ 0x8200 ; 1MB
+; KERNEL_STACK_BASE: equ 0x9000
 
 msg_lm_success: db PREFIX, "64bit Long Mode!", 0
 
