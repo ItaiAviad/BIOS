@@ -1,6 +1,6 @@
 # Project's make file
 
-SECTOR_SIZE = 512
+SECTOR_SIZE := 512
 
 # Directories
 BOOT_DIR := boot
@@ -20,12 +20,12 @@ KERNEL_BIN := $(BUILD_DIR)/kernel.bin
 FLOPPY_BIN := $(BUILD_DIR)/bios.img
 
 # Constants
-SHELL = /bin/bash
-CC := x86_64-elf-gcc
+SHELL := /bin/bash
+CC := @x86_64-elf-gcc
 CFLAGS := -ffreestanding -m64 -masm=intel
-DD := dd
-NASM := nasm
-LD := x86_64-elf-ld
+DD := @dd
+NASM := @nasm
+LD := @x86_64-elf-ld
 LDFLAGS := -T $(KERNEL_LD)
 
 SRC_S := $(KERNEL_S)
@@ -40,7 +40,7 @@ SRC_C := $(KERNEL_C)
 # Objects (example: kernel/kernel_entry.s -> build/obj/kernel/kernel_entry.o)
 OBJ := $(patsubst %, $(OBJ_DIR)/%, $(SRC_S:.s=.o)) $(patsubst %, $(OBJ_DIR)/%, $(SRC_C:.c=.o))
 
-KERNEL_MEM_ADDR = 0x8C00
+KERNEL_LOAD_ADDR := 0x8C00
 
 # -----------------------------------------------
 
@@ -58,10 +58,10 @@ $(FLOPPY_BIN): kernel boot
 # Bootloader
 boot: $(BOOT_BIN)
 $(BOOT_BIN): always kernel
-	$(ASM) $(BOOT_S) -I $(BOOT_DIR)  \
+	$(NASM) $(BOOT_S) -I $(BOOT_DIR)  \
 		-DSECTOR_SIZE=$(SECTOR_SIZE) \
 		-DKERNEL_SIZE_IN_SECTORS=$(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))') \
-		-DKERNEL_LOAD_ADDR=$(KERNEL_MEM_ADDR) \
+		-DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) \
 		-f bin -o $@
 
 # Kernel

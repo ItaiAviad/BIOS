@@ -62,8 +62,6 @@ rm:
     mov si, msg_kernel_sector
     call puts16
 
-
-
     ; Print Initializing Mode Switching message
     mov si, msg_init_ms
     call puts16
@@ -94,17 +92,17 @@ dw 0xAA55; Magic number
 [bits 32]
 
 pm:
-    call clear32
-    mov esi, msg_pm_success ; 32bit Protected Mode success message
-    call puts32
+    ; call clear32
+    ; mov esi, msg_pm_success ; 32bit Protected Mode success message
+    ; call puts32
 
     ; Detect Long Mode support
     detect_long_mode:
         jmp .detect_cpuid
         .lm_not_supported:
-            call clear32
-            mov esi, msg_lm_not_supported
-            call puts32
+            ; call clear32
+            ; mov esi, msg_lm_not_supported
+            ; call puts32
             jmp hlt
         .detect_cpuid:
             ; Detect CPUID support
@@ -126,9 +124,9 @@ pm:
             cmp eax, ecx
             jne .detect_cpuid_extended
             ; CPUID is supported
-            call clear32
-            mov esi, msg_cpuid_not_supported
-            call puts32
+            ; call clear32
+            ; mov esi, msg_cpuid_not_supported
+            ; call puts32
             jmp hlt
         .detect_cpuid_extended:
             mov eax, 0x80000000    ; Set the A-register to 0x80000000.
@@ -156,7 +154,7 @@ msg_pm_success: dw PREFIX, '32bit Protected Mode!', ENDL, 0
 msg_cpuid_not_supported: dw PREFIX, 'CPUID not supported!', ENDL, 0
 msg_lm_not_supported: dw PREFIX, 'LM not supported!', ENDL, 0
 
-%include "vga32.s"
+; %include "vga32.s"
 %include "gdt32.s"
 %include "A20.s"
 %include "ms.s"
@@ -172,10 +170,11 @@ lm:
     mov rdi, style_blue
     mov rsi, msg_lm_success
     call puts64
+    xchg bx, bx
     jmp KERNEL_LOAD_ADDR
 
 ; Constants
-KERNEL_ENTRY_BASE: equ 0x8200 ; 1MB
+; KERNEL_ENTRY_BASE: equ 0x8200 ; 1MB
 ; KERNEL_STACK_BASE: equ 0x9000
 
 msg_lm_success: db PREFIX, "64bit Long Mode!", 0
