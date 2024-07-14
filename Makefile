@@ -100,9 +100,9 @@ run:
 	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN)
 
 run_debug_bochs:
-	sed 's\#$$(FLOPPY_BIN)\#$(FLOPPY_BIN)\#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG)
+	sed 's#$$(FLOPPY_BIN)#$(FLOPPY_BIN)#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG)
 	bochs -qf $(BOCHS_CONFIG)
-	rm $(BOCHS_CONFIG)
+	#rm $(BOCHS_CONFIG)
 
 clean:
 	rm -rf $(BUILD_DIR)/*
