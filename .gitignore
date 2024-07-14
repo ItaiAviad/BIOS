@@ -16,7 +16,11 @@
 # Mono auto generated files
 mono_crash.*
 
+# Custom files
 build/
+*.img
+*_temp
+
 
 # Build results
 [Dd]ebug/
@@ -215,6 +219,7 @@ csx/
 # Microsoft Azure Emulator
 ecf/
 rcf/
+bochs_config_temp
 
 # Windows Store app package directories and files
 AppPackages/

@@ -20,7 +20,7 @@ BOOT_BIN := $(BUILD_DIR)/boot.bin
 KERNEL_S := $(KERNEL_DIR)/kernel_entry.s # Can add all the assembly files in a dir via $(wildcard $(KERNEL_DIR)/*.s)
 KERNEL_C := $(KERNEL_DIR)/kernel.c # Can add all the c files in a dir via $(wildcard $(KERNEL_DIR)/*.c) 
 KERNEL_LD_ORG := $(KERNEL_DIR)/klink.ld
-KERNEL_LD := $(BUILD_DIR)/klink.ld
+KERNEL_LD := $(BUILD_DIR)/klink_temp.ld
 KERNEL_BIN := $(BUILD_DIR)/kernel.bin
 
 FLOPPY_BIN := bios.img
