@@ -174,9 +174,6 @@ lm:
     jmp KERNEL_LOAD_ADDR
 
 ; Constants
-; KERNEL_ENTRY_BASE: equ 0x8200 ; 1MB
-; KERNEL_STACK_BASE: equ 0x9000
-
 msg_lm_success: db PREFIX, "64bit Long Mode!", 0
 
 %include "gdt64.s"
