@@ -60,7 +60,7 @@ boot: $(BOOT_BIN)
 $(BOOT_BIN): always kernel
 	$(ASM) $(BOOT_S) -I $(BOOT_DIR)  \
 		-DSECTOR_SIZE=$(SECTOR_SIZE) \
-		-DKERNEL_SIZE_IN_SECTORS=$(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s .$(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))') \
+		-DKERNEL_SIZE_IN_SECTORS=$(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))') \
 		-DKERNEL_LOAD_ADDR=$(KERNEL_MEM_ADDR) \
 		-f bin -o $@
 
