@@ -68,7 +68,7 @@ $(BOOT_BIN): always kernel
 # Kernel
 kernel: $(KERNEL_BIN)
 $(KERNEL_BIN): always $(OBJ)
-	sed 's/$(KERNEL_LOAD_ADDR)/$$(KERNEL_LOAD_ADDR)/g $(KERNEL_LD_ORG)' > $(KERNEL_LD)
+	sed 's/$$(KERNEL_LOAD_ADDR)/$(KERNEL_LOAD_ADDR)/g' $(KERNEL_LD_ORG) > $(KERNEL_LD)
 	$(LD) $(LDFLAGS) $(OBJ) -o $@
 
 # Objects (Assembling)
