@@ -23,7 +23,7 @@ KERNEL_LD_ORG := $(KERNEL_DIR)/klink.ld
 KERNEL_LD := $(BUILD_DIR)/klink_temp.ld
 KERNEL_BIN := $(BUILD_DIR)/kernel.bin
 
-FLOPPY_BIN := bios.img
+FLOPPY_BIN := $(BUILD_DIR)/bios.img
 
 # Constants
 SHELL := /bin/bash
@@ -44,8 +44,6 @@ KERNEL_LOAD_ADDR := 0x8C00
 
 BOCHS_CONFIG_ORG = ./bochs_config
 BOCHS_CONFIG = ./bochs_config_temp
-
-
 
 # -----------------------------------------------
 
