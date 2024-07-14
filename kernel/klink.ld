@@ -1,6 +1,6 @@
 ENTRY(entry)
 OUTPUT_FORMAT("binary")
-phys = 0x8C00;
+phys = $(KERNEL_LOAD_ADDR);
 SECTIONS
 {
     . = phys;
