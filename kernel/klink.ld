@@ -1,4 +1,4 @@
-ENTRY(entry)
+ENTRY(_kentry)
 OUTPUT_FORMAT("binary")
 phys = $(KERNEL_LOAD_ADDR);
 SECTIONS

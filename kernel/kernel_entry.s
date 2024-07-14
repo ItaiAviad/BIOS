@@ -4,7 +4,7 @@
 [extern kmain]
 
 section .text
-global _kstart
-_kstart:
+global _kentry
+_kentry:
 	call kmain
 	jmp $
