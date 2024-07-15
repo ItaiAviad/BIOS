@@ -120,7 +120,6 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 run:
-	echo $(OBJ)
 	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN)
 
 run_debug_bochs:
