@@ -4,7 +4,6 @@
 
 #define IDT_H
 
-#include <stdint.h>
 #include <types.h>
 
 #define KERNEL_CS_SELECTOR_OFFSET_GDT 0x08

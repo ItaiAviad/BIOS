@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <kernel/tty.h>
+#include <arch/x86_64/tty.h>
 
 int kmain(void) {
     terminal_initialize();
