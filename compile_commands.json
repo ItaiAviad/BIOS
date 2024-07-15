@@ -1,0 +1,279 @@
+[
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-c",
+      "-o",
+      "build/obj/kernel/kernel.o",
+      "kernel/kernel.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/kernel/kernel.c",
+    "output": "/home/gal/BIOS/build/obj/kernel/kernel.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-c",
+      "-o",
+      "build/obj/kernel/arch/x86_64/io.o",
+      "kernel/arch/x86_64/io.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/kernel/arch/x86_64/io.c",
+    "output": "/home/gal/BIOS/build/obj/kernel/arch/x86_64/io.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-c",
+      "-o",
+      "build/obj/kernel/arch/x86_64/tty.o",
+      "kernel/arch/x86_64/tty.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/kernel/arch/x86_64/tty.c",
+    "output": "/home/gal/BIOS/build/obj/kernel/arch/x86_64/tty.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-D__is_libk",
+      "-c",
+      "-o",
+      "build/obj/libc/string/memcmp.libk.o",
+      "libc/string/memcmp.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/libc/string/memcmp.c",
+    "output": "/home/gal/BIOS/build/obj/libc/string/memcmp.libk.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-D__is_libk",
+      "-c",
+      "-o",
+      "build/obj/libc/string/memmove.libk.o",
+      "libc/string/memmove.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/libc/string/memmove.c",
+    "output": "/home/gal/BIOS/build/obj/libc/string/memmove.libk.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-D__is_libk",
+      "-c",
+      "-o",
+      "build/obj/libc/string/memset.libk.o",
+      "libc/string/memset.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/libc/string/memset.c",
+    "output": "/home/gal/BIOS/build/obj/libc/string/memset.libk.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-D__is_libk",
+      "-c",
+      "-o",
+      "build/obj/libc/string/memcpy.libk.o",
+      "libc/string/memcpy.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/libc/string/memcpy.c",
+    "output": "/home/gal/BIOS/build/obj/libc/string/memcpy.libk.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-D__is_libk",
+      "-c",
+      "-o",
+      "build/obj/libc/string/strlen.libk.o",
+      "libc/string/strlen.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/libc/string/strlen.c",
+    "output": "/home/gal/BIOS/build/obj/libc/string/strlen.libk.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-D__is_libk",
+      "-c",
+      "-o",
+      "build/obj/libc/stdlib/abort.libk.o",
+      "libc/stdlib/abort.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/libc/stdlib/abort.c",
+    "output": "/home/gal/BIOS/build/obj/libc/stdlib/abort.libk.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-D__is_libk",
+      "-c",
+      "-o",
+      "build/obj/libc/stdlib/atoi.libk.o",
+      "libc/stdlib/atoi.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/libc/stdlib/atoi.c",
+    "output": "/home/gal/BIOS/build/obj/libc/stdlib/atoi.libk.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-D__is_libk",
+      "-c",
+      "-o",
+      "build/obj/libc/stdlib/itoa.libk.o",
+      "libc/stdlib/itoa.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/libc/stdlib/itoa.c",
+    "output": "/home/gal/BIOS/build/obj/libc/stdlib/itoa.libk.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-D__is_libk",
+      "-c",
+      "-o",
+      "build/obj/libc/stdio/printf.libk.o",
+      "libc/stdio/printf.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/libc/stdio/printf.c",
+    "output": "/home/gal/BIOS/build/obj/libc/stdio/printf.libk.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-D__is_libk",
+      "-c",
+      "-o",
+      "build/obj/libc/stdio/putchar.libk.o",
+      "libc/stdio/putchar.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/libc/stdio/putchar.c",
+    "output": "/home/gal/BIOS/build/obj/libc/stdio/putchar.libk.o"
+  },
+  {
+    "arguments": [
+      "/home/gal/opt/cross/x86_64-elf-7.5.0-Linux-x86_64/bin/x86_64-elf-gcc",
+      "-ffreestanding",
+      "-m64",
+      "-masm=intel",
+      "-Wall",
+      "-Wextra",
+      "-Ilibc/include",
+      "-Ikernel/include",
+      "-D__is_libk",
+      "-c",
+      "-o",
+      "build/obj/libc/stdio/puts.libk.o",
+      "libc/stdio/puts.c"
+    ],
+    "directory": "/home/gal/BIOS",
+    "file": "/home/gal/BIOS/libc/stdio/puts.c",
+    "output": "/home/gal/BIOS/build/obj/libc/stdio/puts.libk.o"
+  }
+]
