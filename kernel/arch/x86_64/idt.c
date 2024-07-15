@@ -1,4 +1,4 @@
-#include <cpu/idt.h>
+#include <arch/x86_64/idt.h>
 
 idt_gate_descriptor idt[IDT_ENTRIES_AMOUNT];
 idt_register idt_reg;

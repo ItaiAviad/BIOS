@@ -1,7 +1,7 @@
-#include <kernel/tty.h>
-#include <kernel/io.h>
+#include <arch/x86_64/tty.h>
+#include <arch/x86_64/io.h>
 
-#include "vga.h"
+#include <arch/x86_64/vga.h>
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
