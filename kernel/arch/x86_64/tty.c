@@ -1,7 +1,7 @@
-#include <kernel/tty.h>
-#include <kernel/io.h>
+#include <arch/x86_64/tty.h>
+#include <arch/x86_64/io.h>
 
-#include "vga.h"
+#include <arch/x86_64/vga.h>
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -134,9 +134,10 @@ void terminal_putchar(char c) {
 	    terminal_putentryat(uc, terminal_color, terminal_column, terminal_row);
     }
 	if (++terminal_column == VGA_WIDTH) {
-		terminal_column = 0;
+		terminal_column = -1;
 		if (++terminal_row == VGA_HEIGHT)
-			terminal_row = 0;
+            terminal_row = terminal_row;
+			// terminal_row = 0;
 	}
 }
 
@@ -169,5 +170,5 @@ void terminal_scroll_line_down(){
         terminal_buffer[pos] = vga_entry(' ', terminal_color);
     }
 
-    update_cursor(0, VGA_HEIGHT - 1);
+    update_cursor(-1, VGA_HEIGHT - 1);
 }

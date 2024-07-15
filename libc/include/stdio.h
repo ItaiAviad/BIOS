@@ -4,6 +4,7 @@
 
 #include <sys/cdefs.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdarg.h>
 
 #define EOF (-1)
@@ -12,9 +13,62 @@
 extern "C" {
 #endif
 
+/**
+ * @brief Write a formatted output to stdout
+ * 
+ * @param __restrict 
+ * @param ... 
+ * @return int - number of characters written
+ */
 int printf(const char* __restrict, ...);
+/**
+ * @brief Write a character to stdout
+ * 
+ * @return int - ascii value
+ */
 int putchar(int);
+/**
+ * @brief Write a string to stdout
+ * 
+ * @return int - number of characters written
+ */
 int puts(const char*);
+/**
+ * @brief Read a character from stdin
+ * 
+ * @return int 
+ */
+int getchar();
+/**
+ * @brief Reads a string from stdin
+ * 
+ * @param str 
+ * @return char* - pointer to string
+ */
+char* gets(char*);
+/**
+ * @brief `gets` with size limit
+ * 
+ * @return char* - pointer to string
+ */
+char* gets_s(char*, size_t);
+/**
+ * @brief Reads formatted input from stdin
+ * 
+ * @param format 
+ * @param ... 
+ * @return int - number of input items read
+ */
+int scanf(const char* __restrict, ...);
+/**
+ * @brief Reads formatted input from given string
+ * 
+ * @param str input string
+ * @param format 
+ * @param ... 
+ * @return int - number of input items read
+ */
+int sscanf(const char *, const char* __restrict, ...);
 
 #ifdef __cplusplus
 }

@@ -4,14 +4,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <kernel/tty.h>
+#include <arch/x86_64/tty.h>
+#include <arch/x86_64/io.h>
 
 int kmain(void) {
     terminal_initialize();
 
-    char* hello = "1234";
-    printf("HELLO! %%c %x %s", atoi(hello), "HEY\t");
-    // terminal_scroll_line_down();
+    char* hello = "Hello!\nEnter message:";
+    printf("%s", hello);
+
+    char ch = 'z';
+    int num = 5;
+    char* dst = "heyy";
+    int x = scanf("%c %s %d", &ch, dst, &num);
+    printf("x: %d\n", x);
+    printf("%c %s %d\n", ch, dst, num);
 
     return 0;
 }
