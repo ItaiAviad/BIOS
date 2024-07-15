@@ -1,49 +1,69 @@
-# Project's Makefile
+# Main Makefile
 
-# Now our Makefile is silent without repeating @ before commands
+# Make Makefile Silent (without repeating @ before commands)
 ifndef VERBOSE
 .SILENT:
 endif
 
 SECTOR_SIZE := 512
 
-# Directories
+KERNEL_LOAD_ADDR := 0x8C00
+
+### Directories
 BOOT_DIR := boot
 KERNEL_DIR := kernel
 BUILD_DIR := build
+LIBC_DIR := libc
 OBJ_DIR := build/obj
 
-# Files
+### Files
+# Boot
 BOOT_S := $(BOOT_DIR)/boot.s
 BOOT_BIN := $(BUILD_DIR)/boot.bin
 
-KERNEL_S := $(KERNEL_DIR)/kernel_entry.s # Can add all the assembly files in a dir via $(wildcard $(KERNEL_DIR)/*.s)
-KERNEL_C := $(KERNEL_DIR)/kernel.c # Can add all the c files in a dir via $(wildcard $(KERNEL_DIR)/*.c) 
+# Bochs
+BOCHS_CONFIG_ORG = ./bochs_config
+BOCHS_CONFIG = ./bochs_config_temp
+
+# Kernel
+KERNEL_S := $(KERNEL_DIR)/kernel_entry.s # Take all asm files in dir via $(wildcard $(KERNEL_DIR)/*.s)
+# KERNEL_C := $(KERNEL_DIR)/kernel.c # Take all C files in dir via $(wildcard $(KERNEL_DIR)/*.c)
+KERNEL_C := $(shell find $(KERNEL_DIR) -name '*.c')
 KERNEL_LD_ORG := $(KERNEL_DIR)/klink.ld
 KERNEL_LD := $(BUILD_DIR)/klink_temp.ld
 KERNEL_BIN := $(BUILD_DIR)/kernel.bin
+KERNEL_INCLUDE := $(KERNEL_DIR)/include
 
+# Libc
+LIBC_C := $(shell find $(LIBC_DIR) -name '*.c')
+LIBC_INCLUDE := $(LIBC_DIR)/include
+
+# Floppy
 FLOPPY_BIN := $(BUILD_DIR)/bios.img
 
-# Constants
+### Sources & Objects (example: kernel/kernel_entry.s -> build/obj/kernel/kernel_entry.o)
+SRC_S := $(KERNEL_S)
+SRC_C := $(KERNEL_C) # $(LIBC_C)
+
+OBJ_LIBC := $(patsubst %, $(OBJ_DIR)/%, $(LIBC_C:.c=.libc.o))
+OBJ_LIBK := $(patsubst %, $(OBJ_DIR)/%, $(LIBC_C:.c=.libk.o))
+# OBJ_KERNEL := $(patsubst %, $(OBJ_DIR)/%, $(KERNEL_S:.s=.o)) $(patsubst %, $(OBJ_DIR)/%, $(KERNEL_C:.c=.o))
+OBJ := 	$(patsubst %, $(OBJ_DIR)/%, $(SRC_S:.s=.o)) \
+		$(patsubst %, $(OBJ_DIR)/%, $(SRC_C:.c=.o)) \
+		$(OBJ_LIBK)
+
+### Constants
 SHELL := /bin/bash
 CC := x86_64-elf-gcc
-CFLAGS := -ffreestanding -m64 -masm=intel
 DD := dd
 NASM := nasm
 LD := x86_64-elf-ld
-LDFLAGS := -T $(KERNEL_LD)
 
-SRC_S := $(KERNEL_S)
-SRC_C := $(KERNEL_C)
-
-# Objects (example: kernel/kernel_entry.s -> build/obj/kernel/kernel_entry.o)
-OBJ := $(patsubst %, $(OBJ_DIR)/%, $(SRC_S:.s=.o)) $(patsubst %, $(OBJ_DIR)/%, $(SRC_C:.c=.o))
-
-KERNEL_LOAD_ADDR := 0x8C00
-
-BOCHS_CONFIG_ORG = ./bochs_config
-BOCHS_CONFIG = ./bochs_config_temp
+INCLUDES := -I$(LIBC_INCLUDE) -I$(KERNEL_INCLUDE)
+CFLAGS := -ffreestanding -m64 -masm=intel -Wall -Wextra $(INCLUDES)
+LDFLAGS := -T $(KERNEL_LD) $(INCLUDES)
+LIBCFLAGS := $(CFLAGS) -D__is_libc
+LIBK_FLAGS := $(CFLAGS) -D__is_libk
 
 # -----------------------------------------------
 
@@ -53,7 +73,6 @@ all: build
 
 # Build Disk (Floppy Image)
 build: $(FLOPPY_BIN)
-
 $(FLOPPY_BIN): kernel boot
 	$(DD) if=$(BOOT_BIN) of=$@ conv=notrunc,fsync
 	$(DD) if=$(KERNEL_BIN) of=$@ bs=1 seek=$$(stat -c %s $(BOOT_BIN)) conv=notrunc,fsync
@@ -73,9 +92,10 @@ $(BOOT_BIN): always kernel
 # Kernel
 kernel: $(KERNEL_BIN)
 $(KERNEL_BIN): always $(OBJ)
+	echo "Linking Kernel..."
 	sed 's/$$(KERNEL_LOAD_ADDR)/$(KERNEL_LOAD_ADDR)/g' $(KERNEL_LD_ORG) > $(KERNEL_LD)
 	$(LD) $(LDFLAGS) $(OBJ) -o $@
-	rm $(KERNEL_LD) 
+	rm $(KERNEL_LD)
 
 # Objects (Assembling)
 $(OBJ_DIR)/%.o: %.s
@@ -87,6 +107,11 @@ $(OBJ_DIR)/%.o: %.c
 	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Libk Object (Compiling)
+$(OBJ_DIR)/%.libk.o: %.c
+	mkdir -p $(dir $@)
+	$(CC) $(LIBK_FLAGS) -c $< -o $@
+
 # ------------------------------------------------
 
 always:
@@ -95,13 +120,14 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 run:
+	echo $(OBJ)
 	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN)
 
 run_debug_bochs:
 	sed 's#$$(FLOPPY_BIN)#$(FLOPPY_BIN)#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG)
 	bochs -qf $(BOCHS_CONFIG)
-	#rm $(BOCHS_CONFIG)
+	rm -f $(BOCHS_CONFIG)
 
 clean:
 	rm -rf $(BUILD_DIR)/*
-	rm *_temp
+	rm -f *_temp

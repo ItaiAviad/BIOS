@@ -1,49 +1,16 @@
 // Kernel Main File
 
-// Source: https://wiki.osdev.org/Creating_a_64-bit_kernel
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#define VGA_ADDR (volatile char *)0xB8000
-#define VGA_COLOR_WHITE 7
-#define VGA_EXTENT 80 * 25
+#include <kernel/tty.h>
 
-#define STYLE_WB 0x0F
+int kmain(void) {
+    terminal_initialize();
 
-typedef struct __attribute__((packed)) {
-    char character;
-    char style;
-} vga_char;
-
-volatile vga_char *SCREEN = (vga_char*) VGA_ADDR;
-
-void clearwin(){
-    vga_char clear_char = {
-        .character=' ',
-        .style=STYLE_WB
-    };
-
-    for(unsigned int i = 0; i < VGA_EXTENT; i++){
-        SCREEN[i] = clear_char;
-    }
-}
-
-void putstr(const char *str){
-    for(unsigned int i = 0; str[i] != '\0'; i++){
-        if (i >= VGA_EXTENT)
-            break;
-
-        vga_char temp = {
-            .character=str[i],
-            .style=STYLE_WB
-        };
-
-        SCREEN[i] = temp;
-    }
-}
-
-int kmain(){
-    // clearwin();
-    const char *welcome_msg = "Kernel!";
-    putstr(welcome_msg);
+    char* hello = "1234";
+    printf("HELLO! %%c %s %d %x", "HEY", 0, atoi(hello));
 
     return 0;
 }
