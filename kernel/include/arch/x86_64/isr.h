@@ -52,6 +52,11 @@ void install_isr_handlers();
             .error_code = 0\
         };\
         isr_handler(isr_num, &isr_args_full);\
+        isr_args->instruction_pointer = isr_args_full.instruction_pointer;\
+        isr_args->code_segment =  isr_args_full.code_segment;\
+        isr_args->cpu_flags = isr_args_full.cpu_flags;\
+        isr_args->stack_pointer = isr_args_full.stack_pointer;\
+        isr_args->stack_segment = isr_args_full.stack_segment;\
     }
 
 #define handle_isr_err_code(isr_num)\

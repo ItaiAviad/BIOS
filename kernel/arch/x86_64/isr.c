@@ -111,7 +111,8 @@ void install_isr_handlers(){
 }
 
 void isr_handler(uint64_t isr_num, isr_frame* isr_args){
-    printf("isr: %s(%d) called", isr_exception_messages[isr_num], isr_num);
+    printf("ISR: %s(%d) called\n", isr_exception_messages[isr_num], isr_num);
+    isr_args->instruction_pointer ++;
 }
 
 

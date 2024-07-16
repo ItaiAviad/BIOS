@@ -11,8 +11,6 @@ int kmain(void) {
     install_isr_handlers();
 
     terminal_initialize();
-    char* hello = "1234";
-    printf("HELLO! %%c %x %s", atoi(hello), "HEY\t");
     int test_int = 1/0;
     // terminal_scroll_line_down();
 
