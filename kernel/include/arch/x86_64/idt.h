@@ -16,21 +16,30 @@ typedef struct __attribute__((packed)) {
 } idt_register;
 
 typedef struct __attribute__((packed)) {
-  uint16_t offset_low; // offset bits 0..15
-  uint16_t selector; // a code segment selector in GDT or LDT
-  uint8_t ist;       // bits 0..2 holds Interrupt Stack Table offset,
-  // rest of bits zero.
+  uint16_t offset_low;      // offset bits 0..15
+  uint16_t selector;        // a code segment selector in GDT or LDT
+  uint8_t ist;              // bits 0..2 holds Interrupt Stack Table offset, The rest of the bits are zero.
   uint8_t type_attributes;  // Attributes bits
                                 //      - Bit 7:     Present bit - should be 1
-                                //      - Bits 6-5:  Privelege level of caller (0=kernel..3=user)
+                                //      - Bits 6-5:  Privilege level of caller (0=kernel..3=user)
                                 //      - Bit 4:     Should always be 0
                                 //      - Bits 3-0:  Gate type - 0b1110 = Interrupt Gate, 0b1111 = Trap Gate 
-  uint16_t offset_meduim;       // offset bits 16..31
-  uint32_t offset_high;       // offset bits 32..63
-  uint32_t zero;           // reserved
+  uint16_t offset_medium;   // offset bits 16..31
+  uint32_t offset_high;     // offset bits 32..63
+  uint32_t zero;            // reserved
 } idt_gate_descriptor;
 
-void set_idt();
-void add_int_idt(uint8_t gate_descriptor_num, uint64_t handler_addr);
+/**
+* Updates the idt by setting its address
+*/
+void update_idt();
+
+
+/**
+* Adds an interrupt handler for a specified interrupt number 
+
+* The interrupt handler must have __attribute__((interrupt)) and can receive struct interrupt_frame* as an argument
+*/
+void set_int_handler_idt(uint8_t gate_descriptor_num, void (*handler)());
 
 #endif // IDT_H
