@@ -170,7 +170,7 @@ lm:
     mov rdi, style_blue
     mov rsi, msg_lm_success
     call puts64
-    xchg bx, bx
+    ; xchg bx, bx
     jmp KERNEL_LOAD_ADDR
 
 ; Constants

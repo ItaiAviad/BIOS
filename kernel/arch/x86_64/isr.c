@@ -1,4 +1,4 @@
-#include "arch/x86_64/idt.h"
+#include <arch/x86_64/idt.h>
 #include <arch/x86_64/isr.h>
 #include <stdio.h>
 

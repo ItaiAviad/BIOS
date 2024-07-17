@@ -44,7 +44,7 @@ elevate_lm:
 
     ; Set up paging
     call init_paging
-    xchg bx, bx
+    ; xchg bx, bx
     ; Set LME bit in MSR (EFER) (Long Mode Enable)
     mov ecx, 0xC0000080
     rdmsr ; Read MSR specified by ecx into edx:eax

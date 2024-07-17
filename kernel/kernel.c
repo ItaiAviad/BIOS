@@ -18,7 +18,7 @@ int kmain(void) {
 
     char ch = 'z';
     int num = 5;
-    char* dst = "heyy";
+    char* dst = "hey";
     int x = scanf("%c %s %d", &ch, dst, &num);
     printf("x: %d\n", x);
     printf("%c %s %d\n", ch, dst, num);

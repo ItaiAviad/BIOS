@@ -1,5 +1,6 @@
 [bits 64]
 
+jmp _isr_start
 
 [extern isr_handler]
 
@@ -64,8 +65,8 @@ QUADWORD_SIZE:          equ 0x08
 %endmacro
 
 %macro ISR_NOERRCODE 1
-  global handle_%1_isr
-  handle_%1_isr:
+    global handle_%1_isr
+    handle_%1_isr:
     cli
 
     push qword 0 ; Push a zero error code into the stack
@@ -82,8 +83,8 @@ QUADWORD_SIZE:          equ 0x08
 %endmacro
 
 %macro ISR_ERRCODE 1
-  global handle_%1_isr
-  handle_%1_isr:
+    global handle_%1_isr
+    handle_%1_isr:
     cli
 
     push qword %1
@@ -132,3 +133,6 @@ ISR_NOERRCODE 28
 ISR_NOERRCODE 29
 ISR_NOERRCODE 30
 ISR_NOERRCODE 31
+
+_isr_start:
+    jmp $
