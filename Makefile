@@ -26,7 +26,7 @@ BOCHS_CONFIG_ORG = ./bochs_config
 BOCHS_CONFIG = ./bochs_config_temp
 
 # Kernel
-KERNEL_S := $(KERNEL_DIR)/kernel_entry.s # Take all asm files in dir via $(wildcard $(KERNEL_DIR)/*.s)
+KERNEL_S := $(shell find $(KERNEL_DIR) -name '*.s') # Take all asm files in dir via $(wildcard $(KERNEL_DIR)/*.s)
 # KERNEL_C := $(KERNEL_DIR)/kernel.c # Take all C files in dir via $(wildcard $(KERNEL_DIR)/*.c)
 KERNEL_C := $(shell find $(KERNEL_DIR) -name '*.c')
 KERNEL_LD_ORG := $(KERNEL_DIR)/klink.ld
