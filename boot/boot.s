@@ -171,7 +171,8 @@ lm:
     mov rsi, msg_lm_success
     call puts64
     ; xchg bx, bx
-    jmp KERNEL_LOAD_ADDR
+    call KERNEL_LOAD_ADDR
+    jmp hlt
 
 ; Constants
 msg_lm_success: db PREFIX, "64bit Long Mode!", 0
