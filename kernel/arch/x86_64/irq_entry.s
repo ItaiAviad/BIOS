@@ -68,7 +68,7 @@ QUADWORD_SIZE:          equ 0x08
   handle_%1_isr:
     cli
 
-    push qword 0
+    push qword 0 ; Push a zero error code into the stack
     push qword %1
 
     SAVE_REGS_AND_CALL_HANDLER isr_handler
