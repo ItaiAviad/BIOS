@@ -41,39 +41,6 @@ char *isr_exception_messages[] = {
 };
 
 
-handle_isr_without_err_code(0)
-handle_isr_without_err_code(1)
-handle_isr_without_err_code(2)
-handle_isr_without_err_code(3)
-handle_isr_without_err_code(4)
-handle_isr_without_err_code(5)
-handle_isr_without_err_code(6)
-handle_isr_without_err_code(7)
-handle_isr_without_err_code(8)
-handle_isr_without_err_code(9)
-handle_isr_err_code(10)
-handle_isr_err_code(11)
-handle_isr_err_code(12)
-handle_isr_err_code(13)
-handle_isr_err_code(14)
-handle_isr_without_err_code(15)
-handle_isr_without_err_code(16)
-handle_isr_without_err_code(17)
-handle_isr_without_err_code(18)
-handle_isr_without_err_code(19)
-handle_isr_without_err_code(20)
-handle_isr_without_err_code(21)
-handle_isr_without_err_code(22)
-handle_isr_without_err_code(23)
-handle_isr_without_err_code(24)
-handle_isr_without_err_code(25)
-handle_isr_without_err_code(26)
-handle_isr_without_err_code(27)
-handle_isr_without_err_code(28)
-handle_isr_without_err_code(29)
-handle_isr_without_err_code(30)
-handle_isr_without_err_code(31)
-
 void install_isr_handlers(){
     set_int_handler_idt(0, handle_0_isr);
     set_int_handler_idt(1, handle_1_isr);
@@ -110,9 +77,9 @@ void install_isr_handlers(){
     update_idt();
 }
 
-void isr_handler(uint64_t isr_num, isr_frame* isr_args){
+void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
     printf("ISR: %s(%d) called\n", isr_exception_messages[isr_num], isr_num);
-    isr_args->instruction_pointer ++;
+    (regs->rip)++;
 }
 
 
