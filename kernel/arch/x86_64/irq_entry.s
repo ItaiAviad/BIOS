@@ -73,7 +73,7 @@ QUADWORD_SIZE:          equ 0x08
 
     SAVE_REGS_AND_CALL_HANDLER isr_handler
 
-    ; Pop the stack by 2 quadwords for the ISR Number and Error Code
+    ; Pop the stack so iretq would find the IP
     add rsp, 0x10
 
     sti
@@ -90,7 +90,7 @@ QUADWORD_SIZE:          equ 0x08
 
     SAVE_REGS_AND_CALL_HANDLER isr_handler
 
-    ; Pop the stack by 2 quadwords for the ISR Number and Error Code
+    ; Pop the stack so iretq would find the IP
     add rsp, 0x10
 
     sti
