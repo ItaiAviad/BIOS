@@ -31,28 +31,6 @@ char* itoa(int, char*, int);
  */
 int atoi(const char *nptr);
 
-/**
- * @brief Set a seed for the random generator
- * 
- * @param seed 
- */
-void srand(uint32_t seed);
-/**
- * @brief Generate a random number
- * 
- * @return uint32_t 
- */
-uint32_t rand(void);
-
-/**
- * @brief Return base**exp (base to the power of exp)
- * 
- * @param base 
- * @param exp 
- * @return int 
- */
-int pow(int base, int exp);
-
 #ifdef __cplusplus
 }
 #endif

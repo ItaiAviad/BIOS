@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <math.h>
 
 int pow(int base, int exp) {
     int result = 1;
@@ -7,4 +7,12 @@ int pow(int base, int exp) {
         exp--;
     }
     return result;
+}
+
+int min(int a, int b) {
+    return a < b ? a : b;
+}
+
+int max(int a, int b) {
+    return a < b ? b : a;
 }

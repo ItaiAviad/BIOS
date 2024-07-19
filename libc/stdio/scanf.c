@@ -90,32 +90,29 @@ int get_next_valid_char_idx(const char* str, size_t size) {
 int get_next_valid_string(const char* str, size_t len, char* dst) {
     const char* base_str = str;
 
+    bool is_next_valid = false;
     uint32_t i = 0;
     for (i = 0; i < len; i++) {
-        int idx = get_next_valid_char_idx(str, strlen(str)); // Get next valid char index
+        int idx = get_next_valid_char_idx(str, len); // Get next valid char index
         if (idx == -1)
             break;
         dst[i] = str[idx];
         // Check if str[idx+1] is valid (if not, break)
-        bool is_next_valid = is_valid_char(str[idx + 1]);
+        is_next_valid = is_valid_char(str[idx + 1]);
         str = str + idx + 1; // +1 to skip current char
         if (!is_next_valid)
-        {
-            i++;
             break;
-        }
     }
 
     // Skip remaining valid chars (of current valid string)
-    while (is_valid_char(*str)) {
+    while (is_valid_char(*str))
         str++;
-    }
 
     // If i == 0, then no valid string was found, keep the original string
-    // If i > 0, fill remaining with `\0`
-    if (i != 0)
-        for (uint32_t j = i; j < len; j++)
-            dst[j] = '\0';
+    // If i > 0, fill remaining with `\0` (only if len > 1 -> not char)
+    if (i != 0 && len > 1)
+        dst[i + 1] = '\0';
+        // for (uint32_t j = i; j < len; j++)
     
     return (int)(str - base_str);
 }
@@ -161,7 +158,7 @@ int sscanf_args(const char* str, const char* restrict format, va_list args) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
 			}
-            int next_idx = get_next_valid_string(str, len, dst);
+            int next_idx = get_next_valid_string(str, SCANF_BUF_SIZE, dst);
             // Only increment written if value written to dst (str incremented)
             str += next_idx;
 			written += next_idx > 0 ? 1 : 0;

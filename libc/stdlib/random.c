@@ -1,4 +1,4 @@
-#include <stdlib.h>
+#include <random.h>
 #include <stdint.h>
 
 // Initial state for the RNG

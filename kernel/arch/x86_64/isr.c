@@ -1,6 +1,7 @@
 #include <arch/x86_64/idt.h>
 #include <arch/x86_64/isr.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 // An array of strings in which exception_messages[i] specifies the i-th interrupt error code
 char *isr_exception_messages[] = {
@@ -80,6 +81,7 @@ void install_isr_handlers(){
 void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
     printf("ISR: %s(%d) called\n", isr_exception_messages[isr_num], isr_num);
     (regs->rip)++;
+    abort();
 }
 
 
