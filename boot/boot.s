@@ -3,8 +3,7 @@
 
 [org 0x7C00] ; BIOS loads the first 512 bits (boot sector) of the device to address 0x7C00
 
-sector_size: equ 512d
-
+%define KERNEL_STACK_START_ADDR KERNEL_LOAD_ADDR
 _start:
     jmp rm
 
@@ -169,6 +168,8 @@ pm_end:
 lm:
     mov rdi, style_blue
     mov rsi, msg_lm_success
+    mov sp, KERNEL_STACK_START_ADDR; Set the stuck to override the bootloaders memory which is no longer needed 
+    mov bp, sp
     call puts64
     ; xchg bx, bx
     call KERNEL_LOAD_ADDR

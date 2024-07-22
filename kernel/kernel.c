@@ -15,13 +15,14 @@ int kmain(void) {
 
     char* hello = "Hello!\nEnter message:";
     printf("%s", hello);
-
+    int num = 1/0;
     char ch = 'z';
-    int num = 5;
+    int num1 = 5;
     char* dst = "hey";
     int x = scanf("%c %s %d", &ch, dst, &num);
     printf("x: %d\n", x);
     printf("%c %s %d\n", ch, dst, num);
+    while(1){}
 
     return 0;
 }

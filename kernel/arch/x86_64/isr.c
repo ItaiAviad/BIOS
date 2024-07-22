@@ -78,7 +78,7 @@ void install_isr_handlers(){
 }
 
 void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
-    printf("ISR: %s(%d) called\n", isr_exception_messages[isr_num], isr_num);
+    printf("ISR: %s(%d) called\n", isr_exception_messages[isr_num], isr_num); 
     (regs->rip)++;
 }
 
