@@ -18,12 +18,13 @@ int kmain(void) {
     // TTY - Terminal
     terminal_initialize();
     
-    malloc_state* heap = (malloc_state*) init_heap(0x100000, 0x100000);
+    malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
+    printf("after heap init\n");
     char* dst = (char*) malloc(0x10);
-    printf("malloc: %d\n", dst);
+    char* dst2 = (char*) malloc(0x10);
+    printf("dst: %x, dst2: %x\n", dst, dst2);
     // char dst[33];
 
-    printf("malloc chunk size: %d\n", sizeof(malloc_chunk));
     char* hello = "In Kernel!\nEnter char, string and a decimal:";
     printf("%s", hello);
     char ch = 0;
@@ -31,7 +32,7 @@ int kmain(void) {
     int x = scanf("%c %s %d", &ch, dst, &num);
     printf("# of parameters read: %d\n", x);
     printf("char: %c, string: %s, decimal: %d\n", ch, dst, num);
-    printf("rand: %d\n", rand());
+    // printf("rand: %d\n", rand());
     // printf("Division by zero interrupt: %d\n", 1 / 0);
 
     return 0;

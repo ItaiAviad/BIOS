@@ -51,13 +51,16 @@ void* malloc(size_t size) {
     if (new_mchunk->fd != NULL)
         new_mchunk->fd->bk = new_mchunk;
 
+    // Memory
+    // Map page(s) if nescessary - Kernel Malloc
+    kmalloc(&allocator, new_mchunk->mchunk_size);
+
     // If new, memcpy header to new memory location
     if (!found_free)
-        memcpy(new_addr, &new_mchunk, sizeof(malloc_chunk));
+        memcpy(new_addr, new_mchunk, sizeof(malloc_chunk));
 
     // Clear data memory
     memset(new_mchunk->data, 0x0, (new_mchunk->mchunk_size - sizeof(malloc_chunk)));
-
 
     return new_mchunk->data;
 }

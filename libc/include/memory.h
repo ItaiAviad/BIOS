@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <arch/x86_64/mmu.h>
 
 #define HEAP_CHUNK_MIN_SIZE_BYTES 40
 
@@ -20,6 +21,8 @@ __attribute__((unused))
 void* heap_base;
 __attribute__((unused))
 void* heap_end;
+__attribute__((unused))
+PageFrameAllocator allocator;
 
 typedef struct __attribute__((__packed__)) malloc_chunk {
     uint32_t mchunk_prev_size;  /* Size of previous chunk, if it is free. */

@@ -87,8 +87,13 @@ int printf(const char* restrict format, ...) {
                 // TODO: Set errno to EOVERFLOW.
                 return -1;
             }
-            char str[32 + 1];
-            itoa(i, str, 16);
+            char str[32 + 1 + 2]; // +1 - for '\0', +2 - for '0x'
+            char tmp[32 + 1];
+            itoa(i, tmp, 16); // Int to string
+            // Add '0x'
+            memmove(str + 2, tmp, strlen(tmp) + 1);
+            str[0] = '0';
+            str[1] = 'x';
             size_t len = strlen(str);
             if (maxrem < len) {
 				// TODO: Set errno to EOVERFLOW.

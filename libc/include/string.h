@@ -28,6 +28,9 @@ void* memcpy(void* __restrict, const void* __restrict, size_t);
 /**
  * @brief Move memory from src to dst
  * 
+ * @param void* `dstptr`
+ * @param void* `srcptr`
+ * @param size_t
  * @return void* 
  */
 void* memmove(void*, const void*, size_t);
