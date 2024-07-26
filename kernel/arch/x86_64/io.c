@@ -24,6 +24,7 @@ void special_key_press(uint16_t scan_code) {
 
 char wait_key() {
     uint16_t uc = 0;
+    // irq_clear_mask(IRQ_KEYBOARD);
     
     // Wait for valid key press
     do {
@@ -38,7 +39,11 @@ char wait_key() {
     while (scs1_is_press(inb(PS2_KEYBOARD_PORT_DATA))) {}
 
     // Delay (TODO!)
-    
+
+    // irq_set_mask(IRQ_KEYBOARD);
+    pic_send_eoi(IRQ_KEYBOARD);
+    pic_send_eoi(0x1);
+
     return scs1_to_ascii(uc);
 }
 

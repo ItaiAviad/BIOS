@@ -87,8 +87,8 @@ int printf(const char* restrict format, ...) {
                 // TODO: Set errno to EOVERFLOW.
                 return -1;
             }
-            char str[32 + 1 + 2]; // +1 - for '\0', +2 - for '0x'
-            char tmp[32 + 1];
+            char str[sizeof(unsigned int) + 1 + 2]; // +1 - for '\0', +2 - for '0x'
+            char tmp[sizeof(unsigned int) + 1];
             itoa(i, tmp, 16); // Int to string
             // Add '0x'
             memmove(str + 2, tmp, strlen(tmp) + 1);
@@ -102,6 +102,30 @@ int printf(const char* restrict format, ...) {
             if (!print(str, len))
 				return -1;
 			written += len;
+        } else if (*format == 'b') {
+            format++;
+            unsigned int i = va_arg(parameters, unsigned int);
+            if (!maxrem) {
+                // TODO: Set errno to EOVERFLOW.
+                return -1;
+            }
+            char str[sizeof(unsigned int) * CHAR_BIT + 3]; // +1 for '\0', +2 for '0b'
+            char *ptr = str + sizeof(unsigned int) * CHAR_BIT + 2;
+            *ptr = '\0';
+            do {
+                *--ptr = (i & 1) ? '1' : '0';
+                i >>= 1;
+            } while (i > 0);
+            *--ptr = 'b';
+            *--ptr = '0';
+            size_t len = strlen(ptr);
+            if (maxrem < len) {
+                // TODO: Set errno to EOVERFLOW.
+                return -1;
+            }
+            if (!print(ptr, len))
+                return -1;
+            written += len;
         } else { // Unsupported format (Continue printing literal text)
 			format = format_begun_at;
 			size_t len = strlen(format);

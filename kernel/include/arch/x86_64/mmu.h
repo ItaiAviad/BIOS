@@ -64,7 +64,7 @@ void map_page(PageFrameAllocator* allocator, uint64_t virtual_address, uint64_t 
  * @param size 
  * @return void* - virtual memory address (base address for new allocation)
  */
-void *kmalloc(PageFrameAllocator *allocator, size_t size);
+void *kmalloc(PageFrameAllocator* allocator, size_t size);
 
 
 #endif

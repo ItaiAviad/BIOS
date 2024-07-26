@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <arch/x86_64/pic.h>
 
 #define STDIN 0
 #define STDOUT 1

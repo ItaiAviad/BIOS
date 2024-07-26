@@ -4,7 +4,7 @@ static uint64_t heap_current = KERNEL_HEAP_START;
 static uint64_t heap_end = KERNEL_HEAP_START;
 static uint64_t heap_current_size_left = 0; // No allocated pages in the beginning
 
-void *kmalloc(PageFrameAllocator *allocator, size_t size) {
+void *kmalloc(PageFrameAllocator* allocator, size_t size) {
     // Check if there is enough space for size in current allocated page
     if ((long long) heap_current_size_left - (long long) size >= 0 && heap_current_size_left > 0)
     {

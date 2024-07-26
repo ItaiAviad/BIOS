@@ -7,9 +7,6 @@
 
 #include <types.h>
 
-
-
-
 // Structure for pushed registers saved for ISR
 typedef struct __attribute__((packed)) {
     // Define the callee-saved registers
@@ -33,8 +30,7 @@ void isr_handler(uint64_t isr_num,uint64_t error_code, registers* regs);
 /**
  * Declares, Sets the isr handlers in the idt
  */
-void install_isr_handlers();
-
+void init_isr_handlers();
 
 extern void handle_0_isr();
 extern void handle_1_isr();
@@ -69,5 +65,8 @@ extern void handle_29_isr();
 extern void handle_30_isr();
 extern void handle_31_isr();
 
+// IRQs
+// extern void handle_32_isr();
+extern void handle_33_isr();
 
 #endif // ISR_H

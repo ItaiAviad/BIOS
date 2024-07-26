@@ -36,10 +36,10 @@ void update_idt();
 
 
 /**
-* Adds an interrupt handler for a specified interrupt number 
+* @brief Adds an interrupt handler for a specified interrupt number 
 
 * The interrupt handler must have __attribute__((interrupt)) and can receive struct interrupt_frame* as an argument
 */
-void set_int_handler_idt(uint8_t gate_descriptor_num, void (*handler)());
+void idt_gate_init(uint8_t gate_descriptor_num, void (*handler)());
 
 #endif // IDT_H
