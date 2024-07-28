@@ -15,8 +15,6 @@
 int kmain(void) {
     // PIC - Programmable Interrupt Controller
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
-    irq_clear_mask(IRQ_KEYBOARD);
-    irq_clear_mask(0x1);
 
     // ISR - Interrupt Service Routines
     init_isr_handlers();
@@ -25,20 +23,9 @@ int kmain(void) {
     terminal_initialize();
     
     malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
-    printf("after heap init\n");
     char* dst = (char*) malloc(0x10);
     char* dst2 = (char*) malloc(0x10);
     printf("dst: %x, dst2: %x\n", dst, dst2);
-    // while (1){
-        printf("pic_get_irr: %b, pic_get_isr: %b\n", pic_get_irr(), pic_get_isr());
-        printf("pic_get_irr: %b, pic_get_isr: %b\n", pic_get_irr(), pic_get_isr());
-        printf("pic_get_irr: %b, pic_get_isr: %b\n", pic_get_irr(), pic_get_isr());
-        printf("pic_get_irr: %b, pic_get_isr: %b\n", pic_get_irr(), pic_get_isr());
-        printf("pic_get_irr: %b, pic_get_isr: %b\n", pic_get_irr(), pic_get_isr());
-        printf("pic_get_irr: %b, pic_get_isr: %b\n", pic_get_irr(), pic_get_isr());
-        printf("pic_get_irr: %b, pic_get_isr: %b\n", pic_get_irr(), pic_get_isr());
-    // }
-    // char dst[33];
 
     char* hello = "In Kernel!\nEnter char, string and a decimal:";
     printf("%s", hello);
@@ -47,12 +34,10 @@ int kmain(void) {
     int x = scanf("%c %s %d", &ch, dst, &num);
     printf("# of parameters read: %d\n", x);
     printf("char: %c, string: %s, decimal: %d\n", ch, dst, num);
-    printf("pic_get_irr: %b, pic_get_isr: %b\n", pic_get_irr(), pic_get_isr());
-    printf("pic_get_irr: %b, pic_get_isr: %b\n", pic_get_irr(), pic_get_isr());
-    printf("pic_get_irr: %b, pic_get_isr: %b\n", pic_get_irr(), pic_get_isr());
-    printf("pic_get_irr: %b, pic_get_isr: %b\n", pic_get_irr(), pic_get_isr());
-    // printf("rand: %d\n", rand());
+    printf("rand: %d\n", rand());
     // printf("Division by zero interrupt: %d\n", 1 / 0);
+
+    while (1) {}
 
     return 0;
 }

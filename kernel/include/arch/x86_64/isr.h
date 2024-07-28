@@ -1,11 +1,13 @@
 // isr.h: Handle ISRs (Interrupt Service Routines)
 
+#pragma once
 #ifndef ISR_H
 #define ISR_H
 
 #define NUM_OF_ISR_INT 32
 
 #include <types.h>
+#include <arch/x86_64/pic.h>
 
 // Structure for pushed registers saved for ISR
 typedef struct __attribute__((packed)) {
@@ -66,7 +68,7 @@ extern void handle_30_isr();
 extern void handle_31_isr();
 
 // IRQs
-// extern void handle_32_isr();
+extern void handle_32_isr();
 extern void handle_33_isr();
 
 #endif // ISR_H

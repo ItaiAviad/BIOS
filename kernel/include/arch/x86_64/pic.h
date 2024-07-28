@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <arch/x86_64/io.h>
+#include <arch/x86_64/scs1.h>
 
 #ifndef PIC_H
 #define PIC_H
@@ -33,11 +34,10 @@
 #define ICW4_BUF_MASTER	0x0C	// Buffered mode/master
 #define ICW4_SFNM	0x10		// Special fully nested (not)
 
-#define IRQ_KEYBOARD 0x21
-
 #define PIC_READ_IRR                0x0a    /* OCW3 irq ready next CMD read */
 #define PIC_READ_ISR                0x0b    /* OCW3 irq service next CMD read */
 
+#define IRQ_KEYBOARD 0x1
 
 void pic_send_eoi(uint8_t irq);
 /**

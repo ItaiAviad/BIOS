@@ -33,10 +33,11 @@ void pic_init(int offset1, int offset2)
 	outb(PIC2_DATA, ICW4_8086);
 	io_wait();
 	
-	outb(PIC1_DATA, a1); // restore saved masks.
+	outb(PIC1_DATA, a1);   // restore saved masks.
 	outb(PIC2_DATA, a2);
 
-    irq_clear_mask(IRQ_KEYBOARD);
+    // Enable interrupts globally
+    __asm__ volatile ("sti");
 }
 
 void pic_disable(void) {
@@ -73,7 +74,6 @@ void irq_clear_mask(uint8_t IRQline) {
 }
 
 
-/* Helper func */
 uint16_t __pic_get_irq_reg(int ocw3)
 {
     /* OCW3 to PIC CMD to get the register values.  PIC2 is chained, and

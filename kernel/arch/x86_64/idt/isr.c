@@ -42,19 +42,6 @@ char *isr_exception_messages[] = {
     "Reserved"
 };
 
-
-void keyboard_handler() {
-    // Read from the keyboard data port to acknowledge the interrupt
-    unsigned char scancode = inb(PS2_KEYBOARD_PORT_DATA);
-
-    // Print "keyboard!" on every key press
-    printf("keyboard!");
-
-    // Send End of Interrupt (EOI) signal to PIC
-    pic_send_eoi(0x1);
-}
-
-
 void init_isr_handlers() {
     // Exception handlers
     idt_gate_init(0, handle_0_isr);
@@ -90,27 +77,22 @@ void init_isr_handlers() {
     idt_gate_init(30, handle_30_isr);
     idt_gate_init(31, handle_31_isr);
     // IRQs (PIC1 - 0x20-0x27, PIC2 - 0x28-0x2F)
-    idt_gate_init(32, keyboard_handler);
-    idt_gate_init(33, keyboard_handler);
-    idt_gate_init(34, keyboard_handler);
-    idt_gate_init(35, keyboard_handler);
-    idt_gate_init(36, keyboard_handler);
-    idt_gate_init(37, keyboard_handler);
+    idt_gate_init(32, handle_32_isr);
+    idt_gate_init(33, handle_33_isr);
 
     update_idt();
 }
 
 void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
-    printf("ISR num: %d\n", isr_num);
     if (isr_num <= 31) {
         printf("ISR: %s (%d) called\n", isr_exception_messages[isr_num], isr_num);
         (regs->rip)++;
         abort();
     }
-    else {
-        printf("ISR: %s (%d) called\n", isr_exception_messages[isr_num], isr_num);
-        (regs->rip)++;
-        abort();
+    else if (isr_num >= 32) {
+        if (isr_num == IRQ_KEYBOARD + PIC1_OFFSET) // Keyboard IRQ
+            buffer_put(inb(PS2_KEYBOARD_PORT_DATA));
+        pic_send_eoi(isr_num - PIC1_OFFSET); // Send ACK to PIC
     }
 }
 

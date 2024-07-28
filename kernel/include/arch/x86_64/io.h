@@ -7,24 +7,42 @@
 #include <stdint.h>
 #include <string.h>
 #include <arch/x86_64/pic.h>
+#include <arch/x86_64/scs1.h>
 
 #define STDIN 0
 #define STDOUT 1
 #define STDERR 2
 
-#define PS2_KEYBOARD_PORT_DATA 0x60
-#define PS2_KEYBOARD_PORT_STATUS_REG 0x64
-#define PS2_KEYBOARD_PORT_CMD_REG 0x64
-#define PS2_KEYBOARD_SCS1_RLS_IDX 0x81
+
+// IO Buffer
+#define BUFFER_SIZE 256
+
+typedef struct keyboard_t {
+    char buffer[BUFFER_SIZE];
+    size_t buffer_head;
+    size_t buffer_tail;
+
+    bool caps;
+    bool lshift;
+    bool lctrl;
+    bool lalt;
+    bool altgr;
+    bool rctrl;
+    bool rshift;
+} keyboard_t;
 
 /**
- * @brief Check if key in scs1 is pressed
+ * @brief Handle key press (including special key presses, e.g. LeftShift, CapsLock, RightShift)
  * 
- * @param scan_code 
- * @return true - key is pressed
- * @return false - key is not pressed
+ * @param unsigned_char 
  */
-bool scs1_is_press(uint16_t scan_code);
+void buffer_put(unsigned char);
+void buffer_put_c(unsigned char);
+unsigned char buffer_get(void);
+int buffer_is_empty(void);
+
+// Keyboard
+
 /**
  * @brief Handle special key press (e.g. LeftShift, CapsLock)
  * 
@@ -37,14 +55,8 @@ void special_key_press(uint16_t scan_code);
  * @return char - ascii char read
  */
 char wait_key();
-/**
- * @brief Convert scs1 scancode to ascii
- * 
- * @param scan_code 
- * @return char - ascii value
- */
-char scs1_to_ascii(uint16_t scan_code);
 
+// Inline Assembly
 /**
  * @brief Writes a byte to a port
  * 
