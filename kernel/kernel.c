@@ -6,7 +6,7 @@
 #include <random.h>
 #include <math.h>
 #include <memory.h>
-
+#include <arch/x86_64/mmu.h>
 #include <arch/x86_64/isr.h>
 #include <arch/x86_64/tty.h>
 #include <arch/x86_64/io.h>
@@ -21,6 +21,9 @@ int kmain(void) {
 
     // TTY - Terminal
     terminal_initialize();
+    
+
+
     
     malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
     char* dst = (char*) malloc(0x10);

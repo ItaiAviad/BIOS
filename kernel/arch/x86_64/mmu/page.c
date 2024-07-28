@@ -1,16 +1,13 @@
 #include <arch/x86_64/mmu.h>
 
-uint64_t *pml4 = (void*) 0x1000;    // PML4 base address
-uint64_t* pdpt = (void*) 0x2000;    // PDPT base address
-uint64_t* pd = (void*) 0x3000;      // PD base address
-uint64_t* pt = (void*) 0x4000;      // PT base address
-
-void map_page(PageFrameAllocator* allocator, uint64_t virtual_address, uint64_t physical_address, uint64_t flags) {
+void map_page(uint64_t* pml4, PageFrameAllocator* allocator, uint64_t virtual_address, uint64_t physical_address, uint64_t flags) {
     // Calculate indices
     uint64_t pml4_index = (virtual_address >> 39) & 0x1FF;
     uint64_t pdpt_index = (virtual_address >> 30) & 0x1FF;
     uint64_t pd_index = (virtual_address >> 21) & 0x1FF;
     uint64_t pt_index = (virtual_address >> 12) & 0x1FF;
+
+    uint64_t *pdpt = NULL, *pd = NULL, *pt = NULL;
 
     // Ensure PDPT, PD, and PT entries exist (allocate and zero if necessary)
     if (!(pml4[pml4_index] & PAGE_PRESENT)) {

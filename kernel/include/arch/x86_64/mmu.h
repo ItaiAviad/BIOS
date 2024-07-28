@@ -11,6 +11,8 @@
 #include <string.h>
 #include "mlayout.h"
 
+#define pml4_kernel 0x1000 // PML4 kernel base address
+
 #define PAGE_SIZE 4096
 #define PAGE_PRESENT 0x1
 #define PAGE_WRITE   0x2
@@ -54,7 +56,7 @@ void* allocate_and_zero_page(PageFrameAllocator* allocator);
  */
 void free_page(PageFrameAllocator* allocator, void* page);
 
-void map_page(PageFrameAllocator* allocator, uint64_t virtual_address, uint64_t physical_address, uint64_t flags);
+void map_page(uint64_t* pml4, PageFrameAllocator* allocator, uint64_t virtual_address, uint64_t physical_address, uint64_t flags);
 
 // Kernel Heap
 /**
@@ -64,7 +66,7 @@ void map_page(PageFrameAllocator* allocator, uint64_t virtual_address, uint64_t 
  * @param size 
  * @return void* - virtual memory address (base address for new allocation)
  */
-void *kmalloc(PageFrameAllocator* allocator, size_t size);
+void *kmalloc(uint64_t* pml4, PageFrameAllocator* allocator, size_t size);
 
 
 #endif

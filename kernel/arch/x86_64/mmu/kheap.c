@@ -1,10 +1,11 @@
 #include <arch/x86_64/mmu.h>
+#include <stdint.h>
 
 static uint64_t heap_current = KERNEL_HEAP_START;
 static uint64_t heap_end = KERNEL_HEAP_START;
 static uint64_t heap_current_size_left = 0; // No allocated pages in the beginning
 
-void *kmalloc(PageFrameAllocator* allocator, size_t size) {
+void *kmalloc(uint64_t* pml4, PageFrameAllocator* allocator, size_t size) {
     // Check if there is enough space for size in current allocated page
     if ((long long) heap_current_size_left - (long long) size >= 0 && heap_current_size_left > 0)
     {
@@ -25,7 +26,7 @@ void *kmalloc(PageFrameAllocator* allocator, size_t size) {
             return NULL; // Out of memory
         }
         // Map page at end of heap
-        map_page(allocator, heap_end, (uint64_t)page, PAGE_PRESENT | PAGE_WRITE);
+        map_page(pml4 ,allocator, heap_end, (uint64_t)page, PAGE_PRESENT | PAGE_WRITE);
         heap_end += PAGE_SIZE;
         heap_current_size_left += PAGE_SIZE;
     }
