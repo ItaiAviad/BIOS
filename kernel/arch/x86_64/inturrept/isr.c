@@ -3,6 +3,7 @@
 #include <arch/x86_64/io.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <arch/x86_64/interrupt.h>
 
 // An array of strings in which exception_messages[i] specifies the i-th interrupt error code
 char *isr_exception_messages[] = {
@@ -84,6 +85,7 @@ void init_isr_handlers() {
 }
 
 void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
+    cdi();// Disable interrupts to prevent getting the same interrupt regenerated while handling one 
     if (isr_num <= 31) {
         printf("ISR: %s (%d) called\n", isr_exception_messages[isr_num], isr_num);
         (regs->rip)++;
@@ -94,6 +96,7 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
             buffer_put(inb(PS2_KEYBOARD_PORT_DATA));
         pic_send_eoi(isr_num - PIC1_OFFSET); // Send ACK to PIC
     }
+    sti(); //Reenable interrupts
 }
 
 
