@@ -1,5 +1,6 @@
 megs: 128
-floppya: 1_44=$(FLOPPY_BIN), status=inserted
-boot: floppy
+ata0-master: type=disk, path=$(FLOPPY_BIN), mode=flat
+boot: disk
 mouse: enabled=0
 display_library: x, options="gui_debug"
+magic_break: enabled=1

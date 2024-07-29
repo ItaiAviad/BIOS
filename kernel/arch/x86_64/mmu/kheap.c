@@ -27,11 +27,11 @@ void *kmalloc(uint64_t* pml4, PageFrameAllocator* allocator, size_t size) {
         }
         // Map page at end of heap
         map_page(pml4 ,allocator, heap_end, (uint64_t)page, PAGE_PRESENT | PAGE_WRITE);
+        set_page_dir_reg(pml4);
         heap_end += PAGE_SIZE;
         heap_current_size_left += PAGE_SIZE;
     }
     heap_current_size_left -= size;
-    
     return (void *)allocation_addr;
 }
 

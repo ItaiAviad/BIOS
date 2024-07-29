@@ -1,7 +1,10 @@
 #include <memory.h>
+#include <stdint.h>
+
+
+PageFrameAllocator allocator;
 
 void* init_heap(uint64_t base_addr, uint64_t size) {
-    heap_base = (void*) aalign(base_addr, HEAP_CHUNK_MIN_SIZE_BYTES);
 
     // Init Page Frame Allocator
     static int allocator_initialized = 0;
@@ -9,6 +12,8 @@ void* init_heap(uint64_t base_addr, uint64_t size) {
         init_page_frame_allocator(&allocator, PAGE_SIZE * 8192);
         allocator_initialized = 1;
     }
+
+    heap_base = (void*) aalign(base_addr, HEAP_CHUNK_MIN_SIZE_BYTES);
 
     // Allocate malloc_state (heap:0x0)- Kernel Malloc
     kmalloc((uint64_t*) PML4_KERNEL, &allocator, sizeof(malloc_state));

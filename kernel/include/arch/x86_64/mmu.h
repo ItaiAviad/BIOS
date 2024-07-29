@@ -54,9 +54,14 @@ void* allocate_and_zero_page(PageFrameAllocator* allocator);
  * @param allocator 
  * @param page physical memory address
  */
+
+void set_page_dir_reg(uint64_t* pml4);
+
 void free_page(PageFrameAllocator* allocator, void* page);
 
 void map_page(uint64_t* pml4, PageFrameAllocator* allocator, uint64_t virtual_address, uint64_t physical_address, uint64_t flags);
+
+bool check_if_mapped(uint64_t* pml4, uint64_t virtual_address);
 
 // Kernel Heap
 /**

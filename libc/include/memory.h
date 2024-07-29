@@ -23,7 +23,6 @@ __attribute__((unused))
 void* heap_end;
 __attribute__((unused))
 PageFrameAllocator allocator;
-
 typedef struct __attribute__((__packed__)) malloc_chunk {
     uint32_t mchunk_prev_size;  /* Size of previous chunk, if it is free. */
     uint32_t mchunk_size;       /* Size in bytes, including overhead. */

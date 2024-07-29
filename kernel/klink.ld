@@ -4,7 +4,7 @@ phys = $(KERNEL_LOAD_ADDR);
 SECTIONS
 {
     . = phys;
-
+    __entry = .;
     .entry       : { __entry_start = .;     *(.entry)   }
     .text        : { __text_start = .;      *(.text)    }
     .data        : { __data_start = .;      *(.data)    }
