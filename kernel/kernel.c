@@ -21,14 +21,13 @@ int kmain(void) {
 
     // TTY - Terminal
     terminal_initialize();
-    
 
 
-    
+
     malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
     char* dst = (char*) malloc(0x10);
     char* dst2 = (char*) malloc(0x10);
-    printf("dst: %x, dst2: %x\n", dst, dst2);
+    printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);    
 
     char* hello = "In Kernel!\nEnter char, string and a decimal:";
     printf("%s", hello);

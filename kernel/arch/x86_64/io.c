@@ -14,16 +14,32 @@ keyboard_t keyboard = {
     .rshift = false,
 };
 
-void buffer_put(unsigned char s) {
+bool is_special_char(char c) {
+    return !(c != '\b' && c != '\r' && c != 0x1B && c != '\t' && c != '\n' && c != EOF && c != '\0');
+}
+
+void buffer_put(unsigned char s) { 
     // Check for special keys
     special_key_press(s);
+
+    unsigned char uc = scs1_to_ascii(s, keyboard.lshift | keyboard.rshift, keyboard.caps);
+
+    // Ctrl+Backspace or Ctrl+Del    
+    // if ((keyboard.lctrl || keyboard.rctrl) && (uc == '\b' || uc == 0x0C)) {
+    //     if (uc == '\b') { // Ctrl+Backspace
+    //         for (int i = keyboard.buffer_head; i >= 0 && keyboard.buffer[i] != ' '; i--) {
+    //             if (!is_special_char(keyboard.buffer[i]))
+    //                 buffer_put_c('\b');
+    //         }
+    //     }
+    //     return;
+    // }
 
     // Invalid input
     if (keyboard.lctrl || keyboard.rctrl || keyboard.lalt || keyboard.altgr)
         return;
 
     // Add char to buffer
-    unsigned char uc = scs1_to_ascii(s, keyboard.lshift | keyboard.rshift, keyboard.caps);
     if (uc)
         buffer_put_c(uc);
 }
@@ -111,11 +127,11 @@ void special_key_press(uint16_t scan_code) {
 }
 
 char wait_key() {
-    // irq_clear_mask(IRQ_KEYBOARD);
+    irq_clear_mask(IRQ_KEYBOARD);
 
     while (buffer_is_empty()) {}
 
-    // irq_set_mask(IRQ_KEYBOARD);
+    irq_set_mask(IRQ_KEYBOARD);
 
     return buffer_get();
 }

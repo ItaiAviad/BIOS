@@ -150,6 +150,7 @@ int sscanf_args(const char* str, const char* restrict format, va_list args) {
 			// Only increment written if value written to dst (str incremented)
             str += next_idx;
 			written += next_idx > 0 ? 1 : 0;
+            printf("c next_idx: %d\n", next_idx);
 		} else if (*format == 's') { // Read string with maximum length
 			format++;
 			char* dst = va_arg(args, char*);
@@ -161,6 +162,7 @@ int sscanf_args(const char* str, const char* restrict format, va_list args) {
             int next_idx = get_next_valid_string(str, SCANF_BUF_SIZE, dst);
             // Only increment written if value written to dst (str incremented)
             str += next_idx;
+            printf("s next_idx: %d\n", next_idx);
 			written += next_idx > 0 ? 1 : 0;
         } else if (*format == 'd') { // Read string and convert to int
             format++;
@@ -169,9 +171,10 @@ int sscanf_args(const char* str, const char* restrict format, va_list args) {
             itoa(*dst, dst_str, 10);
             int next_idx = get_next_valid_string(str, SCANF_BUF_SIZE, dst_str);
             *dst = atoi(dst_str);
-            str += next_idx;
+            // str += next_idx;
             // Only increment written if value written to dst (str incremented)
 			str += next_idx;
+            printf("d next_idx: %d\n", next_idx);
 			written += next_idx > 0 ? 1 : 0;
         }
 	}
