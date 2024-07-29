@@ -1,10 +1,12 @@
 #include <arch/x86_64/mmu.h>
 
-extern uint64_t __kend;
+// extern uint64_t __kend;
+
+static uint64_t kend = 2097152;
 
 void init_page_frame_allocator(PageFrameAllocator* allocator, uint64_t memory_size) {
     allocator->num_pages = memory_size / PAGE_SIZE;
-    allocator->bitmap = (uint8_t *) aalign(__kend, PAGE_SIZE); // Place bitmap after the kernel
+    allocator->bitmap = (uint8_t *) aalign(kend, PAGE_SIZE); // Place bitmap after the kernel
     
     // Calculate bitmap size in bytes
     size_t bitmap_size = allocator->num_pages;
@@ -13,7 +15,7 @@ void init_page_frame_allocator(PageFrameAllocator* allocator, uint64_t memory_si
     }
 
     // Mark used pages (e.g., kernel and reserved regions)
-    for (size_t i = 0; i <= (size_t)(__kend) / PAGE_SIZE; i++) {
+    for (size_t i = 0; i <= (size_t)(kend) / PAGE_SIZE; i++) {
         allocator->bitmap[i] = 1;
     }
     for (size_t i = 0; i <= bitmap_size; i++) {

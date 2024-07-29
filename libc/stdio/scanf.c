@@ -53,7 +53,8 @@ char* gets(char* str) {
  * @return false 
  */
 bool is_valid_char(char c) {
-    return c != '\b' && c != '\r' && c != 0x1B && c != '\t' && c != ' ' && c != '\n' && c != EOF && c != '\0';
+    return (c >= '!' && c <= '~');
+    // return c != '\b' && c != '\r' && c != 0x1B && c != '\t' && c != ' ' && c != '\n' && c != EOF && c != '\0';
 }
 
 /**
@@ -114,7 +115,7 @@ int get_next_valid_string(const char* str, size_t len, char* dst) {
         dst[i + 1] = '\0';
         // for (uint32_t j = i; j < len; j++)
     
-    return (int)(str - base_str);
+    return (int) (str - base_str);
 }
 
 int sscanf_args(const char* str, const char* restrict format, va_list args) {
@@ -150,7 +151,6 @@ int sscanf_args(const char* str, const char* restrict format, va_list args) {
 			// Only increment written if value written to dst (str incremented)
             str += next_idx;
 			written += next_idx > 0 ? 1 : 0;
-            printf("c next_idx: %d\n", next_idx);
 		} else if (*format == 's') { // Read string with maximum length
 			format++;
 			char* dst = va_arg(args, char*);
@@ -162,7 +162,6 @@ int sscanf_args(const char* str, const char* restrict format, va_list args) {
             int next_idx = get_next_valid_string(str, SCANF_BUF_SIZE, dst);
             // Only increment written if value written to dst (str incremented)
             str += next_idx;
-            printf("s next_idx: %d\n", next_idx);
 			written += next_idx > 0 ? 1 : 0;
         } else if (*format == 'd') { // Read string and convert to int
             format++;
@@ -174,7 +173,6 @@ int sscanf_args(const char* str, const char* restrict format, va_list args) {
             // str += next_idx;
             // Only increment written if value written to dst (str incremented)
 			str += next_idx;
-            printf("d next_idx: %d\n", next_idx);
 			written += next_idx > 0 ? 1 : 0;
         }
 	}
