@@ -11,13 +11,16 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_si
     allocator->bitmap = (uint8_t*)aalign(__kend, PAGE_SIZE);
     memset(allocator->bitmap, 0, bitmap_size*sizeof(uint8_t)); // zero bitmap
     allocator->bitmap[0] = 1; // Set the first page as in use for dealing with NULL values
-
+    map_important_pages((uint64_t*) PML4_KERNEL, allocator);
     __kend = (uint64_t)(allocator->bitmap + bitmap_size*sizeof(uint8_t));
-    for (uint64_t addr = 0, i = 0; addr < __kend; addr += PAGE_SIZE, i++) { // Allocate pages with identical mappings map allkernel memory
-        map_page((uint64_t *)PML4_KERNEL, allocator, addr, addr, PAGE_PRESENT | PAGE_WRITE);
+    set_page_dir_reg((uint64_t *)PML4_KERNEL);
+}
+
+void map_important_pages(uint64_t* pml4 ,PageFrameAllocator *allocator){
+    for (uint64_t addr = 0, i = 0; addr < __kend; addr += PAGE_SIZE, i++) { // Identical map all of the kernels memory
+        map_page(pml4, allocator, addr, addr, PAGE_PRESENT | PAGE_WRITE);
         allocator->bitmap[i] = 1;
     }
-    set_page_dir_reg((uint64_t *)PML4_KERNEL);
 }
 
 void *allocate_page(PageFrameAllocator *allocator) {

@@ -46,6 +46,7 @@ void init_page_frame_allocator(PageFrameAllocator* allocator, uint64_t memory_si
  */
 void* allocate_page(PageFrameAllocator* allocator);
 void* allocate_and_zero_page(PageFrameAllocator* allocator);
+void map_important_pages(uint64_t* pml4 ,PageFrameAllocator *allocator);
 /**
  * @brief Free a page from a frame
  * 

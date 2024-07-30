@@ -23,31 +23,29 @@ void map_page(uint64_t* pml4, PageFrameAllocator* allocator, uint64_t virtual_ad
 
     allocator->bitmap[(int)pml4/PAGE_SIZE] = 1; // Map page managment structure as in use
 
-
     // Ensure PDPT, PD, and PT entries exist (allocate and zero if necessary)
     if (!(pml4[pml4_index] & PAGE_PRESENT)) {
         pdpt = allocate_and_zero_page(allocator);
         pml4[pml4_index] = ((uint64_t) pdpt) | PAGE_PRESENT | PAGE_WRITE;
     } else {
         pdpt = (uint64_t*) (pml4[pml4_index] & ~0xFFF);
+        allocator->bitmap[(int)pdpt/PAGE_SIZE] = 1;
     }
-    allocator->bitmap[(int)pdpt/PAGE_SIZE] = 1; // Map page managment structure as in use
-
     if (!(pdpt[pdpt_index] & PAGE_PRESENT)) {
         pd = allocate_and_zero_page(allocator);
         pdpt[pdpt_index] = ((uint64_t) pd) | PAGE_PRESENT | PAGE_WRITE;
     } else {
         pd = (uint64_t*) (pdpt[pdpt_index] & ~0xFFF);
+        allocator->bitmap[(int)pd/PAGE_SIZE] = 1;
     }
-    allocator->bitmap[(int)pd/PAGE_SIZE] = 1; // Map page managment structures as in use
     if (!(pd[pd_index] & PAGE_PRESENT)) {
         pt = allocate_and_zero_page(allocator);
         pd[pd_index] = ((uint64_t) pt) | PAGE_PRESENT | PAGE_WRITE;
     } else {
         pt = (uint64_t*) (pd[pd_index] & ~0xFFF);
+        allocator->bitmap[(int)pt/PAGE_SIZE] = 1;
     }
-    allocator->bitmap[(int)pt/PAGE_SIZE] = 1; // Map page managment structures as in use
-    
+
     // Map the physical address to the virtual address in the page table
     pt[pt_index] = physical_address | flags;
 }
