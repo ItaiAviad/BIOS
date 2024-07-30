@@ -1,5 +1,6 @@
 #include <memory.h>
 #include <string.h>
+#include <arch/x86_64/mmu.h>
 
 void* malloc(size_t size) {
     malloc_state* heap = (malloc_state*) heap_base;

@@ -1,3 +1,4 @@
+#include <arch/x86_64/interrupts.h>
 
 void cli(){
     __asm__ volatile("cli");
