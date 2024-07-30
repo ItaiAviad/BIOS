@@ -11,8 +11,6 @@
 #include <string.h>
 #include "mlayout.h"
 
-#define PML4_KERNEL 0x1000 // PML4 kernel base address
-
 #define PAGE_SIZE 4096
 #define PAGE_PRESENT 0x1
 #define PAGE_WRITE   0x2
