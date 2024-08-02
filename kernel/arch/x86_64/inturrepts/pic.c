@@ -37,7 +37,7 @@ void pic_init(int offset1, int offset2)
 	outb(PIC2_DATA, a2);
 
     // Enable interrupts globally
-    __asm__ volatile ("sti");
+    sti();
 }
 
 void pic_disable(void) {

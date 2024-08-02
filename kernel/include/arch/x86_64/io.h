@@ -8,6 +8,7 @@
 #include <string.h>
 #include <arch/x86_64/pic.h>
 #include <arch/x86_64/scs1.h>
+#include <arch/x86_64/interrupts.h>
 
 #define STDIN 0
 #define STDOUT 1

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <arch/x86_64/io.h>
 #include <arch/x86_64/scs1.h>
+#include <arch/x86_64/interrupts.h>
 
 #ifndef PIC_H
 #define PIC_H

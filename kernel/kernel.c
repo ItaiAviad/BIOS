@@ -1,16 +1,19 @@
 // Kernel Main File
 
+// libc
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
 #include <string.h>
 #include <random.h>
 #include <math.h>
+// arch/x86_64
 #include <arch/x86_64/mmu.h>
 #include <arch/x86_64/isr.h>
 #include <arch/x86_64/tty.h>
 #include <arch/x86_64/io.h>
 #include <arch/x86_64/pic.h>
+#include <arch/x86_64/pit.h>
 
 int kmain(void) {
     // PIC - Programmable Interrupt Controller
@@ -22,6 +25,7 @@ int kmain(void) {
     // TTY - Terminal
     terminal_initialize();
 
+    printf("read_pit_count(): %d\n", read_pit_count());
 
     malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
     char* dst = (char*) malloc(0x10);
