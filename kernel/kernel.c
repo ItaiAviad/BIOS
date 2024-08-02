@@ -26,9 +26,9 @@ int kmain(void) {
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
     printf("c\n");
     asm volatile("xchg bx, bx");
-    if(!allocator_initialized){ 
+    if(!allocator.initialized){ 
         init_page_frame_allocator(&allocator, MEMORY_SIZE);
-        allocator_initialized = 1;
+        allocator.initialized = 1;
     }
     printf("d\n");
     asm volatile("xchg bx, bx");

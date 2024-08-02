@@ -15,7 +15,6 @@
 #define MEMORY_SIZE_INIT PAGE_SIZE * 0x2000 // Use a smaller bitmap for init pages of the larger bitmap
 #define MEMORY_SIZE PAGE_SIZE * 0x4000
 
-extern int allocator_initialized;
 
 #define PAGE_PRESENT 0b1
 #define PAGE_WRITE   0b10
@@ -25,6 +24,8 @@ typedef struct {
     // Bitmap array: Boolean values (page used/unused). Using 8 bits for minimzed memory usage.
     //         Not using bitwise operations for simplicity over memory usage (x8 more space used for bitmap)
     uint64_t num_pages; // Total number of pages
+
+    uint64_t initialized;
 } PageFrameAllocator;
 
 /**

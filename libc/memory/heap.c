@@ -2,14 +2,14 @@
 #include <stdint.h>
 
 
-PageFrameAllocator allocator;
+PageFrameAllocator allocator = {.initialized = false};
 
 void* init_heap(uint64_t base_addr, uint64_t size) {
 
     // Init Page Frame Allocator
-    if (!allocator_initialized) {
+    if (!allocator.initialized) {
         init_page_frame_allocator(&allocator, PAGE_SIZE * 8192);
-        allocator_initialized = 1;
+        allocator.initialized = 1;
     }
 
     heap_base = (void*) aalign(base_addr, HEAP_CHUNK_MIN_SIZE_BYTES);
