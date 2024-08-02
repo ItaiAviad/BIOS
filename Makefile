@@ -7,7 +7,7 @@ endif
 
 SECTOR_SIZE := 512
 
-KERNEL_LOAD_ADDR := 0x8C00
+KERNEL_LOAD_ADDR := 0xF000
 
 ### Directories
 BOOT_DIR := boot

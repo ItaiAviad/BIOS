@@ -30,13 +30,13 @@ a20_activated:
     ret
 
 a20_ns:
-    mov si, msg_a20_ns
-    call puts16
+    ; mov si, msg_a20_ns
+    ; call puts16
     jmp hlt
 
 a20_failed:
-    mov si, msg_a20_failed
-    call puts16
+    ; mov si, msg_a20_failed
+    ; call puts16
     jmp hlt
 
 

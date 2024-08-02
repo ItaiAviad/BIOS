@@ -3,19 +3,70 @@
 
 #include <arch/x86_64/pit.h>
 
-unsigned read_pit_count(void) {
-	unsigned count = 0;
+// PIT Timer Counter
+volatile uint64_t tick_count = 0;
+
+void pit_init(void) {
+    cli();
+
+    uint64_t divisor = PIT_FREQUENCY / PIT_TIMER_FREQ;
+
+    // Set PIT mode
+    // Select channel (bits 6-7):       00  Channel 0
+    // Access mode (bits 4-5):          11
+    // Operating mode (bits 0-3):       011 
+    // BCD/Binary mode (bit 0):         0   
+    // outb(PIT_COMMAND_REGISTER, 0x36); // 00110110
+
+    // Set PIT divisor
+    set_pit_count(divisor);
+
+    sti();
+}
+
+uint64_t read_pit_count(void) {
+    uint64_t pit_count = 0;
 	
 	// Disable interrupts
 	cli();
 	
 	// al = channel in bits 6 and 7, remaining bits clear
-	outb(0x43, 0b0000000);
+	outb(PIT_COMMAND_REGISTER, 0b0000000);
 	
-	count = inb(0x40);              // Low byte
-	count |= inb(0x40) << 8;        // High byte
+	pit_count = inb(PIT_CHANNEL_0_DATA_REGISTER);              // Low byte
+	pit_count |= inb(PIT_CHANNEL_0_DATA_REGISTER) << 8;        // High byte
 
     sti();
 	
-	return count;
+	return pit_count;
 }
+
+void set_pit_count(uint64_t count) {
+	// Disable interrupts
+	cli();
+	
+	// Set low byte
+	outb(PIT_CHANNEL_0_DATA_REGISTER, count & 0xFF);              // Low byte
+	outb(PIT_CHANNEL_0_DATA_REGISTER, (count & 0xFF00) >> 8);     // High byte
+
+    sti();
+}
+
+void pit_handler() {
+    tick_count++;
+}
+
+void sleep(uint64_t milliseconds) {
+    volatile uint64_t start_ticks = tick_count;
+    volatile uint64_t end_ticks = start_ticks + milliseconds;
+    printf("%d\n", start_ticks);
+    printf("%d\n", end_ticks);
+
+    while (tick_count < end_ticks) {
+        asm volatile("hlt");
+        // io_wait();
+        // Wait here until the specified number of ticks have passed
+        // Optionally, yield CPU to other processes or use an efficient wait
+    }
+}
+

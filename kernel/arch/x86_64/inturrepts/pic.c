@@ -36,6 +36,9 @@ void pic_init(int offset1, int offset2)
 	outb(PIC1_DATA, a1);   // restore saved masks.
 	outb(PIC2_DATA, a2);
 
+    // Init PIT
+    pit_init();
+
     // Enable interrupts globally
     sti();
 }

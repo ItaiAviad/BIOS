@@ -81,16 +81,21 @@ void init_isr_handlers() {
 
 void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
     cli();// Disable interrupts to prevent getting the same interrupt regenerated while handling one 
+
     if (isr_num <= 31) {
-        printf("ISR: %s (%d) called, Old rip %d \n", isr_exception_messages[isr_num], isr_num, regs->rip);
+        printf("ISR: %s (%d) called, Old rip: %x \n", isr_exception_messages[isr_num], isr_num, regs->rip);
         (regs->rip)++;
         abort();
     }
     else if (isr_num >= 32) {
-        if (isr_num == IRQ_KEYBOARD + PIC1_OFFSET) // Keyboard IRQ
+        if (isr_num == IRQ_PIT + PIC1_OFFSET) // PIT IRQ
+            pit_handler();
+        else if (isr_num == IRQ_KEYBOARD + PIC1_OFFSET) // Keyboard IRQ
             buffer_put(inb(PS2_KEYBOARD_PORT_DATA));
+
         pic_send_eoi(isr_num - PIC1_OFFSET); // Send ACK to PIC
     }
+
     sti(); //ReEnable interrupts
 }
 

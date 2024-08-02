@@ -8,11 +8,14 @@
 
 #include <types.h>
 #include <arch/x86_64/pic.h>
+#include <arch/x86_64/pit.h>
 #include <arch/x86_64/interrupts.h>
 #include <arch/x86_64/io.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <arch/x86_64/idt.h>
+
+#define PAGE_FAULT 14
 
 // Structure for pushed registers saved for ISR
 typedef struct __attribute__((packed)) {

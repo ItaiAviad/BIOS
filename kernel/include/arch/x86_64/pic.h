@@ -5,6 +5,7 @@
 #include <arch/x86_64/io.h>
 #include <arch/x86_64/scs1.h>
 #include <arch/x86_64/interrupts.h>
+#include <arch/x86_64/pit.h>
 
 #ifndef PIC_H
 #define PIC_H
@@ -38,6 +39,7 @@
 #define PIC_READ_IRR                0x0a    /* OCW3 irq ready next CMD read */
 #define PIC_READ_ISR                0x0b    /* OCW3 irq service next CMD read */
 
+#define IRQ_PIT 0x0
 #define IRQ_KEYBOARD 0x1
 
 void pic_send_eoi(uint8_t irq);

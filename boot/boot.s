@@ -26,8 +26,8 @@ rm:
     mov sp, bp
 
     ; Print Real Mode message
-    mov si, msg_rm_sector
-    call puts16
+    ; mov si, msg_rm_sector
+    ; call puts16
 
     ; Read Protected Mode Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
@@ -37,8 +37,8 @@ rm:
     call disk_read
     
     ; Print Protected Mode Sectors message
-    mov si, msg_pm_sector
-    call puts16
+    ; mov si, msg_pm_sector
+    ; call puts16
 
     ; Read Long Mode Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
@@ -48,8 +48,8 @@ rm:
     call disk_read
 
     ; Print Long Mode Sector message
-    mov si, msg_lm_sector
-    call puts16
+    ; mov si, msg_lm_sector
+    ; call puts16
 
     ; Read Kernel Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
@@ -59,12 +59,12 @@ rm:
     call disk_read
 
     ;Print Kernel Sectors message
-    mov si, msg_kernel_sector
-    call puts16
+    ; mov si, msg_kernel_sector
+    ; call puts16
 
     ; Print Initializing Mode Switching message
-    mov si, msg_init_ms
-    call puts16
+    ; mov si, msg_init_ms
+    ; call puts16
 
     ; Elevate to Protected Mode
     call elevate_pm
@@ -168,8 +168,8 @@ pm_end:
 
 lm:
     mov rdi, style_blue
-    mov rsi, msg_lm_success
-    call puts64
+    ; mov rsi, msg_lm_success
+    ; call puts64
     ; xchg bx, bx
     call KERNEL_LOAD_ADDR
     jmp hlt

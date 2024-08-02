@@ -10,6 +10,22 @@
 #include <arch/x86_64/interrupts.h>
 #include <arch/x86_64/pic.h>
 
-unsigned read_pit_count(void);
+#define PIT_COMMAND_REGISTER 0x43
+#define PIT_CHANNEL_0_DATA_REGISTER 0x40
+#define PIT_FREQUENCY 1193180 // PIT frequency (Hz)
+#define PIT_TIMER_FREQ 1000       // Desired frequency for PIT (1 kHz)
+
+void pit_init(void);
+uint64_t read_pit_count(void);
+void set_pit_count(uint64_t count);
+
+// PIT Timer
+void pit_handler();
+/**
+ * @brief Sleep for a specified number of milliseconds
+ * 
+ * @param uint64_t delay (in milliseconds)
+ */
+void sleep(uint64_t);
 
 #endif

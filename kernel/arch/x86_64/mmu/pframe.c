@@ -17,7 +17,7 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_si
 }
 
 void map_important_pages(uint64_t* pml4 ,PageFrameAllocator *allocator){
-    for (uint64_t addr = 0, i = 0; addr < __kend; addr += PAGE_SIZE, i++) { // Identical map all of the kernels memory
+    for (uint64_t addr = 0, i = 0; addr < __kend + 32 * PAGE_SIZE; addr += PAGE_SIZE, i++) { // Identical map all of the kernels memory
         map_page(pml4, allocator, addr, addr, PAGE_PRESENT | PAGE_WRITE);
         allocator->bitmap[i] = 1;
     }

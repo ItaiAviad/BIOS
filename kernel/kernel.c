@@ -17,20 +17,26 @@
 
 int kmain(void) {
     // PIC - Programmable Interrupt Controller
+    terminal_initialize();
+    printf("a\n");
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
+    printf("b\n");
 
     // ISR - Interrupt Service Routines
     init_isr_handlers();
+    printf("c\n");
 
     // TTY - Terminal
-    terminal_initialize();
+    printf("d\n");
 
-    printf("read_pit_count(): %d\n", read_pit_count());
+    // malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
+    // char* dst = (char*) malloc(0x10);
+    // char* dst2 = (char*) malloc(0x10);
+    // printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
+    char dst[30];
 
-    malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
-    char* dst = (char*) malloc(0x10);
-    char* dst2 = (char*) malloc(0x10);
-    printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
+    sleep(5000);
+    printf("\n");
 
     char* hello = "In Kernel!\nEnter char, string and a decimal:";
     printf("%s", hello);
@@ -42,7 +48,8 @@ int kmain(void) {
     printf("rand: %d\n", rand());
     // printf("Division by zero interrupt: %d\n", 1 / 0);
 
-    while (1) {}
+    // while (1) {}
+    __asm__ volatile ("hlt");
 
     return 0;
 }
