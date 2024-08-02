@@ -67,7 +67,9 @@ void sleep(uint64_t milliseconds) {
         asm volatile("nop");
         // io_wait();
         // Wait here until the specified number of ticks have passed
-        // Optionally, yield CPU to other processes or use an efficient wait
+
+        // TODO:
+        // Yield CPU to other processes or use an efficient wait
     }
 }
 
