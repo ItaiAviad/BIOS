@@ -85,7 +85,9 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
     if (isr_num <= 31) {
         printf("ISR: %s (%d) called, Old rip: %x \n", isr_exception_messages[isr_num], isr_num, regs->rip);
         (regs->rip)++;
-        abort();
+        while(1){
+
+        }
     }
     else if (isr_num >= 32) {
         if (isr_num == IRQ_PIT + PIC1_OFFSET) // PIT IRQ

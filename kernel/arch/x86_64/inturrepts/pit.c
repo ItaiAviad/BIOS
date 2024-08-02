@@ -5,6 +5,7 @@
 
 // PIT Timer Counter
 volatile uint64_t tick_count = 0;
+volatile uint64_t time_pit_on = 0;
 
 void pit_init(void) {
     cli();
@@ -58,12 +59,12 @@ void pit_handler() {
 
 void sleep(uint64_t milliseconds) {
     volatile uint64_t start_ticks = tick_count;
-    volatile uint64_t end_ticks = start_ticks + milliseconds;
+    volatile uint64_t end_ticks = start_ticks + milliseconds/PIT_FREQUENCY;
     printf("%d\n", start_ticks);
     printf("%d\n", end_ticks);
 
     while (tick_count < end_ticks) {
-        asm volatile("hlt");
+        asm volatile("nop");
         // io_wait();
         // Wait here until the specified number of ticks have passed
         // Optionally, yield CPU to other processes or use an efficient wait
