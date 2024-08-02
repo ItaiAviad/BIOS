@@ -20,7 +20,7 @@
 // Structure for pushed registers saved for ISR
 typedef struct __attribute__((packed)) {
     // Define the callee-saved registers
-    uint64_t r15, r14, r13, r12, rbp, rbx;
+    uint64_t cr2, r15, r14, r13, r12, rbp, rbx;
 
     // Define the callee-clobbered registers
     uint64_t r11, r10, r9, r8, rax, rcx, rdx, rsi, rdi;

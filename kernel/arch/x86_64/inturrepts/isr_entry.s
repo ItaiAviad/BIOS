@@ -4,7 +4,7 @@ jmp _isr_start
 
 [extern isr_handler]
 
-REGISTER_SIZE:          equ 0x78
+REGISTER_SIZE:          equ 0x80
 QUADWORD_SIZE:          equ 0x08
 
 %macro PUSHALL 0
@@ -23,10 +23,14 @@ QUADWORD_SIZE:          equ 0x08
     push r13
     push r14
     push r15
+    mov rax, cr2
+    push rax
 %endmacro
 
 
 %macro POPALL 0
+    pop rax
+    mov cr2, rax
     pop r15
     pop r14
     pop r13

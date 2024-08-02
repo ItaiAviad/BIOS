@@ -59,7 +59,7 @@ void pit_handler() {
 
 void sleep(uint64_t milliseconds) {
     volatile uint64_t start_ticks = tick_count;
-    volatile uint64_t end_ticks = start_ticks + milliseconds/PIT_FREQUENCY;
+    volatile uint64_t end_ticks = start_ticks + milliseconds/((1000)/PIT_TIMER_FREQ);
     printf("%d\n", start_ticks);
     printf("%d\n", end_ticks);
 

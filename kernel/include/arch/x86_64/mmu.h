@@ -12,8 +12,12 @@
 #include "mlayout.h"
 
 #define PAGE_SIZE 4096
-#define PAGE_PRESENT 0x1
-#define PAGE_WRITE   0x2
+#define MEMORY_SIZE PAGE_SIZE * 8000
+
+extern int allocator_initialized;
+
+#define PAGE_PRESENT 0b1
+#define PAGE_WRITE   0b10
 
 typedef struct {
     uint8_t* bitmap;     // Bitmap array

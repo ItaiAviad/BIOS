@@ -83,7 +83,7 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
     cli();// Disable interrupts to prevent getting the same interrupt regenerated while handling one 
 
     if (isr_num <= 31) {
-        printf("ISR: %s (%d) called, Old rip: %x \n", isr_exception_messages[isr_num], isr_num, regs->rip);
+        printf("ISR: %s (%d) called, Old rip: %x, cr2: %x \n", isr_exception_messages[isr_num], isr_num, regs->rip, regs->cr2);
         (regs->rip)++;
         while(1){
 

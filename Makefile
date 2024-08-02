@@ -126,6 +126,7 @@ run:
 
 run_debug_bochs:
 	sed 's#$$(FLOPPY_BIN)#$(FLOPPY_BIN)#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG)
+	sync
 	bochs -qf $(BOCHS_CONFIG)
 	rm -f $(BOCHS_CONFIG)
 

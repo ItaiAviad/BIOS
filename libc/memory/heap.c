@@ -7,7 +7,6 @@ PageFrameAllocator allocator;
 void* init_heap(uint64_t base_addr, uint64_t size) {
 
     // Init Page Frame Allocator
-    static int allocator_initialized = 0;
     if (!allocator_initialized) {
         init_page_frame_allocator(&allocator, PAGE_SIZE * 8192);
         allocator_initialized = 1;

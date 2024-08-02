@@ -1,12 +1,12 @@
 // Kernel Main File
 
 // libc
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
 #include <string.h>
 #include <random.h>
-#include <math.h>
 // arch/x86_64
 #include <arch/x86_64/mmu.h>
 #include <arch/x86_64/isr.h>
@@ -18,16 +18,25 @@
 int kmain(void) {
     // PIC - Programmable Interrupt Controller
     terminal_initialize();
-    printf("a\n");
-    pic_init(PIC1_OFFSET, PIC2_OFFSET);
+    printf("a\n"); 
+    asm volatile("xchg bx, bx");
+    init_isr_handlers();
     printf("b\n");
+    asm volatile("xchg bx, bx");
+    pic_init(PIC1_OFFSET, PIC2_OFFSET);
+    printf("c\n");
+    asm volatile("xchg bx, bx");
+    if(!allocator_initialized){ 
+        init_page_frame_allocator(&allocator, MEMORY_SIZE);
+        allocator_initialized = 1;
+    }
+    printf("d\n");
+    asm volatile("xchg bx, bx");
+
 
     // ISR - Interrupt Service Routines
-    init_isr_handlers();
-    printf("c\n");
 
     // TTY - Terminal
-    printf("d\n");
 
     // malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
     // char* dst = (char*) malloc(0x10);

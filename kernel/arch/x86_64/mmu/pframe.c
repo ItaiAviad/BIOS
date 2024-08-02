@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <arch/x86_64/mlayout.h>
 
+int allocator_initialized = 0;
+
 void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_size) {
     allocator->num_pages = memory_size / PAGE_SIZE;
     // Calculate bitmap size in bytes
@@ -17,7 +19,7 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_si
 }
 
 void map_important_pages(uint64_t* pml4 ,PageFrameAllocator *allocator){
-    for (uint64_t addr = 0, i = 0; addr < (__kend + 1) * PAGE_SIZE; addr += PAGE_SIZE, i++) { // Identical map all of the kernels memory
+    for (uint64_t addr = 0, i = 0; addr < (__kend) / PAGE_SIZE; addr += PAGE_SIZE, i++) { // Identical map all of the kernels memory
         map_page(pml4, allocator, addr, addr, PAGE_PRESENT | PAGE_WRITE);
         allocator->bitmap[i] = 1;
     }
