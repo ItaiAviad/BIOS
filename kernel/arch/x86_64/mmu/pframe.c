@@ -9,6 +9,9 @@ int allocator_initialized = 0;
 uint8_t allocator_bitmap_init[MEMORY_SIZE_INIT/PAGE_SIZE];
 
 void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_size) {
+    if(allocator->initialized){
+        return;
+    }
     // Allocate pages for the allocator via allocator_bitmap_init and then copy to the new larger allocator bitmap
 
     uint64_t init_bitmap_size = sizeof(allocator_bitmap_init) * sizeof(uint8_t);
