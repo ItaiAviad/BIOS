@@ -5,10 +5,10 @@
 #include <arch/x86_64/mlayout.h>
 #include <string.h>
 
-int allocator_initialized = 0;
-uint8_t allocator_bitmap_init[MEMORY_SIZE_INIT/PAGE_SIZE];
 
 void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_size) {
+    uint8_t allocator_bitmap_init[MEMORY_SIZE_INIT/PAGE_SIZE];
+    
     if(allocator->initialized){
         return;
     }
