@@ -33,7 +33,7 @@ elevate_pm:
         mov gs, ax
 
         ; Set up stack
-        mov ebp, 0x90000
+        mov ebp, KERNEL_LOAD_ADDR
         mov esp, ebp
 
         jmp pm
