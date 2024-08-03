@@ -28,12 +28,13 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_si
     map_important_pages((uint64_t*) PML4_KERNEL, allocator);
     set_page_dir_reg((uint64_t *) PML4_KERNEL);
 
+    memset(new_bitmap_start_addr, 0, new_bitmap_size * sizeof(uint8_t));
     memcpy(new_bitmap_start_addr, allocator_bitmap_init, init_bitmap_size);
     allocator->bitmap = new_bitmap_start_addr;
     allocator->num_pages = new_bitmap_size;
 }
 
-void map_important_pages(uint64_t* pml4 ,PageFrameAllocator *allocator){
+void map_important_pages(uint64_t* pml4, PageFrameAllocator *allocator){
     for (uint64_t addr = 0, i = 0; addr < (__kend) / PAGE_SIZE; addr += PAGE_SIZE, i++) { // Identical map all of the kernels memory
         map_page(pml4, allocator, addr, addr, PAGE_PRESENT | PAGE_WRITE);
         allocator->bitmap[i] = 1;
