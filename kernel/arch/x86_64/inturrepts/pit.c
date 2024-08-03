@@ -61,6 +61,9 @@ void pit_handler() {
 
 void sleep(uint64_t milliseconds) {
     volatile uint64_t end_ticks = tick_count + milliseconds;
+    #ifdef DEBUG
+    printf("Start ticks: %d, End ticks: %d\n", tick_count, end_ticks);
+    #endif
 
     while (tick_count < end_ticks) {
         io_wait();

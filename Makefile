@@ -122,7 +122,8 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 run:
-	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN)
+	# qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN)
+	qemu-system-x86_64 -enable-kvm -drive format=raw,file=$(FLOPPY_BIN) -cpu host -smp cores=4 -m 4G -nic user,model=virtio
 
 run_debug_bochs:
 	sed 's#$$(FLOPPY_BIN)#$(FLOPPY_BIN)#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG)

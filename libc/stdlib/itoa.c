@@ -26,11 +26,11 @@ char* itoa(int num, char* str, int base) {
 
     // Process individual digits
     while (num != 0) {
-        io_wait_fast();
+        io_wait();
         int rem = num % base;
-        io_wait_fast();
+        io_wait();
         str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
-        io_wait_fast();
+        io_wait();
         num = num / base;
     }
     io_wait();
@@ -47,7 +47,7 @@ char* itoa(int num, char* str, int base) {
     int start = 0;
     int end = i - 1;
     while (start < end) {
-        io_wait_fast();
+        io_wait();
         char temp = str[start];
         str[start] = str[end];
         str[end] = temp;
