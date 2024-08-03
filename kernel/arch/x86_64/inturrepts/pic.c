@@ -10,6 +10,7 @@ void pic_send_eoi(uint8_t irq)
 
 void pic_init(int offset1, int offset2)
 {
+    io_wait();
 	uint8_t a1, a2;
 	
 	a1 = inb(PIC1_DATA);                        // save masks

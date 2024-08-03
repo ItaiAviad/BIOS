@@ -73,6 +73,7 @@ void init_isr_handlers() {
     idt_gate_init(30, handle_30_isr);
     idt_gate_init(31, handle_31_isr);
     // IRQs (PIC1 - 0x20-0x27, PIC2 - 0x28-0x2F)
+    io_wait();
     idt_gate_init(32, handle_32_isr);
     idt_gate_init(33, handle_33_isr);
 

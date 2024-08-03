@@ -70,8 +70,11 @@ int printf(const char* format, ...) {
                 // TODO: Set errno to EOVERFLOW.
                 return -1;
             }
-            char str[32 + 1];
+            char str[64 + 1];
+            memset(str, 0, 64 + 1);
+            io_wait();
             itoa(i, str, 10);
+            io_wait();
             size_t len = strlen(str);
             if (maxrem < len) {
 				// TODO: Set errno to EOVERFLOW.
@@ -87,8 +90,10 @@ int printf(const char* format, ...) {
                 // TODO: Set errno to EOVERFLOW.
                 return -1;
             }
-            char str[32 + 2 + 1]; // +1 - for '\0', +2 - for '0x'
-            char tmp[32 + 1];
+            char str[64 + 2 + 1]; // +1 - for '\0', +2 - for '0x'
+            memset(str, 0, 64 + 2 + 1);
+            char tmp[64 + 1];
+            memset(tmp, 0, 64 + 1);
             itoa(i, tmp, 16); // Int to string
             // Add '0x'
             memmove(str + 2, tmp, strlen(tmp) + 1);

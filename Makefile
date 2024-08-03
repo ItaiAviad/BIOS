@@ -60,7 +60,7 @@ NASM := nasm
 LD := x86_64-elf-ld
 
 INCLUDES := -I$(LIBC_INCLUDE) -I$(KERNEL_INCLUDE)
-CFLAGS := -ffreestanding -m64 -masm=intel -Wall -Wextra $(INCLUDES)
+CFLAGS := -ffreestanding -m64 -masm=intel -Wall -Wextra -O0 $(INCLUDES)
 LDFLAGS := -T $(KERNEL_LD) $(INCLUDES)
 LIBCFLAGS := $(CFLAGS) -D__is_libc
 LIBK_FLAGS := $(CFLAGS) -D__is_libk
