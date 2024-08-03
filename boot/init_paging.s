@@ -26,15 +26,17 @@ init_paging:
     ; Set edi back to PML4T[0]
     mov edi, cr3
 
-    ; Set table's pointers
+    ; Set table's pointers (and allocate 4MB of memory)
     mov edi, 0x1000
     mov dword[edi], 0x2003      ; Set PML4T[0] to address 0x2000 (PDPT), flags: 0x0003
-    add edi, 0x1000             ; Go to PDPT[0]
+    mov edi, 0x2000             ; Go to PDPT[0]
     mov dword[edi], 0x3003      ; Set PDPT[0] to address 0x3000 (PDT), flags: 0x0003
-    add edi, 0x1000             ; Go to PDT[0]
+    mov edi, 0x3000             ; Go to PDT[0]
     mov dword[edi], 0x4003      ; Set PDT[0] to address 0x4000 (PT), flags: 0x0003
+    mov edi, 0x3008
+    mov dword[edi], 0x5003      ; Set PDT[0] to address 0x4000 (PT), flags: 0x0003
 
-    add edi, 0x1000             ; Go to PT[0]
+    mov edi, 0x4000             ; Go to PT[0]
     mov ebx, 0x00000003         ; EBX has address 0x0000, flags: 0x0003
     mov ecx, 512                ; 512 times (512 entries in a table)
 
@@ -44,6 +46,17 @@ init_paging:
         add ebx, 0x1000         ; Increment address of ebx (a+1)
         add edi, 8              ; Increment page table location (8 bytes entries)
         loop .add_page_entry_protected
+
+    mov edi, 0x5000             ; Go to PT[0]
+    mov ebx, 0x00000003         ; EBX has address 0x0000, flags: 0x0003
+    mov ecx, 512                ; 512 times (512 entries in a table)
+
+    .add_page_entry_protected2:
+        ; a = address, x = index of page table, flags are entry flags
+        mov dword[edi], ebx     ; Write ebx to PT[x] = a.append(flags)
+        add ebx, 0x1000         ; Increment address of ebx (a+1)
+        add edi, 8              ; Increment page table location (8 bytes entries)
+        loop .add_page_entry_protected2
 
     ; Enable PAE paging
     mov eax, cr4

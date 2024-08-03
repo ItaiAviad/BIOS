@@ -11,11 +11,6 @@
 #include <string.h>
 #include "mlayout.h"
 
-#define PAGE_SIZE 4096
-#define MEMORY_SIZE_INIT PAGE_SIZE * 0x10 // Use a smaller bitmap for init pages of the larger bitmap
-#define MEMORY_SIZE PAGE_SIZE * 0x7000
-
-
 #define PAGE_PRESENT 0b1
 #define PAGE_WRITE   0b10
 

@@ -24,7 +24,7 @@ int memcmp(const void*, const void*, size_t);
  * @param size_t 
  * @return void* 
  */
-void* memcpy(void* __restrict, const void* __restrict, size_t);
+void* memcpy(void*, const void*, size_t);
 /**
  * @brief Move memory from src to dst
  * 

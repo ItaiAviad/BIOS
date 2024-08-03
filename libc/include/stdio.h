@@ -16,11 +16,11 @@ extern "C" {
 /**
  * @brief Write a formatted output to stdout
  * 
- * @param __restrict 
+ * @param 
  * @param ... 
  * @return int - number of characters written
  */
-int printf(const char* __restrict, ...);
+int printf(const char*, ...);
 /**
  * @brief Write a character to stdout
  * 
@@ -59,7 +59,7 @@ char* gets_s(char*, size_t);
  * @param ... 
  * @return int - number of input items read
  */
-int scanf(const char* __restrict, ...);
+int scanf(const char*, ...);
 /**
  * @brief Reads formatted input from given string
  * 
@@ -68,7 +68,7 @@ int scanf(const char* __restrict, ...);
  * @param ... 
  * @return int - number of input items read
  */
-int sscanf(const char *, const char* __restrict, ...);
+int sscanf(const char *, const char*, ...);
 
 #ifdef __cplusplus
 }

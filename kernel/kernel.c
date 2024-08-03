@@ -23,25 +23,31 @@ int kmain(void) {
     init_isr_handlers();
     printf("b\n");
     asm volatile("xchg bx, bx");
+    asm volatile("nop");
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
     printf("c\n");
     asm volatile("xchg bx, bx");
+    asm volatile("nop");
+    asm volatile("nop");
     init_page_frame_allocator(&allocator, MEMORY_SIZE);
     printf("d\n");
     asm volatile("xchg bx, bx");
+    asm volatile("nop");
+    asm volatile("nop");
+    asm volatile("nop");
 
 
     // ISR - Interrupt Service Routines
 
     // TTY - Terminal
 
-    malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
-    char* dst = (char*) malloc(0x10);
-    char* dst2 = (char*) malloc(0x10);
-    printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
-    //char dst[30];
+    // malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
+    // char* dst = (char*) malloc(0x10);
+    // char* dst2 = (char*) malloc(0x10);
+    // printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
+    char dst[30];
 
-    sleep(5000);
+    sleep(1000);
     printf("\n");
 
     char* hello = "In Kernel!\nEnter char, string and a decimal:";

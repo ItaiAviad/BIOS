@@ -74,13 +74,13 @@ all: build
 # Build Disk (Floppy Image)
 build: $(FLOPPY_BIN)
 $(FLOPPY_BIN): kernel boot
-	$(DD) if=/dev/zero of=$@ conv=notrunc,fsync count=65536
+	# $(DD) if=/dev/zero of=$@ conv=notrunc,fsync count=65536
 	$(DD) if=$(BOOT_BIN) of=$@ conv=notrunc,fsync
-	$(DD) if=$(KERNEL_BIN) seek=3 of=$@ conv=notrunc,fsync
-	# $(DD) if=$(KERNEL_BIN) of=$@ bs=1 seek=$$(stat -c %s $(BOOT_BIN)) conv=notrunc,fsync
-	# FILE_SIZE=$$(stat -c %s $@); \
-	# PADDING=$$(( $(SECTOR_SIZE) - FILE_SIZE % $(SECTOR_SIZE) )); \
-	# $(DD) if=/dev/zero of=$@ bs=1 seek=$$FILE_SIZE count=$$PADDING conv=notrunc,fsync
+	# $(DD) if=$(KERNEL_BIN) seek=3 of=$@ conv=notrunc,fsync
+	$(DD) if=$(KERNEL_BIN) of=$@ bs=1 seek=$$(stat -c %s $(BOOT_BIN)) conv=notrunc,fsync
+	FILE_SIZE=$$(stat -c %s $@); \
+	PADDING=$$(( $(SECTOR_SIZE) - FILE_SIZE % $(SECTOR_SIZE) )); \
+	$(DD) if=/dev/zero of=$@ bs=1 seek=$$FILE_SIZE count=$$PADDING conv=notrunc,fsync
 
 # Bootloader
 boot: $(BOOT_BIN)
