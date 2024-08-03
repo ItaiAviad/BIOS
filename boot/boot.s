@@ -22,7 +22,7 @@ rm:
     mov es, ax
     ; Setup stack
     mov ss, ax
-    mov bp, 0x7C00
+    mov bp, KERNEL_LOAD_ADDR
     mov sp, bp
 
     ; Print Real Mode message

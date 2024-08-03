@@ -21,14 +21,14 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_si
     allocator->bitmap = allocator_bitmap_init;
 
     uint8_t* new_bitmap_start_addr = (uint8_t*) aalign(__kend, PAGE_SIZE);
-    __kend = (uint64_t)(new_bitmap_start_addr + new_bitmap_size * sizeof(uint8_t));
+    __kend = (uint64_t)(new_bitmap_start_addr + (new_bitmap_size + 1) * sizeof(uint8_t));
 
     memset(allocator->bitmap, 0, allocator->num_pages * sizeof(uint8_t)); // zero bitmap
     allocator->bitmap[0] = 1; // Set the first page as in use for dealing with NULL values
     map_important_pages((uint64_t*) PML4_KERNEL, allocator);
     set_page_dir_reg((uint64_t *) PML4_KERNEL);
 
-    memcpy(allocator->bitmap, allocator_bitmap_init, init_bitmap_size);
+    memcpy(new_bitmap_start_addr, allocator_bitmap_init, init_bitmap_size);
     allocator->bitmap = new_bitmap_start_addr;
     allocator->num_pages = new_bitmap_size;
 }
