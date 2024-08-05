@@ -41,11 +41,11 @@ int kmain(void) {
 
     // TTY - Terminal
 
-    // malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
-    // char* dst = (char*) malloc(0x10);
-    // char* dst2 = (char*) malloc(0x10);
+    malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
+    char* dst = (char*) malloc(0x10);
+    char* dst2 = (char*) malloc(0x10);
     // printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
-    char dst[30];
+    //char dst[30];
 
     sleep(1000);
     printf("\n");

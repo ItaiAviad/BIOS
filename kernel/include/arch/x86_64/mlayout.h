@@ -17,7 +17,7 @@
 #define PML4_KERNEL 0x1000 // PML4 kernel base address
 
 // Heap
-#define KERNEL_HEAP_START 0x1000000
+#define KERNEL_HEAP_START 0x200000
 #define KERNEL_HEAP_SIZE_PAGES 4
 
 // extern uint64_t __kend;

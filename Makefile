@@ -31,6 +31,7 @@ KERNEL_S := $(shell find $(KERNEL_DIR) -name '*.s') # Take all asm files in dir 
 KERNEL_C := $(shell find $(KERNEL_DIR) -name '*.c')
 KERNEL_LD_ORG := $(KERNEL_DIR)/klink.ld
 KERNEL_LD := $(BUILD_DIR)/klink_temp.ld
+KERNEL_ELF := $(BUILD_DIR)/kernel.elf
 KERNEL_BIN := $(BUILD_DIR)/kernel.bin
 KERNEL_INCLUDE := $(KERNEL_DIR)/include
 
@@ -60,7 +61,7 @@ NASM := nasm
 LD := x86_64-elf-ld
 
 INCLUDES := -I$(LIBC_INCLUDE) -I$(KERNEL_INCLUDE)
-CFLAGS := -ffreestanding -m64 -masm=intel -Wall -Wextra $(INCLUDES)
+CFLAGS := -ffreestanding -m64 -masm=intel -Wall -O0 -g -Wextra $(INCLUDES)
 LDFLAGS := -T $(KERNEL_LD) $(INCLUDES)
 LIBCFLAGS := $(CFLAGS) -D__is_libc
 LIBK_FLAGS := $(CFLAGS) -D__is_libk
@@ -74,7 +75,7 @@ all: build
 # Build Disk (Floppy Image)
 build: $(FLOPPY_BIN)
 $(FLOPPY_BIN): kernel boot
-	# $(DD) if=/dev/zero of=$@ conv=notrunc,fsync count=65536
+	$(DD) if=/dev/zero of=$@ conv=notrunc,fsync count=65536
 	$(DD) if=$(BOOT_BIN) of=$@ conv=notrunc,fsync
 	# $(DD) if=$(KERNEL_BIN) seek=3 of=$@ conv=notrunc,fsync
 	$(DD) if=$(KERNEL_BIN) of=$@ bs=1 seek=$$(stat -c %s $(BOOT_BIN)) conv=notrunc,fsync
@@ -93,9 +94,13 @@ $(BOOT_BIN): always kernel
 
 # Kernel
 kernel: $(KERNEL_BIN)
-$(KERNEL_BIN): always $(OBJ)
+
+$(KERNEL_BIN): $(KERNEL_ELF)
+	objcopy -O binary $(KERNEL_ELF) $@
+
+$(KERNEL_ELF): always $(OBJ)
 	echo "Linking Kernel..."
-	sed 's/$$(KERNEL_LOAD_ADDR)/$(KERNEL_LOAD_ADDR)/g' $(KERNEL_LD_ORG) > $(KERNEL_LD)
+	sed 's/$$(KERNEL_LOAD_ADDR)/$(KERNEL_LOAD_ADDR)/g' $(KERNEL_LD_ORG) > $(KERNEL_LD) && sync
 	$(LD) $(LDFLAGS) $(OBJ) -o $@
 	rm $(KERNEL_LD)
 
@@ -122,14 +127,16 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 run:
-	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN)
+	qemu-system-x86_64 -enable-kvm -drive format=raw,file=$(FLOPPY_BIN) -cpu host -smp cores=4 -m 4G -nic user,model=virtio
+
+run_debugger: 
+	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN) -s -S 
 
 run_debug_bochs:
-	sed 's#$$(FLOPPY_BIN)#$(FLOPPY_BIN)#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG)
-	sync
+	sed 's#$$(FLOPPY_BIN)#$(FLOPPY_BIN)#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG) && sync
 	bochs -qf $(BOCHS_CONFIG)
 	rm -f $(BOCHS_CONFIG)
 
 clean:
 	rm -rf $(BUILD_DIR)/*
-	rm -f *_temp
+	rm -f *_tempwhy

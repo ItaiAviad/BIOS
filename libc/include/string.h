@@ -1,4 +1,5 @@
 #pragma once
+#include <types.h>
 #ifndef _STRING_H
 #define _STRING_H 1
 
@@ -39,7 +40,7 @@ void* memmove(void*, const void*, size_t);
  * 
  * @return void* 
  */
-void* memset(void*, int, size_t);
+void* memset(uint8_t*, char, uint8_t);
 /**
  * @brief Get length of a string (until `\0`)
  * 

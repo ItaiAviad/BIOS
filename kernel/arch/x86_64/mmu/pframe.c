@@ -12,6 +12,8 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_si
     if(allocator->initialized)
         return;
 
+    allocator->initialized = 1;
+
     printf("1+\n");
     allocator->num_pages = (memory_size / PAGE_SIZE);
     printf("1++\n");

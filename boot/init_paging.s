@@ -48,7 +48,7 @@ init_paging:
         loop .add_page_entry_protected
 
     mov edi, 0x5000             ; Go to PT[0]
-    mov ebx, 0x00000003         ; EBX has address 0x0000, flags: 0x0003
+    mov ebx, 0x00200003         ; EBX has address 0x0000, flags: 0x0003
     mov ecx, 512                ; 512 times (512 entries in a table)
 
     .add_page_entry_protected2:
