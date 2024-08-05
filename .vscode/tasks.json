@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "start_qemu",
+            "type": "shell",
+            "isBackground": true,
+            "command": "make run_debugger",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new",
+                "close": true
+            },
+            "problemMatcher": [],
+        }
+    ]
+}
