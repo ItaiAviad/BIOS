@@ -64,7 +64,7 @@ void sleep(uint64_t milliseconds) {
     printf("%d\n", end_ticks);
 
     while (tick_count < end_ticks) {
-        asm volatile("nop");
+        __asm__ volatile("nop");
         // io_wait();
         // Wait here until the specified number of ticks have passed
 

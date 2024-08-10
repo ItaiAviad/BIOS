@@ -27,7 +27,7 @@ BOCHS_CONFIG = ./bochs_config_temp
 
 # Kernel
 KERNEL_S := $(shell find $(KERNEL_DIR) -name '*.s') # Take all asm files in dir via $(wildcard $(KERNEL_DIR)/*.s)
-# KERNEL_C := $(KERNEL_DIR)/kernel.c # Take all C files in dir via $(wildcard $(KERNEL_DIR)/*.c)
+# KERNEL_C := $(KERNEL_DIR)/kernel.c # Take all C files in dir via $(wildset c style compile flagscard $(KERNEL_DIR)/*.c)
 KERNEL_C := $(shell find $(KERNEL_DIR) -name '*.c')
 KERNEL_LD_ORG := $(KERNEL_DIR)/klink.ld
 KERNEL_LD := $(BUILD_DIR)/klink_temp.ld
@@ -61,7 +61,8 @@ NASM := nasm
 LD := x86_64-elf-ld
 
 INCLUDES := -I$(LIBC_INCLUDE) -I$(KERNEL_INCLUDE)
-CFLAGS := -ffreestanding -m64 -masm=intel -Wall -O0 -g -Wextra $(INCLUDES)
+CFLAGS := -ffreestanding -m64 -masm=intel -Wall -O0 -g -Wextra -std=c11 $(INCLUDES)
+NASMFLAGS := -f elf64 -g
 LDFLAGS := -T $(KERNEL_LD) $(INCLUDES)
 LIBCFLAGS := $(CFLAGS) -D__is_libc
 LIBK_FLAGS := $(CFLAGS) -D__is_libk
@@ -107,7 +108,7 @@ $(KERNEL_ELF): always $(OBJ)
 # Objects (Assembling)
 $(OBJ_DIR)/%.o: %.s
 	mkdir -p $(dir $@)
-	$(NASM) $< -f elf64 -o $@
+	$(NASM) $< $(NASMFLAGS) -o $@
 
 # Objects (Compiling)
 $(OBJ_DIR)/%.o: %.c

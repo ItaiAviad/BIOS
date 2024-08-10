@@ -1,7 +1,7 @@
 #include <arch/x86_64/mmu.h>
 
 void set_page_dir_reg(uint64_t* pml4){
-    asm volatile (
+    __asm__ volatile (
         "mov %%rax, %0\n"     // Move the address of the PML4 table into the RAX register
         "mov %%cr3, %%rax\n"  // Move the address from RAX into the CR3 register
         "mov %%rax, %%cr3\n"

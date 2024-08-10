@@ -4,6 +4,10 @@ char* itoa(int num, char* str, int base) {
     int i = 0;
     int isNegative = 0;
 
+    if (base < 2 || base > 36) {
+        return NULL;
+    }
+
     // Handle 0 explicitly, otherwise empty string is printed for 0
     if (num == 0) {
         str[i++] = '0';

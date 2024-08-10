@@ -19,22 +19,16 @@ int kmain(void) {
     // PIC - Programmable Interrupt Controller
     terminal_initialize();
     printf("a\n"); 
-    asm volatile("xchg bx, bx");
+    __asm__ volatile("xchg bx, bx");
     init_isr_handlers();
     printf("b\n");
-    asm volatile("xchg bx, bx");
-    asm volatile("nop");
+    __asm__ volatile("xchg bx, bx");
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
     printf("c\n");
-    asm volatile("xchg bx, bx");
-    asm volatile("nop");
-    asm volatile("nop");
+    __asm__ volatile("xchg bx, bx");
     init_page_frame_allocator(&allocator, MEMORY_SIZE);
     printf("d\n");
-    asm volatile("xchg bx, bx");
-    asm volatile("nop");
-    asm volatile("nop");
-    asm volatile("nop");
+    __asm__ volatile("xchg bx, bx");
 
 
     // ISR - Interrupt Service Routines
