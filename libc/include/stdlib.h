@@ -5,6 +5,7 @@
 #include <sys/cdefs.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <arch/x86_64/io.h>
 
 #ifdef __cplusplus
 extern "C" {

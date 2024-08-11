@@ -35,6 +35,7 @@ uint64_t read_pit_count(void) {
 	outb(PIT_COMMAND_REGISTER, 0b0000000);
 	
 	pit_count = inb(PIT_CHANNEL_0_DATA_REGISTER);              // Low byte
+    io_wait();
 	pit_count |= inb(PIT_CHANNEL_0_DATA_REGISTER) << 8;        // High byte
 
     sti();
@@ -48,6 +49,7 @@ void set_pit_count(uint64_t count) {
 	
 	// Set low byte
 	outb(PIT_CHANNEL_0_DATA_REGISTER, count & 0xFF);              // Low byte
+    io_wait();
 	outb(PIT_CHANNEL_0_DATA_REGISTER, (count & 0xFF00) >> 8);     // High byte
 
     sti();
@@ -58,13 +60,13 @@ void pit_handler() {
 }
 
 void sleep(uint64_t milliseconds) {
-    volatile uint64_t start_ticks = tick_count;
-    volatile uint64_t end_ticks = start_ticks + milliseconds;
-    printf("%d\n", start_ticks);
-    printf("%d\n", end_ticks);
+    volatile uint64_t end_ticks = tick_count + milliseconds;
+    #ifdef DEBUG
+    printf("%s: Start ticks: %d, End ticks: %d\n", DEBUG, tick_count, end_ticks);
+    #endif
 
     while (tick_count < end_ticks) {
-        __asm__ volatile("nop");
+        // __asm__ volatile("nop");
         // io_wait();
         // Wait here until the specified number of ticks have passed
 

@@ -6,6 +6,7 @@
 #include <sys/cdefs.h>
 
 #include <stddef.h>
+#include <arch/x86_64/io.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,7 +41,7 @@ void* memmove(void*, const void*, size_t);
  * 
  * @return void* 
  */
-void* memset(uint8_t*, char, uint64_t);
+void* memset(void*, char, uint64_t);
 /**
  * @brief Get length of a string (until `\0`)
  * 

@@ -14,7 +14,6 @@ void *kmalloc(uint64_t* pml4, PageFrameAllocator* allocator, size_t size) {
         heap_current += size;
         return (void *)allocation_addr;
     }
-
     size_t num_pages = (size + PAGE_SIZE - 1) / PAGE_SIZE; // Round up to the nearest page
 
     // Allocate new page(s)
@@ -22,7 +21,9 @@ void *kmalloc(uint64_t* pml4, PageFrameAllocator* allocator, size_t size) {
     for (size_t i = 0; i < num_pages; i++) {
         void *page = allocate_and_zero_page(allocator);
         if (page == NULL) {
-            printf("GOT NULL PAGE!\n");
+            #ifdef DEBUG
+            printf("%s: GOT NULL PAGE!\n", DEBUG);
+            #endif
             return NULL; // Out of memory
         }
         // Map page at end of heap

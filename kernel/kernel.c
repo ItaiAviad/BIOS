@@ -16,33 +16,27 @@
 #include <arch/x86_64/pit.h>
 
 int kmain(void) {
-    // PIC - Programmable Interrupt Controller
-    terminal_initialize();
-    printf("a\n"); 
-    __asm__ volatile("xchg bx, bx");
-    init_isr_handlers();
-    printf("b\n");
-    __asm__ volatile("xchg bx, bx");
-    pic_init(PIC1_OFFSET, PIC2_OFFSET);
-    printf("c\n");
-    __asm__ volatile("xchg bx, bx");
-    init_page_frame_allocator(&allocator, MEMORY_SIZE);
-    printf("d\n");
-    __asm__ volatile("xchg bx, bx");
-
-
-    // ISR - Interrupt Service Routines
-
     // TTY - Terminal
+    terminal_initialize();
+    
+    // ISR - Interrupt Service Routines
+    init_isr_handlers();
+    
+    // PIC - Programmable Interrupt Controller
+    pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
+    // Page Frame Allocator - Manage Physical Memory
+    init_page_frame_allocator(&allocator, MEMORY_SIZE);
+
+    // Kernel Heap - Manage Kernel Dynamic Memory
     malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
     char* dst = (char*) malloc(0x10);
     char* dst2 = (char*) malloc(0x10);
-    // printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
-    //char dst[30];
+    printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
+    // char dst[30];
 
-    sleep(1000);
-    printf("\n");
+    sleep(2000);
+    // printf("\n");
 
     char* hello = "In Kernel!\nEnter char, string and a decimal:";
     printf("%s", hello);
@@ -54,7 +48,6 @@ int kmain(void) {
     printf("rand: %d\n", rand());
     // printf("Division by zero interrupt: %d\n", 1 / 0);
 
-    // while (1) {}
     __asm__ volatile ("hlt");
 
     return 0;

@@ -60,7 +60,7 @@ void* malloc(size_t size) {
         memcpy(new_addr, &new_mchunk, sizeof(malloc_chunk));
 
     // Clear data memory
-    memset((uint8_t*) new_mchunk.data, 0x0, (new_mchunk.mchunk_size - sizeof(malloc_chunk)));
+    memset(new_mchunk.data, 0x0, (new_mchunk.mchunk_size - sizeof(malloc_chunk)));
 
     return new_mchunk.data;
 }

@@ -90,7 +90,8 @@ static inline uint8_t inb(uint16_t port)
  */
 static inline void io_wait(void)
 {
-    outb(0x80, 0x0);
+    for (int i = 0; i < 2; i++)
+        outb(0x80, 0x0);
 }
 
 #endif

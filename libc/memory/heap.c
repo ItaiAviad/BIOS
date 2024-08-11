@@ -36,4 +36,3 @@ void* sbrk(size_t increment) {
     heap_end += aalign(increment, HEAP_CHUNK_MIN_SIZE_BYTES);
     return (void*) old_break;
 }
-

@@ -9,7 +9,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
-#include "mlayout.h"
+#include <arch/x86_64/io.h>
+#include <arch/x86_64/mlayout.h>
 
 #define PAGE_PRESENT 0b1
 #define PAGE_WRITE   0b10

@@ -159,7 +159,7 @@ int sscanf_args(const char* str, const char* restrict format, va_list args) {
 				// TODO: Set errno to EOVERFLOW.
 				return -1;
 			}
-            int next_idx = get_next_valid_string(str, SCANF_BUF_SIZE, dst);
+            int next_idx = get_next_valid_string(str, strlen(str), dst);
             // Only increment written if value written to dst (str incremented)
             str += next_idx;
 			written += next_idx > 0 ? 1 : 0;
@@ -168,9 +168,8 @@ int sscanf_args(const char* str, const char* restrict format, va_list args) {
 			int* dst = va_arg(args, int*);
             char dst_str[SCANF_BUF_SIZE];
             itoa(*dst, dst_str, 10);
-            int next_idx = get_next_valid_string(str, SCANF_BUF_SIZE, dst_str);
+            int next_idx = get_next_valid_string(str, strlen(str), dst_str);
             *dst = atoi(dst_str);
-            // str += next_idx;
             // Only increment written if value written to dst (str incremented)
 			str += next_idx;
 			written += next_idx > 0 ? 1 : 0;
