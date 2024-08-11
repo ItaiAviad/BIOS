@@ -171,7 +171,9 @@ lm:
     ; mov rsi, msg_lm_success
     ; call puts64
     ; xchg bx, bx
-    call KERNEL_LOAD_ADDR
+    mov sp, KERNEL_LOAD_ADDR
+    mov bp, sp
+    jmp KERNEL_LOAD_ADDR
     jmp hlt
 
 ; Constants

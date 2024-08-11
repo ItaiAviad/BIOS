@@ -85,8 +85,8 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
     if (isr_num <= 31) {
         printf("ISR: %s (%d) called, rip: %x, cr2: %x, error_code: %d \n", isr_exception_messages[isr_num], isr_num, regs->rip, regs->cr2, error_code);
         (regs->rip)++;
-        while(1) {
-
+        while(true){
+            
         }
     }
     else if (isr_num >= 32) {

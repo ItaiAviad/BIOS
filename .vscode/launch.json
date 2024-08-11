@@ -11,7 +11,9 @@
       "cwd": "${workspaceRoot}",
       "valuesFormatting": "prettyPrinters",
       "preLaunchTask": "start_qemu",
-      "autorun": [""]
+      "autorun": [
+        ""
+      ]
     },
     {
       "name": "C/C++ Runner: Debug Session",
@@ -20,8 +22,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/gal/BIOS/libc/string",
-      "program": "/home/gal/BIOS/libc/string/build/Debug/outDebug",
+      "cwd": "/home/gal/BIOS/kernel/arch/x86_64/interrupts",
+      "program": "/home/gal/BIOS/kernel/arch/x86_64/interrupts/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

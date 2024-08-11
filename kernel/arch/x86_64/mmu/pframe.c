@@ -5,6 +5,8 @@
 #include <arch/x86_64/mlayout.h>
 #include <string.h>
 
+extern uint64_t __end;
+
 void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_size) {
     // Allocate pages for the allocator via allocator_bitmap_init and then copy to the new larger allocator bitmap
     
@@ -18,7 +20,7 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_si
     allocator->num_pages = (memory_size / PAGE_SIZE);
     printf("1++\n");
     // allocator->bitmap = (uint8_t*) aalign(__kend, PAGE_SIZE) + PAGE_SIZE;
-    allocator->bitmap = (uint8_t*) aalign(0xA000, PAGE_SIZE);
+    allocator->bitmap = (uint8_t*) aalign(0x300000, PAGE_SIZE);
     printf("1+++\n");
 
     // Update __kend to the end of the new bitmap
@@ -28,7 +30,7 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, uint64_t memory_si
     printf("bitmap size: %d\n", allocator->num_pages);
     // printf("__kend: %d\n", __kend);
     printf("2\n");
-    memset(allocator->bitmap, 0, allocator->num_pages); // zero bitmap
+    memset((uint8_t*)allocator->bitmap, (char)0, (uint64_t)allocator->num_pages); // zero bitmap
     printf("3\n");
     allocator->bitmap[0] = 1; // Set the first page as in use for dealing with NULL values
 
