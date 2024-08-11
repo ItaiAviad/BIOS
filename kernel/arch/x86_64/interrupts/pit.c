@@ -66,8 +66,8 @@ void sleep(uint64_t milliseconds) {
     #endif
 
     while (tick_count < end_ticks) {
-        // __asm__ volatile("nop");
-        // io_wait();
+        // For bypassing compiler optimization (see: https://en.wikipedia.org/wiki/Compiler_optimization):
+        io_wait();
         // Wait here until the specified number of ticks have passed
 
         // TODO:
