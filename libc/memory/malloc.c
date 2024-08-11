@@ -12,10 +12,8 @@ void* malloc(size_t size) {
     // Find a suitable free chunk
     bool found_free = false;
     malloc_chunk* cur = heap->unsorted_bin_head;
-    io_wait();
     while (cur != NULL)
     {
-        io_wait();
         if (cur->mchunk_size >= size) { // TODO: Split found chunk (if remainder > min_chunk_size)
             found_free = true;
 
@@ -37,7 +35,6 @@ void* malloc(size_t size) {
         cur = cur->fd;
     }
     
-    io_wait();
     if (!found_free) {
         // Expand the heap
         size_t data_size = max(HEAP_CHUNK_MIN_SIZE_BYTES - sizeof(malloc_chunk), aalign(size, 0x8));
@@ -56,9 +53,7 @@ void* malloc(size_t size) {
 
     // Memory
     // Map page(s) if nescessary - Kernel Malloc
-    io_wait();
     kmalloc((uint64_t*) PML4_KERNEL, &allocator, new_mchunk.mchunk_size);
-    io_wait();
     
     // If new, memcpy header to new memory location
     if (!found_free)

@@ -22,7 +22,6 @@ int kmain(void) {
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
     init_page_frame_allocator(&allocator, MEMORY_SIZE);
 
-
     // ISR - Interrupt Service Routines
 
     // TTY - Terminal

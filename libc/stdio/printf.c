@@ -72,9 +72,7 @@ int printf(const char* format, ...) {
             }
             char str[64 + 1];
             memset(str, 0, 64 + 1);
-            io_wait();
             itoa(i, str, 10);
-            io_wait();
             size_t len = strlen(str);
             if (maxrem < len) {
 				// TODO: Set errno to EOVERFLOW.

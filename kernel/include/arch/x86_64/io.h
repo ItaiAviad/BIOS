@@ -93,12 +93,5 @@ static inline void io_wait(void)
     for (int i = 0; i < 2; i++)
         outb(0x80, 0x0);
 }
-// static inline void io_wait_fast(void)
-// {
-//     for (int i = 0; i < 1; i++) {
-//         __asm__ volatile ("nop");
-//         outb(0x80, 0x0);
-//     }
-// }
 
 #endif
