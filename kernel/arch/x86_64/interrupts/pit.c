@@ -4,8 +4,8 @@
 #include <arch/x86_64/pit.h>
 
 // PIT Timer Counter
-volatile uint64_t tick_count = 0;
-volatile uint64_t time_pit_on = 0;
+volatile uint64_t pit_tick_count = 0;
+volatile uint64_t pit_time = 0;
 
 void pit_init(void) {
     cli();
@@ -56,16 +56,16 @@ void set_pit_count(uint64_t count) {
 }
 
 void pit_handler() {
-    tick_count++;
+    pit_tick_count++;
 }
 
-void sleep(uint64_t milliseconds) {
-    volatile uint64_t end_ticks = tick_count + milliseconds;
+void pit_sleep(uint64_t milliseconds) {
+    volatile uint64_t end_ticks = pit_tick_count + milliseconds;
     #ifdef DEBUG
-    printf("%s: Start ticks: %d, End ticks: %d\n", DEBUG, tick_count, end_ticks);
+    printf("%s: Start ticks: %d, End ticks: %d\n", DEBUG, pit_tick_count, end_ticks);
     #endif
 
-    while (tick_count < end_ticks) {
+    while (pit_tick_count < end_ticks) {
         // For bypassing compiler optimization (see: https://en.wikipedia.org/wiki/Compiler_optimization):
         io_wait();
         // Wait here until the specified number of ticks have passed

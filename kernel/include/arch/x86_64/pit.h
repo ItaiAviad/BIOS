@@ -26,6 +26,6 @@ void pit_handler();
  * 
  * @param uint64_t delay (in milliseconds)
  */
-void sleep(uint64_t);
+void pit_sleep(uint64_t);
 
 #endif

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <types.h>
 
 static bool print(const char* data, size_t length) {
     const unsigned char* bytes = (const unsigned char*) data;
@@ -65,7 +66,7 @@ int printf(const char* format, ...) {
 			written += len;
         } else if (*format == 'd') {
             format++;
-            int i = va_arg(parameters, int);
+            uint64_t i = va_arg(parameters, uint64_t);
             if (!maxrem) {
                 // TODO: Set errno to EOVERFLOW.
                 return -1;
@@ -83,7 +84,7 @@ int printf(const char* format, ...) {
 			written += len;
         } else if (*format == 'x') {
             format++;
-            int i = va_arg(parameters, int);
+            uint64_t i = va_arg(parameters, uint64_t);
             if (!maxrem) {
                 // TODO: Set errno to EOVERFLOW.
                 return -1;
@@ -108,7 +109,7 @@ int printf(const char* format, ...) {
 			written += len;
         } else if (*format == 'b') {
             format++;
-            unsigned int i = va_arg(parameters, unsigned int);
+            uint64_t i = va_arg(parameters, uint64_t);
             if (!maxrem) {
                 // TODO: Set errno to EOVERFLOW.
                 return -1;

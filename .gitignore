@@ -401,3 +401,4 @@ FodyWeavers.xsd
 *.sln.iml
 .gdb_history
 bx_enh_dbg.ini
+nohup.out

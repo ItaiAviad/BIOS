@@ -171,6 +171,7 @@ lm:
     ; mov rsi, msg_lm_success
     ; call puts64
     ; xchg bx, bx
+    ; IMPORTANT: Use `jmp` and not `call` as `call` misaligns RSP
     mov sp, KERNEL_LOAD_ADDR
     mov bp, sp
     jmp KERNEL_LOAD_ADDR

@@ -3,6 +3,9 @@
     {
       "name": "linux-gcc-x64",
       "includePath": [
+        "./",
+        "./kernel/include",
+        "./libc/include",
         "${workspaceFolder}/**"
       ],
       "compilerPath": "/usr/bin/gcc",

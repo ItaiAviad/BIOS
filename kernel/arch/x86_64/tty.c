@@ -151,7 +151,7 @@ void terminal_writestring(const char* data) {
 	terminal_write(data, strlen(data));
 }
 
-void terminal_scroll_line_down(){
+void terminal_scroll_line_down() {
     // Copy memory buffer upward
     for(uint16_t i = 1; i < VGA_HEIGHT; i++){
         for(uint16_t j = 0; j < VGA_WIDTH; j++){

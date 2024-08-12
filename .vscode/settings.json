@@ -37,7 +37,12 @@
   "C_Cpp_Runner.warningsAsError": false,
   "C_Cpp_Runner.compilerArgs": [],
   "C_Cpp_Runner.linkerArgs": [],
-  "C_Cpp_Runner.includePaths": [],
+  "C_Cpp_Runner.includePaths": [
+    ".",
+    "./include",
+    "./kernel/include",
+    "./libc/include",
+  ],
   "C_Cpp_Runner.includeSearch": [
     "*",
     "**/*"
@@ -58,6 +63,18 @@
 "C_Cpp_Runner.msvcSecureNoWarnings": false,
 "files.associations": {
     "cstring": "c",
-    "string.h": "c"
+    "string.h": "c",
+    "compare": "c",
+    "cstdint": "c",
+    "format": "c",
+    "time.h": "c",
+    "idt.h": "c",
+    "stdio.h": "c",
+    "stdarg.h": "c",
+    "stdbool.h": "c",
+    "stdlib.h": "c",
+    "types.h": "c",
+    "limits.h": "c",
+    "pic.h": "c"
 }
 }

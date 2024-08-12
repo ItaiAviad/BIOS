@@ -7,6 +7,8 @@
 #include <memory.h>
 #include <string.h>
 #include <random.h>
+#include <time.h>
+#include <unistd.h>
 // arch/x86_64
 #include <arch/x86_64/mmu.h>
 #include <arch/x86_64/isr.h>
@@ -35,7 +37,16 @@ int kmain(void) {
     printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
     // char dst[30];
 
-    sleep(2000);
+    #ifdef UTC_YEAR
+    printf("UTC year: %d\n", UTC_YEAR);
+    #endif
+    for (int i = 0; i < 100; i++) {
+        printf("%d\n", time());
+        date();
+        sleep(1000);
+    }
+
+    sleep(1000);
     // printf("\n");
 
     char* hello = "In Kernel!\nEnter char, string and a decimal:";
