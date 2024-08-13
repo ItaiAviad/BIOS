@@ -108,7 +108,20 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
     pt[pt_index] = physical_address | flags;
 }
 
-bool is_page_mapped(uint64_t* pml4, uint64_t virtual_address){
+void unmap_page(Context ctx, uint64_t virtual_address) {
+    // Calculate PT index
+    uint64_t pt_index = (virtual_address >> 12) & 0x1FF;
+    int64_t *pt = NULL;
+
+    pt = is_page_mapped(ctx.pml4, virtual_address);
+    if (pt < (int64_t*) 0x0)
+        return;
+    
+    // Unmap the physical address to the virtual address in the page table
+    pt[pt_index] = 0x0;
+}
+
+int64_t* is_page_mapped(uint64_t* pml4, uint64_t virtual_address){
     uint64_t pml4_index = (virtual_address >> 39) & 0x1FF;
     uint64_t pdpt_index = (virtual_address >> 30) & 0x1FF;
     uint64_t pd_index = (virtual_address >> 21) & 0x1FF;
@@ -118,26 +131,26 @@ bool is_page_mapped(uint64_t* pml4, uint64_t virtual_address){
 
     // Check if all page directories/tables to address exist in the provided pml4
     if (!(pml4[pml4_index] & PAGE_PRESENT)) {
-        return false;
+        return (int64_t*) -0x1;
     }
     pdpt = (uint64_t*) (pml4[pml4_index] & ~0xFFF);
 
     if (!(pdpt[pdpt_index] & PAGE_PRESENT)) {
-        return false;
+        return (int64_t*) -0x1;
     }
     pd = (uint64_t*) (pdpt[pdpt_index ] & ~0xFFF);
 
     if (!(pd[pd_index] & PAGE_PRESENT)) {
-        return false;
+        return (int64_t*) -0x1;
     }
     pt = (uint64_t*) (pd[pd_index] & ~0xFFF);
 
     if(!(pt[pt_index] & PAGE_PRESENT)){
-        return false;
+        return (int64_t*) -0x1;
     }
     #ifdef DEBUG
     printf("%s pml4: %x pdpt: %x pd: %x pt: %x pd_index: %x pd[pd_index]: %x pt_index: %x pt[pt_index]: %x\n", DEBUG, pml4, pdpt, pd, pt, pd_index, pd[pd_index], pt_index, pt[pt_index]);
     #endif
 
-    return true;
+    return (int64_t*) pt;
 }

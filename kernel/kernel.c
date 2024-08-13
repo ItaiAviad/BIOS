@@ -29,24 +29,22 @@ int kmain(void) {
     // Paging sturctures (PML4T, PDPT, PDT, PT)
     init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
     
-
     // Kernel Heap - Manage Kernel Dynamic Memory
-    printf("HEAP:\n");
     malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
-    char* dst = (char*) malloc(0x10);
-    char* dst2 = (char*) malloc(0x10);
-    // printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
+    char* dst = (char*) malloc(0x1000);
+    char* dst2 = (char*) malloc(0x2000);
+    free(dst);
+    printf("----------------\n");
+    print_heap();
+    printf("----------------\n");
     // char dst[30];
 
-    // PIC - Programmable Interrupt Controller (IMPORTANT: Should be after PageFrameAllocator Init)
-    // PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
+    // PIC - Programmable Interrupt Controller
+    // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
-    for (int i = 0; i < 1; i++) {
-        printf("%d\n", time());
-        date();
-        sleep(1000);
-    }
+    printf("%d\n", time());
+    date();
 
     sleep(1000);
 

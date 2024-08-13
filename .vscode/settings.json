@@ -76,6 +76,9 @@
     "types.h": "c",
     "limits.h": "c",
     "pic.h": "c",
-    "*.tcc": "c"
+    "*.tcc": "c",
+    "mmu.h": "c",
+    "memory.h": "c",
+    "stdint.h": "c"
 }
 }

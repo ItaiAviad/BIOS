@@ -57,7 +57,7 @@ void *allocate_page(Context ctx, bool is_p_struct) {
         if ((&ctx.allocator)->bitmap[i] != 1) { // If not all bits are set
             (&ctx.allocator)->bitmap[i] = 1;      // Mark as used
             #ifdef DEBUG
-            printf("%s: Free page found: %d. Is p_struct: %d\n", DEBUG, i, is_p_struct);
+            printf("%s: Free page found: %x. Is p_struct: %d\n", DEBUG, i, is_p_struct);
             #endif
             return (void *)((i)*PAGE_SIZE);
       }

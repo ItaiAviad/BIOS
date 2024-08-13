@@ -1,23 +1,28 @@
 #include <arch/x86_64/mmu.h>
 #include <stdint.h>
 
-static uint64_t heap_current = KERNEL_HEAP_START;
-static uint64_t heap_end = KERNEL_HEAP_START;
-static uint64_t heap_current_size_left = 0; // No allocated pages in the beginning
+uint64_t kheap_current = KERNEL_HEAP_START;
+uint64_t kheap_end = KERNEL_HEAP_START;
+uint64_t kheap_current_size_left = 0; // No allocated pages in the beginning
 
 void *kmalloc(size_t size) {
+    uint64_t kheap_current_old = kheap_current;
+    uint64_t kheap_end_old = kheap_end;
+
     // Check if there is enough space for size in current allocated page
-    if ((long long) heap_current_size_left - (long long) size >= 0 && heap_current_size_left > 0)
+    if ((long long) kheap_current_size_left - (long long) size >= 0 && kheap_current_size_left > 0)
     {
-        heap_current_size_left -= size;
-        uint64_t allocation_addr = heap_current;
-        heap_current += size;
+        kheap_current_size_left -= size;
+        uint64_t allocation_addr = kheap_current;
+        kheap_current += size;
         return (void *)allocation_addr;
     }
-    size_t num_pages = (size + PAGE_SIZE - 1) / PAGE_SIZE; // Round up to the nearest page
+
+    size = aalign(size, PAGE_SIZE);
+    size_t num_pages = size / PAGE_SIZE; // Round up to the nearest page
 
     // Allocate new page(s)
-    uint64_t allocation_addr = heap_current;
+    uint64_t allocation_addr = kheap_current;
     for (size_t i = 0; i < num_pages; i++) {
         void *page = allocate_page(k_ctx, false);
         if (page == NULL) {
@@ -27,13 +32,24 @@ void *kmalloc(size_t size) {
             return NULL; // Out of memory
         }
         // Map page at end of heap
-        map_page(k_ctx, heap_end, (uint64_t)page, PAGE_PRESENT | PAGE_WRITE);
-        memset((void*) heap_end, 0, PAGE_SIZE);
-        heap_end += PAGE_SIZE;
-        heap_current_size_left += PAGE_SIZE;
+        map_page(k_ctx, kheap_end, (uint64_t)page, PAGE_PRESENT | PAGE_WRITE);
+        memset((void*) kheap_end, 0, PAGE_SIZE);
+        kheap_end += PAGE_SIZE;
+        kheap_current_size_left += PAGE_SIZE;
     }
-    heap_current_size_left -= size;
+    kheap_current_size_left -= size;
+
+    // If it's first allocation for Heap (Reserving memory for Heap)
+    if (kheap_current_old == kheap_end_old) {
+        kheap_current_size_left += size;
+        // Reserve 1 Page for Heap Metadata (malloc_state)
+        kheap_current_size_left -= PAGE_SIZE;
+    }
+
     return (void *)allocation_addr;
 }
 
+void kfree(void* ptr) {
+    // Kernel Free - Optional (Heap can just stay the same without freeing)
+}
 

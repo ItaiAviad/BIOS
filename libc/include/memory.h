@@ -11,37 +11,40 @@
 #include <math.h>
 #include <arch/x86_64/mmu.h>
 
-#define HEAP_CHUNK_MIN_SIZE_BYTES 40
+#define HEAP_CHUNK_MIN_SIZE_BYTES 64
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 __attribute__((unused))
-void* heap_base;
+void* heap_malloc_state_base;
 __attribute__((unused))
 void* heap_end;
 __attribute__((unused))
 PageFrameAllocator kernel_allocator;
+// ----------------------------------------------
+
+// Heap
+// Chunk
 typedef struct __attribute__((__packed__)) malloc_chunk {
-    uint32_t mchunk_prev_size;  /* Size of previous chunk, if it is free. */
-    uint32_t mchunk_size;       /* Size in bytes, including overhead. */
-    struct malloc_chunk* fd;    /* double links -- used only if this chunk is free. */
+    uint32_t mchunk_prev_size;  // Size of previous chunk, if it is free
+    uint32_t mchunk_size;       // Size in bytes, including overhead
+    struct malloc_chunk* fd;    // Double links - used only if this chunk is free
     struct malloc_chunk* bk;
     void* data;
 } malloc_chunk;
 
+// Heap State
+#define MALLOC_STATE_PADDING_SIZE HEAP_CHUNK_MIN_SIZE_BYTES - (sizeof(uint64_t) + sizeof(size_t) + sizeof(malloc_chunk*) * 2)
 typedef struct __attribute__((__packed__)) malloc_state {
     void* heap_base;
-    size_t heap_size;
-
+    size_t heap_total_size;
     malloc_chunk* mchunk;
-
     malloc_chunk* unsorted_bin_head;
-    // malloc_chunk* unsorted_bin_tail;
-
-    char padding[HEAP_CHUNK_MIN_SIZE_BYTES - (sizeof(uint64_t) + sizeof(size_t) + sizeof(malloc_chunk*) * 2)];
+    char padding[MALLOC_STATE_PADDING_SIZE];
 } malloc_state;
+// ----------------------------------------------
 
 /**
  * @brief Initialize the heap
@@ -61,7 +64,7 @@ int brk(void *end_data_segment);
 /**
  * @brief Increase the heap
  * 
- * @return void* 
+ * @return void* Old Heap end address
  */
 void* sbrk(size_t);
 /**
@@ -77,6 +80,8 @@ void* malloc(size_t);
  * @param ptr 
  */
 void free(void*);
+
+void print_heap(void);
 
 #ifdef __cplusplus
 }
