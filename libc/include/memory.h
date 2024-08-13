@@ -22,7 +22,7 @@ void* heap_base;
 __attribute__((unused))
 void* heap_end;
 __attribute__((unused))
-PageFrameAllocator allocator;
+PageFrameAllocator kernel_allocator;
 typedef struct __attribute__((__packed__)) malloc_chunk {
     uint32_t mchunk_prev_size;  /* Size of previous chunk, if it is free. */
     uint32_t mchunk_size;       /* Size in bytes, including overhead. */
@@ -77,12 +77,6 @@ void* malloc(size_t);
  * @param ptr 
  */
 void free(void*);
-/**
- * @brief Address Align
- * 
- * @return uint64_t 
- */
-uint64_t aalign(uint64_t, uint64_t);
 
 #ifdef __cplusplus
 }

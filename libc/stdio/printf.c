@@ -66,7 +66,7 @@ int printf(const char* format, ...) {
 			written += len;
         } else if (*format == 'd') {
             format++;
-            uint64_t i = va_arg(parameters, uint64_t);
+            int64_t i = va_arg(parameters, int64_t);
             if (!maxrem) {
                 // TODO: Set errno to EOVERFLOW.
                 return -1;
@@ -84,7 +84,7 @@ int printf(const char* format, ...) {
 			written += len;
         } else if (*format == 'x') {
             format++;
-            uint64_t i = va_arg(parameters, uint64_t);
+            int64_t i = va_arg(parameters, int64_t);
             if (!maxrem) {
                 // TODO: Set errno to EOVERFLOW.
                 return -1;
@@ -109,7 +109,7 @@ int printf(const char* format, ...) {
 			written += len;
         } else if (*format == 'b') {
             format++;
-            uint64_t i = va_arg(parameters, uint64_t);
+            int64_t i = va_arg(parameters, int64_t);
             if (!maxrem) {
                 // TODO: Set errno to EOVERFLOW.
                 return -1;

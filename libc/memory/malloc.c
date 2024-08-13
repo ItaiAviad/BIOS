@@ -53,7 +53,7 @@ void* malloc(size_t size) {
 
     // Memory
     // Map page(s) if nescessary - Kernel Malloc
-    kmalloc((uint64_t*) PML4_KERNEL, &allocator, new_mchunk.mchunk_size);
+    kmalloc(new_mchunk.mchunk_size);
     
     // If new, memcpy header to new memory location
     if (!found_free)

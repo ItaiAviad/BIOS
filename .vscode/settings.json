@@ -75,6 +75,7 @@
     "stdlib.h": "c",
     "types.h": "c",
     "limits.h": "c",
-    "pic.h": "c"
+    "pic.h": "c",
+    "*.tcc": "c"
 }
 }

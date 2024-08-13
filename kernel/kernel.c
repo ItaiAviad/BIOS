@@ -23,31 +23,32 @@ int kmain(void) {
     
     // ISR - Interrupt Service Routines
     init_isr_handlers();
-    
-    // PIC - Programmable Interrupt Controller
-    pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
+    // Initialize Kernel Paging:
     // Page Frame Allocator - Manage Physical Memory
-    init_page_frame_allocator(&allocator, MEMORY_SIZE);
+    // Paging sturctures (PML4T, PDPT, PDT, PT)
+    init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
+    
 
     // Kernel Heap - Manage Kernel Dynamic Memory
+    printf("HEAP:\n");
     malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
     char* dst = (char*) malloc(0x10);
     char* dst2 = (char*) malloc(0x10);
-    printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
+    // printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
     // char dst[30];
 
-    #ifdef UTC_YEAR
-    printf("UTC year: %d\n", UTC_YEAR);
-    #endif
-    for (int i = 0; i < 100; i++) {
+    // PIC - Programmable Interrupt Controller (IMPORTANT: Should be after PageFrameAllocator Init)
+    // PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
+    pic_init(PIC1_OFFSET, PIC2_OFFSET);
+
+    for (int i = 0; i < 1; i++) {
         printf("%d\n", time());
         date();
         sleep(1000);
     }
 
     sleep(1000);
-    // printf("\n");
 
     char* hello = "In Kernel!\nEnter char, string and a decimal:";
     printf("%s", hello);

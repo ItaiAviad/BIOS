@@ -7,12 +7,12 @@ PageFrameAllocator allocator = {.initialized = false};
 void* init_heap(uint64_t base_addr, uint64_t size) {
 
     // Init Page Frame Allocator
-    init_page_frame_allocator(&allocator, PAGE_SIZE * 8192);
+    // init_page_frame_allocator(&allocator, PAGE_SIZE * 8192);
 
     heap_base = (void*) aalign(base_addr, HEAP_CHUNK_MIN_SIZE_BYTES);
 
     // Allocate malloc_state (heap:0x0)- Kernel Malloc
-    kmalloc((uint64_t*) PML4_KERNEL, &allocator, sizeof(malloc_state));
+    kmalloc(sizeof(malloc_state));
 
     malloc_state heap;
     heap.heap_base = heap_base;

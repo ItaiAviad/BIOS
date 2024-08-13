@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
-int atoi(const char *nptr) {
-    int num = 0;
+uint64_t atoi(const char *nptr) {
+    uint64_t num = 0;
     int sign = 1;
 
     // Skip whitespace

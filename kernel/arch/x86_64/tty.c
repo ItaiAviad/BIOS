@@ -91,7 +91,6 @@ void terminal_initialize(void) {
 			terminal_buffer[index] = vga_entry(' ', terminal_color);
 		}
 	}
-    terminal_writestring(">");
 }
 
 void terminal_setcolor(uint8_t color) {

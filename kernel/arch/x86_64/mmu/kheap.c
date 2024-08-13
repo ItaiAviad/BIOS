@@ -5,7 +5,7 @@ static uint64_t heap_current = KERNEL_HEAP_START;
 static uint64_t heap_end = KERNEL_HEAP_START;
 static uint64_t heap_current_size_left = 0; // No allocated pages in the beginning
 
-void *kmalloc(uint64_t* pml4, PageFrameAllocator* allocator, size_t size) {
+void *kmalloc(size_t size) {
     // Check if there is enough space for size in current allocated page
     if ((long long) heap_current_size_left - (long long) size >= 0 && heap_current_size_left > 0)
     {
@@ -19,7 +19,7 @@ void *kmalloc(uint64_t* pml4, PageFrameAllocator* allocator, size_t size) {
     // Allocate new page(s)
     uint64_t allocation_addr = heap_current;
     for (size_t i = 0; i < num_pages; i++) {
-        void *page = allocate_and_zero_page(allocator);
+        void *page = allocate_page(k_ctx, false);
         if (page == NULL) {
             #ifdef DEBUG
             printf("%s: GOT NULL PAGE!\n", DEBUG);
@@ -27,8 +27,8 @@ void *kmalloc(uint64_t* pml4, PageFrameAllocator* allocator, size_t size) {
             return NULL; // Out of memory
         }
         // Map page at end of heap
-        map_page(pml4 ,allocator, heap_end, (uint64_t)page, PAGE_PRESENT | PAGE_WRITE);
-        set_page_dir_reg(pml4);
+        map_page(k_ctx, heap_end, (uint64_t)page, PAGE_PRESENT | PAGE_WRITE);
+        memset((void*) heap_end, 0, PAGE_SIZE);
         heap_end += PAGE_SIZE;
         heap_current_size_left += PAGE_SIZE;
     }

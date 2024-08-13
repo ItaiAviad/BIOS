@@ -34,9 +34,11 @@ init_paging:
     mov edi, 0x3000             ; Go to PDT[0]
     mov dword[edi], 0x4003      ; Set PDT[0] to address 0x4000 (PT), flags: 0x0003
     mov edi, 0x3008
-    mov dword[edi], 0x5003      ; Set PDT[0] to address 0x4000 (PT), flags: 0x0003
+    mov dword[edi], 0x5003      ; Set PDT[1] to address 0x4000 (PT), flags: 0x0003
+    mov edi, 0x3010
+    mov dword[edi], 0x6003      ; Set PDT[2] to address 0x4000 (PT), flags: 0x0003
 
-    mov edi, 0x4000             ; Go to PT[0]
+    mov edi, 0x4000             ; Go to PT[0] ; (0MB-2MB)
     mov ebx, 0x00000003         ; EBX has address 0x0000, flags: 0x0003
     mov ecx, 512                ; 512 times (512 entries in a table)
 
@@ -47,7 +49,7 @@ init_paging:
         add edi, 8              ; Increment page table location (8 bytes entries)
         loop .add_page_entry_protected
 
-    mov edi, 0x5000             ; Go to PT[1]
+    mov edi, 0x5000             ; Go to PT[1] ; (2MB-4MB)
     mov ebx, 0x00200003         ; EBX has address 0x0000, flags: 0x0003
     mov ecx, 512                ; 512 times (512 entries in a table)
 
@@ -57,6 +59,17 @@ init_paging:
         add ebx, 0x1000         ; Increment address of ebx (a+1)
         add edi, 8              ; Increment page table location (8 bytes entries)
         loop .add_page_entry_protected2
+    
+    mov edi, 0x6000             ; Go to PT[2] ; (4MB-6MB)
+    mov ebx, 0x00400003         ; EBX has address 0x0000, flags: 0x0003
+    mov ecx, 512                ; 512 times (512 entries in a table)
+
+    .add_page_entry_protected3:
+        ; a = address, x = index of page table, flags are entry flags
+        mov dword[edi], ebx     ; Write ebx to PT[x] = a.append(flags)
+        add ebx, 0x1000         ; Increment address of ebx (a+1)
+        add edi, 8              ; Increment page table location (8 bytes entries)
+        loop .add_page_entry_protected3
 
     ; Enable PAE paging
     mov eax, cr4

@@ -1,6 +1,6 @@
 #include <stdlib.h>
 
-char* itoa(int num, char* str, int base) {
+char* itoa(int64_t num, char* str, int base) {
     int i = 0;
     int isNegative = 0;
 
@@ -23,7 +23,7 @@ char* itoa(int num, char* str, int base) {
 
     // Process individual digits
     while (num != 0) {
-        int rem = num % base;
+        uint64_t rem = num % base;
         str[i++] = (rem > 9) ? (rem - 10) + 'a' : rem + '0';
         num = num / base;
     }
