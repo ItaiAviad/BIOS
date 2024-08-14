@@ -23,12 +23,12 @@ int kmain(void) {
     terminal_initialize();
     
     // ISR - Interrupt Service Routines
-    init_isr_handlers();
+    // init_isr_handlers();
 
     // Initialize Kernel Paging:
     // Page Frame Allocator - Manage Physical Memory
     // Paging sturctures (PML4T, PDPT, PDT, PT)
-    init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
+    // init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
     
     // Kernel Heap - Manage Kernel Dynamic Memory
     // malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
@@ -43,14 +43,15 @@ int kmain(void) {
 
     // PIC - Programmable Interrupt Controller
     // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
-    pic_init(PIC1_OFFSET, PIC2_OFFSET);
+    // pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
-    printf("%d\n", time());
-    date();
+    // printf("%d\n", time());
+    // date();
 
     // Jump to Userspace
     cli();
-    init_userspace();
+    init_gdt();
+    // init_userspace();
 
     // srand(time());
 
