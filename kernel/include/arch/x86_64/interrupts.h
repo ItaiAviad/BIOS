@@ -1,3 +1,7 @@
+#ifndef INTERRUPTS_H
+
+#define INTERRUPTS_H
+
 /**
 * @brief Disable interrupts via the cli instruction
 * @param none
@@ -10,3 +14,5 @@ void cli();
 * @param none
 */
 void sti();
+
+#endif

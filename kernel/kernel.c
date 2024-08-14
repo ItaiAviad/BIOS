@@ -16,6 +16,7 @@
 #include <arch/x86_64/io.h>
 #include <arch/x86_64/pic.h>
 #include <arch/x86_64/pit.h>
+#include <arch/x86_64/gdt.h>
 
 int kmain(void) {
     // TTY - Terminal
@@ -30,13 +31,13 @@ int kmain(void) {
     init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
     
     // Kernel Heap - Manage Kernel Dynamic Memory
-    malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
-    char* dst = (char*) malloc(0x1000);
-    char* dst2 = (char*) malloc(0x2000);
-    free(dst);
-    printf("----------------\n");
-    print_heap();
-    printf("----------------\n");
+    // malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
+    // char* dst = (char*) malloc(0x1000);
+    // char* dst2 = (char*) malloc(0x2000);
+    // free(dst);
+    // printf("----------------\n");
+    // print_heap();
+    // printf("----------------\n");
 
     // char dst[30];
 
@@ -47,17 +48,21 @@ int kmain(void) {
     printf("%d\n", time());
     date();
 
-    srand(time());
+    // Jump to Userspace
+    cli();
+    init_userspace();
 
-    sleep(1000);
+    // srand(time());
 
-    char* hello = "In Kernel!\nEnter char, string and a decimal:";
-    printf("%s", hello);
-    char ch = 0;
-    int num = 0;
-    int x = scanf("%c %s %d", &ch, dst, &num);
-    printf("# of parameters read: %d\n", x);
-    printf("char: %c, string: %s, decimal: %d\n", ch, dst, num);
+    // sleep(1000);
+
+    // char* hello = "In Kernel!\nEnter char, string and a decimal:";
+    // printf("%s", hello);
+    // char ch = 0;
+    // int num = 0;
+    // int x = scanf("%c %s %d", &ch, dst, &num);
+    // printf("# of parameters read: %d\n", x);
+    // printf("char: %c, string: %s, decimal: %d\n", ch, dst, num);
     // printf("Division by zero interrupt: %d\n", 1 / 0);
 
     __asm__ volatile ("hlt");

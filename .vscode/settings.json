@@ -79,6 +79,7 @@
     "*.tcc": "c",
     "mmu.h": "c",
     "memory.h": "c",
-    "stdint.h": "c"
+    "stdint.h": "c",
+    "pit.h": "c"
 }
 }
