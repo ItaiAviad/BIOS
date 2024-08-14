@@ -62,12 +62,12 @@ NASM := nasm
 LD := x86_64-elf-ld
 
 INCLUDES := -I$(LIBC_INCLUDE) -I$(KERNEL_INCLUDE)
-MISC_FLAGS = -DCURRENT_YEAR=$(shell date --utc | awk '{print $$4}')
+MISC_FLAGS = -DCURRENT_YEAR=$(shell date --utc | awk '{print $$7}')
 MISC_FLAGS += -DTIMEZONE=\"$(shell date --utc | awk '{print $$6}')\"
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
 endif
-CFLAGS := -ffreestanding -m64 -masm=intel -Wall -O0 -g -Wextra -std=c11 -mpreferred-stack-boundary=4 -mstackrealign $(INCLUDES) $(MISC_FLAGS)
+CFLAGS := -ffreestanding -m64 -masm=intel -Wall -g -Wextra $(INCLUDES) $(MISC_FLAGS)
 NASMFLAGS := -f elf64 -g
 LDFLAGS := -T $(KERNEL_LD) $(INCLUDES)
 LIBCFLAGS := $(CFLAGS) -D__is_libc

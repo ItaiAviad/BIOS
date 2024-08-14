@@ -41,7 +41,7 @@
     ".",
     "./include",
     "./kernel/include",
-    "./libc/include",
+    "./libc/include"
   ],
   "C_Cpp_Runner.includeSearch": [
     "*",
@@ -60,8 +60,8 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-"C_Cpp_Runner.msvcSecureNoWarnings": false,
-"files.associations": {
+  "C_Cpp_Runner.msvcSecureNoWarnings": false,
+  "files.associations": {
     "cstring": "c",
     "string.h": "c",
     "compare": "c",
@@ -77,5 +77,5 @@
     "limits.h": "c",
     "pic.h": "c",
     "*.tcc": "c"
-}
+  }
 }

@@ -85,6 +85,58 @@ static inline uint8_t inb(uint16_t port)
 }
 
 /**
+ * @brief Writes a word to a port
+ * 
+ * @param port 
+ * @param val 
+ */
+static inline void outw(uint16_t port, uint16_t val) {
+    __asm__ volatile ( "outb %w1, %b0" : : "a"(val), "Nd"(port) : "memory");
+}
+
+/**
+ * @brief Reads a word from a port
+ * 
+ * @param port 
+ * @return uint32_t 
+ */
+static inline uint16_t inw(uint16_t port)
+{
+    uint16_t ret;
+    __asm__ volatile ( "inb %b0, %w1"
+                   : "=a"(ret)
+                   : "Nd"(port)
+                   : "memory");
+    return ret;
+}
+
+/**
+ * @brief Writes a long-word to a port
+ * 
+ * @param port 
+ * @param val 
+ */
+static inline void outl(uint16_t port, uint32_t val) {
+    __asm__ volatile ( "outb %w1, %b0" : : "a"(val), "Nd"(port) : "memory");
+}
+
+/**
+ * @brief Reads a long-word from a port
+ * 
+ * @param port 
+ * @return uint32_t 
+ */
+static inline uint32_t inl(uint16_t port)
+{
+    uint32_t ret;
+    __asm__ volatile ( "inb %b0, %w1"
+                   : "=a"(ret)
+                   : "Nd"(port)
+                   : "memory");
+    return ret;
+}
+
+/**
  * @brief Wait
  * 
  */
