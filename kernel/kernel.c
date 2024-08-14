@@ -37,6 +37,7 @@ int kmain(void) {
     printf("----------------\n");
     print_heap();
     printf("----------------\n");
+
     // char dst[30];
 
     // PIC - Programmable Interrupt Controller
@@ -45,6 +46,8 @@ int kmain(void) {
 
     printf("%d\n", time());
     date();
+
+    srand(time());
 
     sleep(1000);
 
@@ -55,7 +58,6 @@ int kmain(void) {
     int x = scanf("%c %s %d", &ch, dst, &num);
     printf("# of parameters read: %d\n", x);
     printf("char: %c, string: %s, decimal: %d\n", ch, dst, num);
-    printf("rand: %d\n", rand());
     // printf("Division by zero interrupt: %d\n", 1 / 0);
 
     __asm__ volatile ("hlt");
