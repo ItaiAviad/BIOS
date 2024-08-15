@@ -41,6 +41,7 @@ typedef struct PCIDevice {
   //  Device localization data:
   uint8_t bus;
   uint8_t slot;
+  uint8_t function;
 
   //  Device Identity data:
   uint8_t vendorId;
@@ -75,6 +76,8 @@ uint8_t pciCheckDevice(uint8_t bus, uint8_t slot);
  * listPCIDevices list.
  */
 void initPCIDevList();
+
+void checkFunction(uint8_t bus, uint8_t device, uint8_t function);
 
 inline uint16_t getVendorId(uint8_t bus, uint8_t slot, uint8_t func) {
   return pciConfigReadWord(bus, slot, func, PCI_OFFSET_VENDOR_ID);
