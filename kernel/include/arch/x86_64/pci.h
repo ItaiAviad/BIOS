@@ -38,7 +38,7 @@
 extern linkedListNode *listPCIDevices;
 
 typedef struct PCIDevice {
-  //  Device Identity:
+  //  Device localization data:
   uint8_t bus;
   uint8_t slot;
 
