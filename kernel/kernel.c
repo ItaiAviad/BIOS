@@ -17,13 +17,14 @@
 #include <arch/x86_64/pic.h>
 #include <arch/x86_64/pit.h>
 #include <arch/x86_64/gdt.h>
+#include <arch/x86_64/tss.h>
 
 int kmain(void) {
     // TTY - Terminal
     terminal_initialize();
     
     // ISR - Interrupt Service Routines
-    // init_isr_handlers();
+    init_isr_handlers();
 
     // Initialize Kernel Paging:
     // Page Frame Allocator - Manage Physical Memory
@@ -49,8 +50,16 @@ int kmain(void) {
     // date();
 
     // Jump to Userspace
-    cli();
-    init_gdt();
+    // char* hello1 = "In Kernel!\nEnter char, string and a decimal:";
+    // printf("%s", hello1);
+    // __asm__ volatile ("xchg bx, bx");
+    printf("a\n");
+    flush_tss();
+    printf("b\n");
+    // cli();
+    // __asm__ volatile ("xchg bx, bx");
+    // init_gdt();
+    // reloadSegments();
     // init_userspace();
 
     // srand(time());
@@ -59,6 +68,9 @@ int kmain(void) {
 
     // char* hello = "In Kernel!\nEnter char, string and a decimal:";
     // printf("%s", hello);
+    // while (1) {
+
+    // }
     // char ch = 0;
     // int num = 0;
     // int x = scanf("%c %s %d", &ch, dst, &num);
@@ -66,7 +78,7 @@ int kmain(void) {
     // printf("char: %c, string: %s, decimal: %d\n", ch, dst, num);
     // printf("Division by zero interrupt: %d\n", 1 / 0);
 
-    __asm__ volatile ("hlt");
+    // __asm__ volatile ("hlt");
 
     return 0;
 }

@@ -25,17 +25,17 @@ void init_tss(gdt_entry_bits *g) {
 	g->big = 0; // should leave zero according to manuals.
 	g->gran = 0; // limit is in bytes, not pages
 	g->base_high = (base & (0xff << 24)) >> 24; //isolate top byte
-    g->base64 = 0x0;
-    g->reserved = 0x0;
+    // g->base64 = 0x0;
+    // g->reserved = 0x0;
 
 	// Ensure the TSS is initially zero'd.
 	memset(&tss_entry, 0x0, sizeof(tss_entry));
 
 	// tss_entry.ss0  = 0x10;  // Set the kernel stack segment.
-	tss_entry.rsp0_low = 0x100000 + 64 * 4096 - 8; // Set the kernel stack pointer.
+	tss_entry.rsp0 = 0x100000 + 64 * 4096; // Set the kernel stack pointer.
 	//note that CS is loaded from the IDT entry and should be the regular kernel code segment
 }
 
 void set_kernel_stack(uint32_t stack) { // Used when an interrupt occurs
-	tss_entry.rsp0_low = stack;
+	tss_entry.rsp0 = stack;
 }

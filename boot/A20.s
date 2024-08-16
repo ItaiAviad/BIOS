@@ -40,6 +40,6 @@ a20_failed:
     jmp hlt
 
 
-msg_a20_ns: db "A20 failed, INT 0x15 is not supported", ENDL, 0
-msg_a20_failed: db "A20 failed", ENDL, 0
+; msg_a20_ns: db "A20 failed, INT 0x15 is not supported", ENDL, 0
+; msg_a20_failed: db "A20 failed", ENDL, 0
 
