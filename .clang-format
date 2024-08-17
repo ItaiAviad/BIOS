@@ -1,0 +1,14 @@
+# Use 4 spaces for indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+# Optional: Use the LLVM style as a base
+BasedOnStyle: LLVM
+
+# Optional: Other settings to customize formatting
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Empty
+IndentCaseLabels: true
+ColumnLimit: 100
+

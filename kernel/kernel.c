@@ -1,28 +1,28 @@
 // Kernel Main File
 
 // libc
+#include <memory.h>
+#include <random.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <memory.h>
 #include <string.h>
-#include <random.h>
 #include <time.h>
 #include <unistd.h>
 // arch/x86_64
-#include <arch/x86_64/mmu.h>
-#include <arch/x86_64/isr.h>
-#include <arch/x86_64/tty.h>
+#include <arch/x86_64/gdt.h>
 #include <arch/x86_64/io.h>
+#include <arch/x86_64/isr.h>
+#include <arch/x86_64/mmu.h>
 #include <arch/x86_64/pic.h>
 #include <arch/x86_64/pit.h>
-#include <arch/x86_64/gdt.h>
 #include <arch/x86_64/tss.h>
+#include <arch/x86_64/tty.h>
 
 int kmain(void) {
     // TTY - Terminal
     terminal_initialize();
-    
+
     // ISR - Interrupt Service Routines
     init_isr_handlers();
 
@@ -30,11 +30,10 @@ int kmain(void) {
     // Page Frame Allocator - Manage Physical Memory
     // Paging sturctures (PML4T, PDPT, PDT, PT)
     // init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
-    
+
     // Kernel Heap - Manage Kernel Dynamic Memory
-    // malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
-    // char* dst = (char*) malloc(0x1000);
-    // char* dst2 = (char*) malloc(0x2000);
+    // malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES *
+    // PAGE_SIZE); char* dst = (char*) malloc(0x1000); char* dst2 = (char*) malloc(0x2000);
     // free(dst);
     // printf("----------------\n");
     // print_heap();
@@ -43,8 +42,8 @@ int kmain(void) {
     // char dst[30];
 
     // PIC - Programmable Interrupt Controller
-    // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
-    // pic_init(PIC1_OFFSET, PIC2_OFFSET);
+    // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race
+    // conditions! pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
     // printf("%d\n", time());
     // date();
@@ -53,13 +52,11 @@ int kmain(void) {
     // char* hello1 = "In Kernel!\nEnter char, string and a decimal:";
     // printf("%s", hello1);
     // __asm__ volatile ("xchg bx, bx");
-    printf("a\n");
+    init_gdt();
+    //reloadSegments();
     flush_tss();
-    printf("b\n");
     // cli();
     // __asm__ volatile ("xchg bx, bx");
-    // init_gdt();
-    // reloadSegments();
     // init_userspace();
 
     // srand(time());

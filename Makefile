@@ -62,8 +62,7 @@ NASM := nasm
 LD := x86_64-elf-ld
 
 INCLUDES := -I$(LIBC_INCLUDE) -I$(KERNEL_INCLUDE)
-MISC_FLAGS = -DCURRENT_YEAR=$(shell date --utc | awk '{print $$4}')
-MISC_FLAGS += -DTIMEZONE=\"$(shell date --utc | awk '{print $$6}')\"
+MISC_FLAGS = -DCURRENT_YEAR=$(shell $(SHELL) -c "date -u +%Y")
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
 endif

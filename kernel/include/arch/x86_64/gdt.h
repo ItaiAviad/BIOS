@@ -38,11 +38,11 @@ typedef struct __attribute__((packed)) {
 } gdt_entry_bits;
 
 typedef struct __attribute__((packed)) {
-  uint16_t limit;
   uint64_t base;
+  uint16_t limit;
 } gdt_register;
 
-extern void load_gdt();
+extern void load_gdt(uint16_t, uint64_t);
 extern void reloadSegments();
 
 void init_gdt();
