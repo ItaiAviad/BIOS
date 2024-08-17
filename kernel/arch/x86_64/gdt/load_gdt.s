@@ -14,7 +14,7 @@ load_gdt:
     ;sub sp, 8
     ;mov [rsp], rax
     push rax
-    lretfq 
+    lretq 
 
 reload_cs:
     mov ax, 0x20
@@ -24,4 +24,5 @@ reload_cs:
     mov fs, ax
     mov ss, ax
     add sp, 0x10
+    sti
     ret

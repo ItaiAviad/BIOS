@@ -20,6 +20,9 @@
 #include <arch/x86_64/tty.h>
 
 int kmain(void) {
+    init_gdt();
+    flush_tss();
+
     // TTY - Terminal
     terminal_initialize();
 
@@ -52,9 +55,6 @@ int kmain(void) {
     // char* hello1 = "In Kernel!\nEnter char, string and a decimal:";
     // printf("%s", hello1);
     // __asm__ volatile ("xchg bx, bx");
-    init_gdt();
-    //reloadSegments();
-    flush_tss();
     // cli();
     // __asm__ volatile ("xchg bx, bx");
     // init_userspace();
@@ -64,10 +64,11 @@ int kmain(void) {
     // sleep(1000);
 
     // char* hello = "In Kernel!\nEnter char, string and a decimal:";
-    // printf("%s", hello);
-    // while (1) {
-
-    // }
+    printf("%s","hello");
+    int i = 0;
+    while (1) {
+        i++;
+    }
     // char ch = 0;
     // int num = 0;
     // int x = scanf("%c %s %d", &ch, dst, &num);
@@ -75,7 +76,7 @@ int kmain(void) {
     // printf("char: %c, string: %s, decimal: %d\n", ch, dst, num);
     // printf("Division by zero interrupt: %d\n", 1 / 0);
 
-    // __asm__ volatile ("hlt");
+    __asm__ volatile ("hlt");
 
     return 0;
 }
