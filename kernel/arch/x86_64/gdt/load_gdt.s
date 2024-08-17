@@ -10,7 +10,7 @@ load_gdt:
     lgdt [gdtr]         ; Load GDT Register with LGDT 
     sub rsp, 8 
 
-    mov ax, 0x10
+    mov ax, 0x20
     mov ds, ax         ; Reload all the data descriptors with Data selector  
     mov es, ax
     mov gs, ax

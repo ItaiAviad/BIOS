@@ -25,8 +25,8 @@ void init_tss(gdt_entry_bits *g) {
 	g->big = 0; // should leave zero according to manuals.
 	g->gran = 0; // limit is in bytes, not pages
 	g->base_high = (base & (0xff << 24)) >> 24; //isolate top byte
-    // g->base64 = 0x0;
-    // g->reserved = 0x0;
+    g->base32 = 0x0;
+    g->reserved = 0x0;
 
 	// Ensure the TSS is initially zero'd.
 	memset(&tss_entry, 0x0, sizeof(tss_entry));

@@ -17,6 +17,8 @@ typedef struct __attribute__((packed)) {
     uint8_t access;         // access to segment
     uint8_t granularity;    // contains limit and flags
     uint8_t base_high;      // 32 base contains base linear address of segment
+	uint32_t base32;
+	uint32_t reserved;
 } gdt_entry;
 
 typedef struct __attribute__((packed)) {
@@ -35,6 +37,8 @@ typedef struct __attribute__((packed)) {
 	unsigned int big                    :  1; // 32-bit opcodes for code, uint32_t stack for data
 	unsigned int gran                   :  1; // 1 to use 4k page addressing, 0 for byte addressing
 	unsigned int base_high              :  8;
+	uint32_t     base32					: 32;
+	unsigned int reserved				: 32;
 } gdt_entry_bits;
 
 typedef struct __attribute__((packed)) {
