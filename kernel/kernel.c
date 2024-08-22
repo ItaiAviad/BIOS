@@ -20,12 +20,12 @@
 #include <arch/x86_64/tty.h>
 
 int kmain(void) {
-    init_gdt();
-    flush_tss();
+    // init_gdt();
+    // flush_tss();
 
     // TTY - Terminal
     terminal_initialize();
-
+    
     // ISR - Interrupt Service Routines
     init_isr_handlers();
 
@@ -41,15 +41,16 @@ int kmain(void) {
     // printf("----------------\n");
     // print_heap();
     // printf("----------------\n");
-
+    
+    flush_tss();
     // char dst[30];
 
     // PIC - Programmable Interrupt Controller
     // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race
     // conditions! pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
-    // printf("%d\n", time());
-    // date();
+    printf("%d\n", time());
+    date();
 
     // Jump to Userspace
     // char* hello1 = "In Kernel!\nEnter char, string and a decimal:";
@@ -64,11 +65,11 @@ int kmain(void) {
     // sleep(1000);
 
     // char* hello = "In Kernel!\nEnter char, string and a decimal:";
-    printf("%s","hello");
-    int i = 0;
-    while (1) {
-        i++;
-    }
+    // printf("%s","hello");
+    // int i = 0;
+    // while (1) {
+        // i++;
+    // }
     // char ch = 0;
     // int num = 0;
     // int x = scanf("%c %s %d", &ch, dst, &num);
