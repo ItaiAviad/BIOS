@@ -41,12 +41,12 @@ int kmain(void) {
     // ISR - Interrupt Service Routines
 
     // TTY - Terminal
-    //cli();
+    cli();
     terminal_initialize();
     //init_gdt();
     init_isr_handlers();
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
-    //sti();
+    sti();
     kernel_allocator.initialized = 0;
     init_page_frame_allocator(&kernel_allocator, MEMORY_SIZE_PAGES);
 
