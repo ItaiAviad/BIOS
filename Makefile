@@ -9,6 +9,7 @@ endif
 SECTOR_SIZE := 512
 
 KERNEL_LOAD_ADDR := 0xF000
+KERNEL_STACK_START_ADDR := $(KERNEL_LOAD_ADDR)
 
 ### Directories
 BOOT_DIR := boot
@@ -62,7 +63,7 @@ NASM := nasm
 LD := x86_64-elf-ld
 
 INCLUDES := -I$(LIBC_INCLUDE) -I$(KERNEL_INCLUDE)
-MISC_FLAGS = -DCURRENT_YEAR=$(shell $(SHELL) -c "date -u +%Y")
+MISC_FLAGS = -DKERNEL_STACK_START_ADDR=$(KERNEL_STACK_START_ADDR) -DCURRENT_YEAR=$(shell $(SHELL) -c "date -u +%Y")
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
 endif
@@ -96,6 +97,7 @@ $(BOOT_BIN): always kernel
 		-DSECTOR_SIZE=$(SECTOR_SIZE) \
 		-DKERNEL_SIZE_IN_SECTORS=$(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))') \
 		-DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) \
+		-DKERNEL_STACK_START_ADDR=$(KERNEL_STACK_START_ADDR) \
 		-f bin -o $@
 
 # Kernel
@@ -133,7 +135,7 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 run:
-	qemu-system-x86_64 -enable-kvm -drive format=raw,file=$(FLOPPY_BIN) -cpu host -smp cores=4 -m 4G -nic user,model=virtio
+	qemu-system-x86_64 -enable-kvm -drive format=raw,file=$(FLOPPY_BIN) -cpu host -smp cores=4 -m 4G -nic user,model=virtio -no-reboot -d int,cpu_reset
 
 run_debugger: 
 	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN) -d int -s -S 

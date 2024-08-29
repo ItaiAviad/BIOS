@@ -19,15 +19,38 @@
 #include <arch/x86_64/tss.h>
 #include <arch/x86_64/tty.h>
 
+void print_gdtr() {
+    // GDTR register structure
+    struct {
+        uint16_t limit;
+        uint64_t base;
+    } __attribute__((packed)) gdtr;
+
+    // Use inline assembly to load GDTR
+    __asm__ (
+        "sgdt %0"   // Store GDTR register into the memory pointed to by %0
+        : "=m" (gdtr)  // Output operand: GDTR structure
+    );
+
+    // Print GDTR base and limit
+    printf("GDTR Base Address: %d\n", gdtr.base);
+    printf("GDTR Limit: %d\n", gdtr.limit);
+}
+
 int kmain(void) {
     init_gdt();
-    flush_tss();
+    //flush_tss();
 
     // TTY - Terminal
     terminal_initialize();
 
     // ISR - Interrupt Service Routines
     init_isr_handlers();
+
+    init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
+
+
+    //print_gdtr();
 
     // Initialize Kernel Paging:
     // Page Frame Allocator - Manage Physical Memory
@@ -67,7 +90,8 @@ int kmain(void) {
     printf("%s","hello");
     int i = 0;
     while (1) {
-        i++;
+        i = 1/0;
+        printf("%d", i);
     }
     // char ch = 0;
     // int num = 0;

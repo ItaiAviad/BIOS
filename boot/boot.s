@@ -172,7 +172,7 @@ lm:
     ; call puts64
     ; xchg bx, bx
     ; IMPORTANT: Use `jmp` and not `call` as `call` misaligns RSP
-    mov sp, KERNEL_LOAD_ADDR
+    mov sp, KERNEL_STACK_START_ADDR
     mov bp, sp
     jmp KERNEL_LOAD_ADDR
     jmp hlt

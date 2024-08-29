@@ -1,13 +1,13 @@
 #include <arch/x86_64/gdt.h>
 #include <arch/x86_64/tss.h>
 
-gdt_entry gdt[GDT_ENTRIES]; // one null segment, two ring 0 segments, two ring 3 segments,
+gdt_entry gdt[3]; // one null segment, two ring 0 segments, two ring 3 segments,
                   // TSS segment
 gdt_register gdt_reg;
 
 void init_gdt() {
     // (ring 0 segments)
-    gdt_reg.limit = sizeof(gdt_entry) * GDT_ENTRIES  - 1;
+    gdt_reg.limit = sizeof(gdt_entry) * 3  - 1;
     gdt_reg.base = (uint64_t)gdt;
 
     // Null Segment (0x0)
@@ -24,7 +24,7 @@ void init_gdt() {
     gdt[1].limit = 0xFFFF;
     gdt[1].base_low = 0x0;
     gdt[1].base_middle = 0x0;
-    gdt[1].access = 0x9A;            // 0b10011010
+    gdt[1].access = 0b10011010;            // 0b10011010
     gdt[1].granularity = 0b10101111; // 0b11001111
     gdt[1].base_high = 0x0;
     gdt[1].base32 = 0x0;
@@ -34,7 +34,7 @@ void init_gdt() {
     gdt[2].limit = 0xFFFF;
     gdt[2].base_low = 0x0;
     gdt[2].base_middle = 0x0;
-    gdt[2].access = 0x92;            // 0b10010010
+    gdt[2].access = 0b10010010;            // 0b10010010
     gdt[2].granularity = 0b10100000; // 0b11001111
     gdt[2].base_high = 0x0;
     gdt[2].base32 = 0x0;

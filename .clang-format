@@ -10,5 +10,5 @@ BasedOnStyle: LLVM
 BreakBeforeBraces: Attach
 AllowShortFunctionsOnASingleLine: Empty
 IndentCaseLabels: true
-ColumnLimit: 100
+ColumnLimit: 0
 
