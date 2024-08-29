@@ -38,16 +38,27 @@ void print_gdtr() {
 }
 
 int kmain(void) {
-    init_gdt();
-    //flush_tss();
+    // ISR - Interrupt Service Routines
 
     // TTY - Terminal
+    //cli();
     terminal_initialize();
-    
-    // ISR - Interrupt Service Routines
+    //init_gdt();
     init_isr_handlers();
+    pic_init(PIC1_OFFSET, PIC2_OFFSET);
+    //sti();
+    kernel_allocator.initialized = 0;
+    init_page_frame_allocator(&kernel_allocator, MEMORY_SIZE_PAGES);
 
-    init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
+    // init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
+    // 
+    // sti();
+    char c = '1';
+    buffer_get();
+    //__asm__ volatile ("xchg bx, bx");
+    //flush_tss();*/
+
+
 
 
     //print_gdtr();
@@ -55,7 +66,7 @@ int kmain(void) {
     // Initialize Kernel Paging:
     // Page Frame Allocator - Manage Physical Memory
     // Paging sturctures (PML4T, PDPT, PDT, PT)
-    // init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
+    //init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
 
     // Kernel Heap - Manage Kernel Dynamic Memory
     // malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES *
@@ -65,15 +76,15 @@ int kmain(void) {
     // print_heap();
     // printf("----------------\n");
     
-    flush_tss();
-    // char dst[30];
+    // int dst;
+    // scanf("%d", &dst);
 
     // PIC - Programmable Interrupt Controller
     // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race
     // conditions! pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
-    printf("%d\n", time());
-    date();
+    // printf("%d\n", dst);
+    //date();
 
     // Jump to Userspace
     // char* hello1 = "In Kernel!\nEnter char, string and a decimal:";
@@ -87,11 +98,11 @@ int kmain(void) {
 
     // sleep(1000);
 
-    // char* hello = "In Kernel!\nEnter char, string and a decimal:";
-    printf("%s","hello");
+    char* hello = "In Kernel!\nEnter char, string and a decimal:";
+    printf("%s",hello);
     int i = 0;
     while (1) {
-        i = 1/0;
+        i++;
         printf("%d", i);
     }
     // char ch = 0;

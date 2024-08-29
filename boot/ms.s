@@ -78,4 +78,5 @@ elevate_lm:
         mov gs, ax
         mov ss, ax
         
+        sti
         jmp lm

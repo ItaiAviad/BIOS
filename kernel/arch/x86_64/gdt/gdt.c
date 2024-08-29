@@ -7,7 +7,7 @@ gdt_register gdt_reg;
 
 void init_gdt() {
     // (ring 0 segments)
-    gdt_reg.limit = sizeof(gdt_entry) * 3  - 1;
+    gdt_reg.limit = sizeof(gdt) - 1;
     gdt_reg.base = (uint64_t)gdt;
 
     // Null Segment (0x0)
@@ -35,11 +35,11 @@ void init_gdt() {
     gdt[2].base_low = 0x0;
     gdt[2].base_middle = 0x0;
     gdt[2].access = 0b10010010;            // 0b10010010
-    gdt[2].granularity = 0b10100000; // 0b11001111
+    gdt[2].granularity = 0b10001111; // 0b11001111
     gdt[2].base_high = 0x0;
     gdt[2].base32 = 0x0;
     gdt[2].reserved = 0x0;
-    // Ring 3 code segment(0x30)
+    /*// Ring 3 code segment(0x30)
     gdt_entry_bits *ring3_code = (gdt_entry_bits *)&gdt[3];
     // Ring 3 data segment(0x40)
     gdt_entry_bits *ring3_data = (gdt_entry_bits *)&gdt[4];
@@ -67,11 +67,11 @@ void init_gdt() {
     *ring3_data = *ring3_code; // contents are similar so save time by copying
     ring3_data->code = 0;      // not code but data
     // Tss(0x50)
-    init_tss((gdt_entry_bits*)(&gdt[5])); // TSS segment will be the fifth
+    init_tss((gdt_entry_bits*)(&gdt[5])); // TSS segment will be the sixth*/
 
     load_gdt(gdt_reg.limit, gdt_reg.base);
 
-    // flush_tss();
+    //flush_tss();
 }
 
 void test_user_function(void) {}
