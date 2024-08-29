@@ -43,7 +43,7 @@ int kmain(void) {
 
     // TTY - Terminal
     terminal_initialize();
-
+    
     // ISR - Interrupt Service Routines
     init_isr_handlers();
 
@@ -64,15 +64,16 @@ int kmain(void) {
     // printf("----------------\n");
     // print_heap();
     // printf("----------------\n");
-
+    
+    flush_tss();
     // char dst[30];
 
     // PIC - Programmable Interrupt Controller
     // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race
     // conditions! pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
-    // printf("%d\n", time());
-    // date();
+    printf("%d\n", time());
+    date();
 
     // Jump to Userspace
     // char* hello1 = "In Kernel!\nEnter char, string and a decimal:";

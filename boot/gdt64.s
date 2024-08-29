@@ -7,47 +7,47 @@
 
 align 16
 
-; section .bss
-; align 16
-; tss:
-;     resq 1               ; Reserved
-;     resq 1               ; RSP0
-;     resq 1               ; RSP1
-;     resq 1               ; RSP2
-;     resq 1               ; Reserved
-;     resq 1               ; IST1
-;     resq 1               ; IST2
-;     resq 1               ; IST3
-;     resq 1               ; IST4
-;     resq 1               ; IST5
-;     resq 1               ; IST6
-;     resq 1               ; IST7
-;     resq 1               ; Reserved
-;     ; dw 0x0000            ; Reserved
-;     resw 1               ; Reserved
-;     ; dw 0x0000            ; IO Map Base Address
-;     resw 1               ; IO Map Base Address
-
 section .bss
 align 16
 tss:
-    dq 0x0               ; Reserved
-    dq 0x0               ; RSP0
-    dq 0x0               ; RSP1
-    dq 0x0               ; RSP2
-    dq 0x0               ; Reserved
-    dq 0x0               ; IST1
-    dq 0x0               ; IST2
-    dq 0x0               ; IST3
-    dq 0x0               ; IST4
-    dq 0x0               ; IST5
-    dq 0x0               ; IST6
-    dq 0x0               ; IST7
-    dq 0x0               ; Reserved
+    resq 1               ; Reserved
+    resq 1               ; RSP0
+    resq 1               ; RSP1
+    resq 1               ; RSP2
+    resq 1               ; Reserved
+    resq 1               ; IST1
+    resq 1               ; IST2
+    resq 1               ; IST3
+    resq 1               ; IST4
+    resq 1               ; IST5
+    resq 1               ; IST6
+    resq 1               ; IST7
+    resq 1               ; Reserved
     ; dw 0x0000            ; Reserved
-    dw 0x0               ; Reserved
+    resw 1               ; Reserved
     ; dw 0x0000            ; IO Map Base Address
-    dw 0x0               ; IO Map B
+    resw 1               ; IO Map Base Address
+
+; section .data
+; align 16
+; tss:
+;     dq 0x0               ; Reserved
+;     dq 0x0               ; RSP0
+;     dq 0x0               ; RSP1
+;     dq 0x0               ; RSP2
+;     dq 0x0               ; Reserved
+;     dq 0x0               ; IST1
+;     dq 0x0               ; IST2
+;     dq 0x0               ; IST3
+;     dq 0x0               ; IST4
+;     dq 0x0               ; IST5
+;     dq 0x0               ; IST6
+;     dq 0x0               ; IST7
+;     dq 0x0               ; Reserved
+;     ; dw 0x0000            ; Reserved
+;     dw 0x0               ; Reserved
+;     ; dw 0x0000            ; IO Map Base Address
+;     dw 0x0               ; IO Map B
 
 section .text
 rsp0_value: dd KERNEL_LOAD_ADDR
@@ -55,6 +55,7 @@ rsp0_value: dd KERNEL_LOAD_ADDR
 tss_init_rsp0:
     mov eax, [rsp0_value]
     mov [tss + 4], eax          ; Store RSP0 value in TSS (offset 4)
+    ret
     ; mov word [tss + 4],  rsp0_value  ; Initialize RSP0
     ; mov qword [tss + 12], rsp1_value  ; Initialize RSP1
     ; mov qword [tss + 20], rsp2_value  ; Initialize RSP2
