@@ -1,3 +1,4 @@
+#include <arch/x86_64/interrupts.h>
 #include <arch/x86_64/pic.h>
 
 void pic_send_eoi(uint8_t irq)
@@ -10,6 +11,7 @@ void pic_send_eoi(uint8_t irq)
 
 void pic_init(int offset1, int offset2)
 {
+    cli();
     io_wait();
 	uint8_t a1, a2;
 	

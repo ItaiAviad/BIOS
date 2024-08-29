@@ -8,6 +8,7 @@
 extern uint64_t __end;
 
 void init_page_frame_allocator(PageFrameAllocator *allocator, size_t memory_size_pages) {
+    cli();
     // Allocate pages for the allocator via allocator_bitmap_init and then copy to the new larger allocator bitmap
     if(allocator->initialized)
         return;
@@ -19,6 +20,7 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, size_t memory_size
     allocator->bitmap = aalign(PAGE_FRAME_ALLOCATOR_START, PAGE_SIZE);
     memset(allocator->bitmap, (char)0, (uint64_t)allocator->num_pages); // Zero bitmap
     allocator->bitmap[0] = 1; // Set the first page as in use for dealing with NULL values
+    sti();
 }
 
 void map_reserved_paging_tables(Context ctx) {

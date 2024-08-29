@@ -101,11 +101,11 @@ gdt64_kcode:
     ;   Reserved - AVL:     0
 
     dw 0xFFFF           ; Limit (bits 0-15)
-    dw 0x0000           ; Base  (bits 0-15)
-    db 0x00             ; Base  (bits 16-23)
-    db 0b10011010       ; 1st Flags, Type flags
-    db 0b10101111       ; 2nd Flags, Limit (bits 16-19)
-    db 0x00             ; Base  (bits 24-31)
+    dw 0x0000           ; Base  (bits 16-31)
+    db 0x00             ; Base  (bits 31-39)
+    db 0b10011010       ; 1st Flags, Type flags (40-47)
+    db 0b10101111       ; 2nd Flags, Limit (bits 48-55)
+    db 0x00             ; Base  (bits 56-63)
 
 
 gdt64_kdata:
@@ -187,12 +187,12 @@ gdt64_udata:
 
 tss_entry:
     dw 0x0067                   ; Limit (104 bytes - 1)
-    dw tss_base_low             ; Base (bits 0-15)
-    db tss_base_mid             ; Base (bits 16-23)
+    dw tss             ; Base (bits 0-15)
+    db 0             ; Base (bits 16-23)
     db 0b10001001               ; Type: 64-bit TSS (available), DPL=3, Present
     db 0b00000000               ; Granularity, Limit (bits 16-19)
-    db tss_base_high            ; Base (bits 24-31)
-    dd tss_base_upper           ; Base (bits 32-63) - Upper 32 bits
+    db 0            ; Base (bits 24-31)
+    dd 0           ; Base (bits 32-63) - Upper 32 bits
     dw 0x0000                   ; Reserved, must be zero
     dw 0x0000                   ; Reserved, must be zero
 

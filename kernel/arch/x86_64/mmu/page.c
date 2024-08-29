@@ -29,6 +29,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 }
 
 void switch_context(Context ctx) {
+    cli();
     // Initialize (new) Page Frame Allocator
     init_page_frame_allocator(&ctx.allocator, ctx.memory_size_pages);
 
@@ -47,13 +48,16 @@ void switch_context(Context ctx) {
     
     // Switch PML4 to use the (new) s PML4
     set_pml4_address((uint64_t *) ctx.pml4);
+    sti();
 }
 
 void set_pml4_address(uint64_t* pml4){
     __asm__ volatile (
+        "cli\n"
         "mov %%rax, %0\n"     // Move the address of the PML4 table into the RAX register
         "mov %%cr3, %%rax\n"  // Move the address from RAX into the CR3 register
         "mov %%rax, %%cr3\n"
+        "sti"
         : 
         : "r" (pml4) // Input operand: the address of the PML4 table
         : "rax" // Clobbered register
