@@ -8,7 +8,9 @@
 #include <string.h>
 #include <arch/x86_64/interrupts.h>
 
-#define GDT_ENTRIES 6
+#define TSS_DESCRIPTOR_OFFSET 28
+#define USER_CODE_DESCRIPTOR_OFFSET 24
+#define USER_DATA_DESCRIPTOR_OFFSET 32
 
 typedef struct __attribute__((packed)) {
     uint16_t limit;         // 20 bit maximum addressable unit
@@ -40,17 +42,5 @@ typedef struct __attribute__((packed)) {
 	uint32_t     base32					: 32;
 	unsigned int reserved				: 32;
 } gdt_entry_bits;
-
-typedef struct __attribute__((packed)) {
-  uint64_t base;
-  uint16_t limit;
-} gdt_register;
-
-extern void load_gdt(uint16_t, uint64_t);
-extern void reloadSegments();
-
-void init_gdt();
-// void init_userspace();
-void test_user_function(void);
 
 #endif

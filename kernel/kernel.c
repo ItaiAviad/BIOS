@@ -19,6 +19,8 @@
 #include <arch/x86_64/tss.h>
 #include <arch/x86_64/tty.h>
 
+extern void jump_usermode();
+
 void print_gdtr() {
     // GDTR register structure
     struct {
@@ -49,21 +51,19 @@ int kmain(void) {
 
 
     kernel_allocator.initialized = 0;
-    init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
+    //init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
 
-
-
-    sleep(1000);
-
-    printf("Hi, please input a string with up to 29 chars:");
-
-    char hello[30];
-
-    scanf("%s", hello);
-
-    printf("%s",hello);
+    jump_usermode();
 
     __asm__ volatile ("hlt");
 
+    
+
     return 0;
+}
+
+
+void test_user_function(){
+    while (true) {
+    }
 }

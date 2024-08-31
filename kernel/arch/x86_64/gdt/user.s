@@ -1,19 +1,24 @@
 global jump_usermode
 extern test_user_function
 jump_usermode:
-	mov ax, (4 * 8) | 3 ; ring 3 data with bottom 2 bits set for ring 3
-	mov ds, ax
-	mov es, ax 
-	mov fs, ax 
-	mov gs, ax ; SS is handled by iret
+    mov ax, 0x20 | 3         ; ring 3 data selector with RPL 3
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax               ; SS is handled by iretq
 
-	; set up the stack frame iret expects
-	mov eax, esp
-	push (4 * 8) | 3 ; data selector
-	push rax ; current esp
-	pushf ; eflags
-	push (3 * 8) | 3 ; code selector (ring 3 code with bottom 2 bits set for ring 3)
-	push test_user_function ; instruction address to return to
-	iret
-
-
+    ; Push SS selector + RPL = 3 (Ring 3)
+    push 0x20 | 3
+    ; Push RSP value that IRETQ will return to (the stack pointer for the user mode)
+    mov rax, 0xF000   ; Ensure rsp_user_mode is set correctly for user mode stack
+    push rax
+    ; Push RFLAGS (including interrupt flag enabled)
+    pushfq                   ; Use pushfq for 64-bit environment
+    or qword [rsp], 1 << 9   ; Set interrupt flag in the pushed flags value
+    ; Push CS selector + RPL = 3 (Ring 3)
+    push 0x18 | 3
+    ; Push RIP (address where CPU should start execution in user mode)
+    mov rax, test_user_function
+    push rax
+    ; Perform the far return to transition to user mode
+    iretq

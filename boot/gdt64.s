@@ -178,11 +178,11 @@ gdt64_udata:
     ;   L - 64bit Segment:  1
     ;   Reserved - AVL:     0
 
-    dw 0x0000           ; Limit (bits 0-15)
+    dw 0xFFFF           ; Limit (bits 0-15)
     dw 0x0000           ; Base  (bits 0-15)
     db 0x00             ; Base  (bits 16-23)
     db 0b11110010       ; 1st Flags, Type flags
-    db 0b10100000       ; 2nd Flags, Limit (bits 16-19)
+    db 0b10101111       ; 2nd Flags, Limit (bits 16-19)
     db 0x00             ; Base  (bits 24-31)
 
 tss_entry:
