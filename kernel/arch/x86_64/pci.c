@@ -1,5 +1,8 @@
+#include "dataStructrures/linkedList.h"
 #include <arch/x86_64/pci.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 linkedListNode *listPCIDevices;
 
@@ -39,17 +42,67 @@ void checkDevice(uint8_t bus, uint8_t device) {
   }
 }
 
-void checkFunction(uint8_t bus, uint8_t device, uint8_t function) {
+void checkBus(uint8_t bus) {
+  uint8_t device;
+
+  for (device = 0; device < 32; device++) {
+    checkDevice(bus, device);
+  }
+}
+
+void checkFunction(uint8_t bus, uint8_t slot, uint8_t function) {
   uint8_t baseClass;
   uint8_t subClass;
   uint8_t secondaryBus;
 
-  baseClass = getClassCode(bus, device, function);
-  subClass = getSubclass(bus, device, function);
+  baseClass = getClassCode(bus, slot, function);
+  subClass = getSubclass(bus, slot, function);
   if ((baseClass == 0x6) && (subClass == 0x4)) {
-    secondaryBus = getSubclass(bus, device, function);
+    secondaryBus = getSubclass(bus, slot, function);
     checkBus(secondaryBus);
+  } else {
+
+  }
+      PCIDevice *pciDevice = malloc(sizeof(PCIDevice));
+    pciDevice->bus = bus;
+    pciDevice->slot = slot;
+    pciDevice->function = function;
+
+    pciDevice->vendorId = getVendorId(bus, slot, function);
+    pciDevice->deviceId = getProductId(bus, slot, function);
+
+    pciDevice->classCode = getClassCode(bus, slot, function);
+    pciDevice->subclass = getSubclass(bus, slot, function);
+    pciDevice->progIf = getProgIf(bus, slot, function);
+
+    append_node(&listPCIDevices, (void*) pciDevice);
+}
+
+void enumeratePCI() {
+  listPCIDevices = (linkedListNode*) NULL;
+  uint8_t function;
+  uint8_t bus;
+
+  uint8_t headerType = getHeaderType(0, 0, 0);
+  if ((headerType & 0x80) == 0) {
+    // Single PCI host controller
+    checkBus(0);
+  } else {
+    // Multiple PCI host controllers
+    for (function = 0; function < 8; function++) {
+      if (getVendorId(0, 0, function) != 0xFFFF)
+        break;
+      bus = function;
+      checkBus(bus);
+    }
   }
 }
 
-void initPCIDevList() {}
+void printPCIDevices(){
+  linkedListNode* head = (linkedListNode*) listPCIDevices;
+  while(head != NULL){
+    PCIDevice* device = (PCIDevice*) head->data;
+    printf("%x:%x.%x %x %x, ",device->bus,device->slot,device->function,device->vendorId,device->deviceId);
+    head = (linkedListNode*) head->next;
+  }
+}

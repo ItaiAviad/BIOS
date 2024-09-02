@@ -39,7 +39,7 @@
 
 // Heap
 // #define KERNEL_HEAP_START 0x200000
-#define KERNEL_HEAP_START 0x1000000 // 16 MB
+#define KERNEL_HEAP_START 0x2500000 // 16 MB
 #define KERNEL_HEAP_SIZE_PAGES 0x4 // 4 Pages
 
 // Processes (1GB of virtual memory: 0-0.5B -> User, 0.5B-1GB -> Kernel)

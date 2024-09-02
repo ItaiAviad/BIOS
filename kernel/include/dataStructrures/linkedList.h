@@ -1,13 +1,18 @@
+#ifndef LINKED_LIST
+
+#define LINKED_LIST
+
 #include <memory.h>
+#include <stdio.h>
 
 // Define a generic linked list node
 typedef struct linkedListNode {
     void *data;              // Pointer to hold data of any type
-    struct Node *next;       // Pointer to the next node
+    struct linkedListNode *next;       // Pointer to the next node
 } linkedListNode;
 
 // Create a new node
-linkedListNode* create_node(void *data) {
+static inline linkedListNode* create_node(void *data) {
     linkedListNode *new_node = (linkedListNode *)malloc(sizeof(linkedListNode));
     if (new_node) {
         new_node->data = data;
@@ -17,21 +22,23 @@ linkedListNode* create_node(void *data) {
 }
 
 // Add a node to the end of the list
-void append_node(linkedListNode **head, void *data) {
+static inline void append_node(linkedListNode **head, void *data) {
     linkedListNode *new_node = create_node(data);
-    if (*head == NULL) {
-        *head = new_node;
-    } else {
-        linkedListNode *current = *head;
-        while (current->next != NULL) {
-            current = current->next;
-        }
-        current->next = new_node;
+    if(!new_node){
+        printf("Failed to create node");
+        return;
     }
+    if(*head == NULL){
+        new_node->next = NULL;
+        (*head) = new_node;
+        return;
+    }
+    new_node->next = (*head);
+    (*head) = new_node;
 }
 
 // Remove a node from the list
-void remove_node(linkedListNode **head, void *data, int (*cmp)(void *, void *)) {
+static inline void remove_node(linkedListNode **head, void *data, int (*cmp)(void *, void *)) {
     linkedListNode *current = *head;
     linkedListNode *previous = NULL;
     while (current != NULL) {
@@ -50,7 +57,7 @@ void remove_node(linkedListNode **head, void *data, int (*cmp)(void *, void *)) 
 }
 
 // Free the entire list
-void free_list(linkedListNode *head) {
+static inline void free_list(linkedListNode *head) {
     linkedListNode *current = head;
     linkedListNode *next_node;
     while (current != NULL) {
@@ -59,3 +66,5 @@ void free_list(linkedListNode *head) {
         current = next_node;
     }
 }
+
+#endif

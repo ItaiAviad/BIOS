@@ -16,6 +16,7 @@
 #include <arch/x86_64/io.h>
 #include <arch/x86_64/pic.h>
 #include <arch/x86_64/pit.h>
+#include <arch/x86_64/pci.h>
 
 int kmain(void) {
     // TTY - Terminal
@@ -33,8 +34,6 @@ int kmain(void) {
     // Kernel Heap - Manage Kernel Dynamic Memory
     printf("HEAP:\n");
     malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
-    char* dst = (char*) malloc(0x10);
-    char* dst2 = (char*) malloc(0x10);
     // printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
     // char dst[30];
 
@@ -42,24 +41,9 @@ int kmain(void) {
     // PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
-    for (int i = 0; i < 1; i++) {
-        printf("%d\n", time());
-        date();
-        sleep(1000);
-    }
-
-    sleep(1000);
-
-    char* hello = "In Kernel!\nEnter char, string and a decimal:";
-    printf("%s", hello);
-    char ch = 0;
-    int num = 0;
-    int x = scanf("%c %s %d", &ch, dst, &num);
-    printf("# of parameters read: %d\n", x);
-    printf("char: %c, string: %s, decimal: %d\n", ch, dst, num);
-    printf("rand: %d\n", rand());
-    // printf("Division by zero interrupt: %d\n", 1 / 0);
-
+    enumeratePCI();
+    printPCIDevices();
+    
     __asm__ volatile ("hlt");
 
     return 0;
