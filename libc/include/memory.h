@@ -44,7 +44,7 @@ typedef struct __attribute__((__packed__)) malloc_state {
     malloc_chunk* unsorted_bin_head;
     char padding[MALLOC_STATE_PADDING_SIZE];
 } malloc_state;
-// ----------------------------------------------
+
 
 /**
  * @brief Initialize the heap

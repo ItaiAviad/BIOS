@@ -16,7 +16,8 @@
 #include <arch/x86_64/io.h>
 #include <arch/x86_64/pic.h>
 #include <arch/x86_64/pit.h>
-#include <arch/x86_64/pci.h>
+#include <pci.h>
+#include <ahci.h>
 
 int kmain(void) {
     // TTY - Terminal
@@ -42,7 +43,9 @@ int kmain(void) {
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
     enumeratePCI();
-    printPCIDevices();
+    print_PCI_devices();
+
+    setup_ahci_controllers();
     
     __asm__ volatile ("hlt");
 

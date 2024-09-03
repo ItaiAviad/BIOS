@@ -137,7 +137,7 @@ run:
 	qemu-system-x86_64 -enable-kvm -drive format=raw,file=$(FLOPPY_BIN) -device ahci,id=ahci -cpu host -smp cores=4 -m 4G -nic user,model=virtio
 
 run_debugger: 
-	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN) -d int -s -S 
+	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN) -device ahci,id=ahci -d int -s -S 
 
 run_debug_bochs:
 	sed 's#$$(FLOPPY_BIN)#$(FLOPPY_BIN)#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG) && sync
