@@ -69,6 +69,16 @@ uint16_t pciConfigReadWord(uint8_t bus, uint8_t slot, uint8_t func,
                            uint8_t offset);
 
 /**
+ * @brief Read from a double word at an offset from a pci device config.
+ * @param bus
+ * @param slot
+ * @param func
+ * @param offset
+ */
+uint32_t pciConfigReadDoubleWord(uint8_t bus, uint8_t slot, uint8_t func,
+                           uint8_t offset);
+
+/**
  * @brief Check if a device at a certain bus and slot is a valid pcie device.
  * @param bus
  * @param slot

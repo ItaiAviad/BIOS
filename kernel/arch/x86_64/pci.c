@@ -62,8 +62,7 @@ void checkFunction(uint8_t bus, uint8_t slot, uint8_t function) {
     checkBus(secondaryBus);
   } else {
 
-  }
-      PCIDevice *pciDevice = malloc(sizeof(PCIDevice));
+    PCIDevice *pciDevice = malloc(sizeof(PCIDevice));
     pciDevice->bus = bus;
     pciDevice->slot = slot;
     pciDevice->function = function;
@@ -75,11 +74,12 @@ void checkFunction(uint8_t bus, uint8_t slot, uint8_t function) {
     pciDevice->subclass = getSubclass(bus, slot, function);
     pciDevice->progIf = getProgIf(bus, slot, function);
 
-    append_node(&listPCIDevices, (void*) pciDevice);
+    append_node(&listPCIDevices, (void *)pciDevice);
+  }
 }
 
 void enumeratePCI() {
-  listPCIDevices = (linkedListNode*) NULL;
+  listPCIDevices = (linkedListNode *)NULL;
   uint8_t function;
   uint8_t bus;
 
@@ -98,11 +98,14 @@ void enumeratePCI() {
   }
 }
 
-void printPCIDevices(){
-  linkedListNode* head = (linkedListNode*) listPCIDevices;
-  while(head != NULL){
-    PCIDevice* device = (PCIDevice*) head->data;
-    printf("%x:%x.%x %x %x, ",device->bus,device->slot,device->function,device->vendorId,device->deviceId);
-    head = (linkedListNode*) head->next;
+void printPCIDevices() {
+  linkedListNode *head = (linkedListNode *)listPCIDevices;
+  printf("__PCI__\n");
+  while (head != NULL) {
+    PCIDevice *device = (PCIDevice *)head->data;
+    printf("%x:%x.%d %x %x, ", device->bus, device->slot, device->function,
+           device->vendorId, device->deviceId);
+    head = (linkedListNode *)head->next;
   }
+  printf("__PCI_END__\n");
 }

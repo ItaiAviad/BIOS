@@ -91,7 +91,7 @@ static inline uint8_t inb(uint16_t port)
  * @param val 
  */
 static inline void outw(uint16_t port, uint16_t val) {
-    __asm__ volatile ( "outb %w1, %b0" : : "a"(val), "Nd"(port) : "memory");
+    __asm__ volatile ( "outb %w1, %w0" : : "a"(val), "Nd"(port) : "memory");
 }
 
 /**
@@ -103,7 +103,7 @@ static inline void outw(uint16_t port, uint16_t val) {
 static inline uint16_t inw(uint16_t port)
 {
     uint16_t ret;
-    __asm__ volatile ( "inb %b0, %w1"
+    __asm__ volatile ( "inb %w0, %w1"
                    : "=a"(ret)
                    : "Nd"(port)
                    : "memory");
@@ -117,7 +117,7 @@ static inline uint16_t inw(uint16_t port)
  * @param val 
  */
 static inline void outl(uint16_t port, uint32_t val) {
-    __asm__ volatile ( "outb %w1, %b0" : : "a"(val), "Nd"(port) : "memory");
+    __asm__ volatile ( "out %1, %0" : : "a"(val), "Nd"(port) : "memory");
 }
 
 /**
@@ -128,12 +128,13 @@ static inline void outl(uint16_t port, uint32_t val) {
  */
 static inline uint32_t inl(uint16_t port)
 {
-    uint32_t ret;
-    __asm__ volatile ( "inb %b0, %w1"
-                   : "=a"(ret)
-                   : "Nd"(port)
-                   : "memory");
-    return ret;
+    uint32_t value;
+    __asm__ volatile (
+        "in %0, %1"
+        : "=a" (value)        // output: value will be stored in the EAX register
+        : "Nd" (port)         // input: port is a 16-bit immediate value
+    );
+    return value;
 }
 
 /**
