@@ -8,6 +8,8 @@
 
 #define AHCI_CONFIG_BAR_NUM 5
 
-linkedListNode* setup_ahci_controllers();
+extern linkedListNode* ahci_devices;
+
+void setup_ahci_controllers();
 
 #endif
