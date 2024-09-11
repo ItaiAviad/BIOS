@@ -51,12 +51,11 @@ int kmain(void) {
 
 
     kernel_allocator.initialized = 0;
-    //init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
+    init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
 
     jump_usermode();
 
     __asm__ volatile ("hlt");
-
     
 
     return 0;
@@ -64,6 +63,8 @@ int kmain(void) {
 
 
 void test_user_function(){
+    // printf("%d\n", 1);
+    // __asm__ volatile("cli");
     while (true) {
     }
 }

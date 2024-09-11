@@ -32,7 +32,7 @@ void *kmalloc(size_t size) {
             return NULL; // Out of memory
         }
         // Map page at end of heap
-        map_page(k_ctx, kheap_end, (uint64_t)page, PAGE_PRESENT | PAGE_WRITE);
+        map_page(k_ctx, kheap_end, (uint64_t)page, PAGE_MAP_FLAGS);
         memset((void*) kheap_end, 0, PAGE_SIZE);
         kheap_end += PAGE_SIZE;
         kheap_current_size_left += PAGE_SIZE;

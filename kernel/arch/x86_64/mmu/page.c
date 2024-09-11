@@ -35,9 +35,9 @@ void switch_context(Context ctx) {
 
     // Map New PML4
     // Map the Page of the NEW PML4T in the OLD PML4T
-    // map_page((uint64_t *) ctx.old_pml4, &ctx.allocator, (uint64_t)ctx.pml4, (uint64_t)ctx.pml4, PAGE_PRESENT | PAGE_WRITE);
+    // map_page((uint64_t *) ctx.old_pml4, &ctx.allocator, (uint64_t)ctx.pml4, (uint64_t)ctx.pml4, PAGE_MAP_FLAGS);
     // Map self (new) PML4 Page (PML4 Table Page) (IMPORTANT! Not doing so causes page fault on PML4 Table access (not good  ¯\_(ツ)_/¯))
-    // map_page(ctx, (uint64_t)ctx.pml4, (uint64_t)ctx.pml4, PAGE_PRESENT | PAGE_WRITE);
+    // map_page(ctx, (uint64_t)ctx.pml4, (uint64_t)ctx.pml4, PAGE_MAP_FLAGS);
     
     // Map Reserved Paging Tables
     map_reserved_paging_tables(ctx);
@@ -78,30 +78,30 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
     // Ensure PDPT, PD, and PT entries exist (allocate and zero if necessary)
     if (!(ctx.pml4[pml4_index] & PAGE_PRESENT)) { // Check if PDPT entry exists (in PML4T)
         pdpt = allocate_and_zero_page(ctx, true);
-        ctx.pml4[pml4_index] = ((uint64_t) pdpt) | PAGE_PRESENT | PAGE_WRITE;
+        ctx.pml4[pml4_index] = ((uint64_t) pdpt) | PAGE_MAP_FLAGS;
         
         // Map new self
-        map_page(ctx, (uint64_t)ctx.pml4[pml4_index], (uint64_t)ctx.pml4[pml4_index], PAGE_PRESENT | PAGE_WRITE);
+        map_page(ctx, (uint64_t)ctx.pml4[pml4_index], (uint64_t)ctx.pml4[pml4_index], PAGE_MAP_FLAGS);
     } else {
         pdpt = (uint64_t*) (ctx.pml4[0] & ~0xFFF);
         (&ctx.allocator)->bitmap[(uint64_t)pdpt/PAGE_SIZE] = 1;
     }
     if (!(pdpt[pdpt_index] & PAGE_PRESENT)) { // Check if PDT entry exists (in PDPT)
         pd = allocate_and_zero_page(ctx, true);
-        pdpt[pdpt_index] = ((uint64_t) pd) | PAGE_PRESENT | PAGE_WRITE;
+        pdpt[pdpt_index] = ((uint64_t) pd) | PAGE_MAP_FLAGS;
         
         // Map new self
-        map_page(ctx, (uint64_t)pdpt[pdpt_index], (uint64_t)pdpt[pdpt_index], PAGE_PRESENT | PAGE_WRITE);
+        map_page(ctx, (uint64_t)pdpt[pdpt_index], (uint64_t)pdpt[pdpt_index], PAGE_MAP_FLAGS);
     } else {
         pd = (uint64_t*) (pdpt[pdpt_index] & ~0xFFF);
         (&ctx.allocator)->bitmap[(uint64_t)pd/PAGE_SIZE] = 1;
     }
     if (!(pd[pd_index] & PAGE_PRESENT)) { // Check if PT entry exists (in PDT)
         pt = allocate_and_zero_page(ctx, true);
-        pd[pd_index] = ((uint64_t) pt) | PAGE_PRESENT | PAGE_WRITE;
+        pd[pd_index] = ((uint64_t) pt) | PAGE_MAP_FLAGS;
 
         // Map new self
-        map_page(ctx, (uint64_t)pdpt[pdpt_index], (uint64_t)pdpt[pdpt_index], PAGE_PRESENT | PAGE_WRITE);
+        map_page(ctx, (uint64_t)pdpt[pdpt_index], (uint64_t)pdpt[pdpt_index], PAGE_MAP_FLAGS);
         memset(pt, 0, PAGE_SIZE);
     } else {
         pt = (uint64_t*) (pd[pd_index] & ~0xFFF);

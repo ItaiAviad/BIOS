@@ -27,7 +27,7 @@ void map_reserved_paging_tables(Context ctx) {
     volatile uint64_t start = aalign((uint64_t) ctx.pml4, PAGE_SIZE);
     volatile uint64_t end = aalign((uint64_t) ctx.pml4 + PAGING_SECTION_SIZE, PAGE_SIZE);
     for (uint64_t addr = start; addr < end; addr += PAGE_SIZE) {
-        map_page(ctx, addr, addr, PAGE_PRESENT | PAGE_WRITE); // Identity Mapping!
+        map_page(ctx, addr, addr, PAGE_MAP_FLAGS); // Identity Mapping!
         (&ctx.allocator)->bitmap[addr/PAGE_SIZE] = 0;
     }
 }
@@ -38,7 +38,7 @@ void map_memory_range(Context ctx, uint64_t start_addr, uint64_t end_addr, uint6
     physical_addr = aalign((uint64_t) physical_addr, PAGE_SIZE);
 
     for (uint64_t addr = start; addr < end; addr += PAGE_SIZE, physical_addr += PAGE_SIZE) {
-        map_page(ctx, addr, physical_addr, PAGE_PRESENT | PAGE_WRITE);
+        map_page(ctx, addr, physical_addr, PAGE_MAP_FLAGS);
         (&ctx.allocator)->bitmap[addr/PAGE_SIZE] = 1;
     }
 }
