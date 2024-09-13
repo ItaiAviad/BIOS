@@ -62,7 +62,7 @@ void* malloc(size_t size) {
     // If new, allocate memory (if needed) memcpy header to new memory location
     if (!found_free) {
         // Map page(s) if nescessary - Kernel Malloc
-        kmalloc(new_mchunk.mchunk_size);
+        // kmalloc(new_mchunk.mchunk_size); TODO: Add kmalloc syscall
         
         // Paste malloc chunk data to memory
         memcpy(new_addr, &new_mchunk, sizeof(malloc_chunk));

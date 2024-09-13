@@ -45,6 +45,7 @@ void switch_context(Context ctx) {
     // Map Kernel (In new PML4)
     // Map Kernel + Page Frame Allocator + Pagign Tables in new Kernel Context
     map_memory_range(ctx, ctx.start_addr + ctx.kernel_start_offset, ctx.start_addr + ctx.kernel_start_offset + PAGE_FRAME_ALLOCATOR_END, 0x0);
+    map_memory_range(ctx, 0x4000000, 0x4200000, 0x0);
     
     // Switch PML4 to use the (new) s PML4
     set_pml4_address((uint64_t *) ctx.pml4);

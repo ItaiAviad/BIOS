@@ -1,4 +1,5 @@
 #include <arch/x86_64/mmu.h>
+#include <memory.h>
 #include <stdint.h>
 
 uint64_t kheap_current = KERNEL_HEAP_START;

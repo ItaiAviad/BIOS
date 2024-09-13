@@ -17,14 +17,6 @@
 #define PAGE_USER    0b100
 #define PAGE_MAP_FLAGS (PAGE_PRESENT | PAGE_WRITE | PAGE_USER)
 
-/**
- * @brief Address Align (bigger (>) than given address)
- * 
- * @param address
- * @param alignment
- * @return uint64_t 
- */
-uint64_t aalign(uint64_t, uint64_t);
 // ----------------------------------------------
 
 typedef struct {
@@ -102,7 +94,6 @@ void map_reserved_paging_tables(Context ctx);
  * @param start_address 
  * @param end_address 
  * @param physical_addr
- * @param allocator 
  */
 void map_memory_range(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr);
 
@@ -118,7 +109,6 @@ void set_pml4_address(uint64_t* pml4);
  * @brief Map physical address to virtual address (Page aligned)
  * 
  * @param Context 
- * @param allocator 
  * @param virtual_address 
  * @param physical_address 
  * @param flags 

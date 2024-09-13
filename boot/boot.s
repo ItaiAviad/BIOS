@@ -54,7 +54,7 @@ rm:
     ; Read Kernel Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
     mov ax, (bootloader_end - _start) / SECTOR_SIZE ; LBA (sector address/offset)
-    mov cl, KERNEL_SIZE_IN_SECTORS ; # of sectors to read
+    mov cl, TOTAL_SIZE_IN_SECTORS ; # of sectors to read
     mov bx, (KERNEL_LOAD_ADDR) ; Destination address
     call disk_read
 
@@ -93,6 +93,12 @@ dw 0xAA55; Magic number
 [bits 32]
 
 pm:
+    ; Move User code
+    mov edi, USER_LOAD_ADDR
+    mov esi, USER_SEEK_FROM_KERNEL_LOAD_ADDR
+    mov ecx, USER_SIZE
+    rep movsb
+
     ; call clear32
     ; mov esi, msg_pm_success ; 32bit Protected Mode success message
     ; call puts32
@@ -167,7 +173,7 @@ pm_end:
 [bits 64]
 
 lm:
-    mov rdi, style_blue
+    ; mov rdi, style_blue
     ; mov rsi, msg_lm_success
     ; call puts64
     ; xchg bx, bx

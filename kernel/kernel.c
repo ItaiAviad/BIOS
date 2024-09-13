@@ -43,14 +43,14 @@ int kmain(void) {
     init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
     
     // Kernel Heap - Manage Kernel Dynamic Memory
-    malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
+    // malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
 
     // Init Syscall Management
     init_syscall();
 
+    printf("1\n");
 
-
-    // jump_usermode();
+    jump_usermode();
 
     __asm__ volatile ("hlt");
 

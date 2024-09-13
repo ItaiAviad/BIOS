@@ -10,7 +10,7 @@ void enable_syscall() {
 
 void configure_segments() {
     // Set kernel CS to 0x08 and user CS to 0x1b (these are typical values)
-    uint64_t star_value = ((uint64_t)0x08 << 32) | ((uint64_t)0x1b << 48);
+    uint64_t star_value = ((uint64_t)0x08 << 32) | ((uint64_t)0x18 << 48);
     write_msr(MSR_STAR, star_value);
 }
 

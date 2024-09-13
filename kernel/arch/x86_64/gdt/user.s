@@ -1,5 +1,7 @@
-global jump_usermode
-extern test_user_function
+section .text
+[global jump_usermode]
+[extern test_user_function]
+
 jump_usermode:
     mov ax, 0x20 | 3         ; ring 3 data selector with RPL 3
     mov ds, ax
@@ -18,7 +20,8 @@ jump_usermode:
     ; Push CS selector + RPL = 3 (Ring 3)
     push 0x18 | 3
     ; Push RIP (address where CPU should start execution in user mode)
-    mov rax, test_user_function
+    ; mov rax, test_user_function
+    mov rax, 0x400F000
     push rax
     ; Perform the far return to transition to user mode
     iretq

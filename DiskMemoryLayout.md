@@ -12,6 +12,10 @@
 |**Bootloader** Protected Mode Sector|512|0x200|0x7E00|
 |**Bootloader** Long Mode Sector|512|0x400|0x8000|
 |**Kernel** Stack|||0xF000|
-|**Kernel**||0x600|0xF000|
+|**Kernel**||0x600|0x4F000|
 |**Kernel** Page Frame Allocator|||0x200000 (2MB)|
 |**Kernel** PML4T|||0x400000 (4MB)|
+|**Userspace** Stack|||0x4000F000 (1GB + 0xF000)|
+|**Userspace**||0x600|0x4000F000 (1GB + 0xF000)|
+|**Userspace** Page Frame Allocator|||0x40200000 (1GB + 2MB)|
+|**Userspace** PML4T|||0x40400000 (1GB + 4MB)|

@@ -17,6 +17,17 @@
 extern "C" {
 #endif
 
+
+/**
+ * @brief Address Align (bigger (>) than given address)
+ * 
+ * @param address
+ * @param alignment
+ * @return uint64_t 
+ */
+uint64_t aalign(uint64_t, uint64_t);
+// ----------------------------------------------
+
 __attribute__((unused))
 void* heap_malloc_state_base;
 __attribute__((unused))
