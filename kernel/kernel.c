@@ -18,49 +18,44 @@
 #include <arch/x86_64/pit.h>
 #include <arch/x86_64/tss.h>
 #include <arch/x86_64/tty.h>
+// sys
+#include <sys/syscall.h>
 
 extern void jump_usermode();
-
-void print_gdtr() {
-    // GDTR register structure
-    struct {
-        uint16_t limit;
-        uint64_t base;
-    } __attribute__((packed)) gdtr;
-
-    // Use inline assembly to load GDTR
-    __asm__ (
-        "sgdt %0"   // Store GDTR register into the memory pointed to by %0
-        : "=m" (gdtr)  // Output operand: GDTR structure
-    );
-
-    // Print GDTR base and limit
-    printf("GDTR Base Address: %d\n", gdtr.base);
-    printf("GDTR Limit: %d\n", gdtr.limit);
-}
-
 int kmain(void) {
-    // ISR - Interrupt Service Routines
-
     // TTY - Terminal
-    //init_gdt();
     terminal_initialize();
+    
+    // ISR - Interrupt Service Routines
     init_isr_handlers();
+
+    // Flush TSS
     flush_tss();
+
+    // PIC - Programmable Interrupt Controller
+    // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
-
+    // Initialize Kernel Paging:
+    // Page Frame Allocator - Manage Physical Memory
+    // Paging sturctures (PML4T, PDPT, PDT, PT)
     kernel_allocator.initialized = 0;
     init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
+    
+    // Kernel Heap - Manage Kernel Dynamic Memory
+    malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
 
-    jump_usermode();
+    // Init Syscall Management
+    init_syscall();
+
+
+
+    // jump_usermode();
 
     __asm__ volatile ("hlt");
-    
 
     return 0;
 }
-
 
 void test_user_function(){
     // printf("%d\n", 1);

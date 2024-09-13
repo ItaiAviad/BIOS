@@ -17,7 +17,7 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, size_t memory_size
 
     // Initialize the allocator
     allocator->num_pages = (memory_size_pages);
-    allocator->bitmap = aalign(PAGE_FRAME_ALLOCATOR_START, PAGE_SIZE);
+    allocator->bitmap = (uint8_t*) aalign(PAGE_FRAME_ALLOCATOR_START, PAGE_SIZE);
     memset(allocator->bitmap, (char)0, (uint64_t)allocator->num_pages); // Zero bitmap
     allocator->bitmap[0] = 1; // Set the first page as in use for dealing with NULL values
     sti();

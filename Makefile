@@ -38,6 +38,7 @@ KERNEL_BIN := $(BUILD_DIR)/kernel.bin
 KERNEL_INCLUDE := $(KERNEL_DIR)/include
 
 # Libc
+LIBC_S := $(shell find $(LIBC_DIR) -name '*.s')
 LIBC_C := $(shell find $(LIBC_DIR) -name '*.c')
 LIBC_INCLUDE := $(LIBC_DIR)/include
 
@@ -49,9 +50,9 @@ SRC_S := $(KERNEL_S)
 SRC_C := $(KERNEL_C) # $(LIBC_C)
 
 OBJ_LIBC := $(patsubst %, $(OBJ_DIR)/%, $(LIBC_C:.c=.libc.o))
-OBJ_LIBK := $(patsubst %, $(OBJ_DIR)/%, $(LIBC_C:.c=.libk.o))
+OBJ_LIBK := $(patsubst %, $(OBJ_DIR)/%, $(LIBC_C:.c=.libk.o)) $(patsubst %, $(OBJ_DIR)/%, $(LIBC_S:.s=.libk.o)) 
 # OBJ_KERNEL := $(patsubst %, $(OBJ_DIR)/%, $(KERNEL_S:.s=.o)) $(patsubst %, $(OBJ_DIR)/%, $(KERNEL_C:.c=.o))
-OBJ := 	$(patsubst %, $(OBJ_DIR)/%, $(SRC_S:.s=.o)) \
+KERNEL_OBJ := $(patsubst %, $(OBJ_DIR)/%, $(SRC_S:.s=.o)) \
 		$(patsubst %, $(OBJ_DIR)/%, $(SRC_C:.c=.o)) \
 		$(OBJ_LIBK)
 
@@ -70,7 +71,7 @@ endif
 CFLAGS := -ffreestanding -m64 -masm=intel -Wall -O0 -g -Wextra -std=c11 -mpreferred-stack-boundary=4 -mstackrealign $(INCLUDES) $(MISC_FLAGS)
 NASMFLAGS := -f elf64 -g
 LDFLAGS := -T $(KERNEL_LD) $(INCLUDES)
-LIBCFLAGS := $(CFLAGS) -D__is_libc
+LIBC_FLAGS := $(CFLAGS) -D__is_libc
 LIBK_FLAGS := $(CFLAGS) -D__is_libk
 
 # -----------------------------------------------
@@ -82,9 +83,11 @@ all: build
 # Build Disk (Floppy Image)
 build: $(FLOPPY_BIN)
 $(FLOPPY_BIN): kernel boot
+	# Write zeroes to disk
 	$(DD) if=/dev/zero of=$@ conv=notrunc,fsync count=65536
+	# Write bootloader to disk
 	$(DD) if=$(BOOT_BIN) of=$@ conv=notrunc,fsync
-	# $(DD) if=$(KERNEL_BIN) seek=3 of=$@ conv=notrunc,fsync
+	# Write kernel to disk
 	$(DD) if=$(KERNEL_BIN) of=$@ bs=1 seek=$$(stat -c %s $(BOOT_BIN)) conv=notrunc,fsync
 	FILE_SIZE=$$(stat -c %s $@); \
 	PADDING=$$(( $(SECTOR_SIZE) - FILE_SIZE % $(SECTOR_SIZE) )); \
@@ -106,10 +109,10 @@ kernel: $(KERNEL_BIN)
 $(KERNEL_BIN): $(KERNEL_ELF)
 	objcopy -O binary $(KERNEL_ELF) $@
 
-$(KERNEL_ELF): always $(OBJ)
+$(KERNEL_ELF): always $(KERNEL_OBJ)
 	echo "Linking Kernel..."
 	sed 's/$$(KERNEL_LOAD_ADDR)/$(KERNEL_LOAD_ADDR)/g' $(KERNEL_LD_ORG) > $(KERNEL_LD) && sync
-	$(LD) $(LDFLAGS) $(OBJ) -o $@
+	$(LD) $(LDFLAGS) $(KERNEL_OBJ) -o $@
 	rm $(KERNEL_LD)
 
 # Objects (Assembling)
@@ -121,6 +124,11 @@ $(OBJ_DIR)/%.o: %.s
 $(OBJ_DIR)/%.o: %.c
 	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+# Libk Objects (Assembling)
+$(OBJ_DIR)/%.libk.o: %.s
+	mkdir -p $(dir $@)
+	$(NASM) $< $(NASMFLAGS) -o $@
 
 # Libk Object (Compiling)
 $(OBJ_DIR)/%.libk.o: %.c

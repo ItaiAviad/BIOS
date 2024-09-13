@@ -159,6 +159,8 @@
     "cfenv": "cpp",
     "typeinfo": "cpp",
     "valarray": "cpp",
-    "variant": "cpp"
-  }
+    "variant": "cpp",
+    "tss.h": "c",
+    "syscall.h": "c"
+}
 }
