@@ -134,7 +134,7 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 run:
-	qemu-system-x86_64 -enable-kvm -drive format=raw,file=$(FLOPPY_BIN) -device ahci,id=ahci -cpu host -smp cores=4 -m 4G -nic user,model=virtio
+	qemu-system-x86_64 -enable-kvm -drive format=raw,file=$(FLOPPY_BIN) -device ahci,id=ahci -drive id=disk1,file=disk.img,if=none,format=raw -device ide-hd,drive=disk1,bus=ahci.0 -cpu host -smp cores=4 -m 4G -nic user,model=virtio
 
 run_debugger: 
 	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN) -device ahci,id=ahci -d int -s -S 

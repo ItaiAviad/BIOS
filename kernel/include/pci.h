@@ -116,7 +116,7 @@ void enumeratePCI();
 
 void print_PCI_devices();
 
-void assign_bar(PCIDevice device, uint8_t bar_num);
+void* assign_bar(PCIDevice device, uint8_t bar_num);
 
 void check_function(uint8_t bus, uint8_t device, uint8_t function);
 

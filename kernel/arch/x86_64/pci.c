@@ -171,7 +171,7 @@ void print_PCI_devices() {
   printf("__PCI_END__\n");
 }
 
-void assign_bar(PCIDevice device, uint8_t bar_num) {
+void* assign_bar(PCIDevice device, uint8_t bar_num) {
   uint16_t offset = PCI_OFFSET_BASE_ADDRESS_0 + sizeof(uint32_t) * bar_num;
   uint16_t addr = PCI_BAR_START + PAGE_SIZE * num_of_used_PCI_bar_pages;
 
@@ -187,4 +187,5 @@ void assign_bar(PCIDevice device, uint8_t bar_num) {
   pci_config_write_dword(device.bus, device.slot, device.function, offset, new_bar_value);
 
   num_of_used_PCI_bar_pages += bar_size/PAGE_SIZE;
+  return (void*) addr;
 }
