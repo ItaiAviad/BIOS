@@ -10,7 +10,7 @@ void initialize_ahci(HBA_MEM *abar) {
 
     // Wait for AHCI controller to become ready
     while (!(abar->ghc & (1 << 31))) {
-        // Polling loop to check if AHCI is enabled
+		printf("Ahci not ready");
     }
     
     // Check capabilities and configure ports
@@ -27,6 +27,7 @@ void setup_ahci_controllers() {
     PCIDevice *device = (PCIDevice *)head->data;
     if ((device->classCode == 0x06 || device->classCode == 0x01) && device->subclass == 0x06) {
       HBA_MEM* abar = assign_bar(*device, AHCI_CONFIG_BAR_NUM);
+	  printf("Abar addr: %x\n", abar);
       initialize_ahci(abar);
       probe_port(abar);
       append_node(&ahci_devices, device);
@@ -65,6 +66,7 @@ void probe_port(HBA_MEM *abar)
 {
 	// Search disk in implemented ports
 	uint32_t pi = abar->pi;
+	printf("Pi: %x", pi);
 	int i = 0;
 	while (i<32)
 	{
