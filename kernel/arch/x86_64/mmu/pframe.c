@@ -30,15 +30,19 @@ void map_reserved_paging_tables(Context ctx) {
     }
 }
 
-void map_memory_range(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr) {
+void map_memory_range_with_flags(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr, uint64_t flags) {
     volatile uint64_t start = aalign((uint64_t) start_addr, PAGE_SIZE);
     volatile uint64_t end = aalign((uint64_t) end_addr, PAGE_SIZE);
     physical_addr = aalign((uint64_t) physical_addr, PAGE_SIZE);
 
     for (uint64_t addr = start; addr < end; addr += PAGE_SIZE, physical_addr += PAGE_SIZE) {
-        map_page(ctx, addr, physical_addr, PAGE_PRESENT | PAGE_WRITE);
+        map_page(ctx, addr, physical_addr, flags);
         (&ctx.allocator)->bitmap[addr/PAGE_SIZE] = 1;
     }
+}
+
+void map_memory_range(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr) {
+    map_memory_range_with_flags(ctx, start_addr, end_addr, physical_addr, PAGE_PRESENT | PAGE_WRITE);
 }
 
 void *allocate_page(Context ctx, bool is_p_struct) {

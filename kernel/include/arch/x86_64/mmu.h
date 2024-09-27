@@ -14,6 +14,7 @@
 
 #define PAGE_PRESENT 0b1
 #define PAGE_WRITE   0b10
+#define PAGE_UNCACHEABLE 0b1000
 
 /**
  * @brief Address Align (bigger (>) than given address)
@@ -103,6 +104,9 @@ void map_reserved_paging_tables(Context ctx);
  * @param allocator 
  */
 void map_memory_range(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr);
+
+
+void map_memory_range_with_flags(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr, uint64_t flags);
 
 /**
  * @brief Set the PML4 Address in the CR3 reg object (Paging Register)

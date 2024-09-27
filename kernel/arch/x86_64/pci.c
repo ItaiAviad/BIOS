@@ -1,7 +1,7 @@
 #include "arch/x86_64/io.h"
 #include "arch/x86_64/mlayout.h"
 #include "arch/x86_64/mmu.h"
-#include "dataStructrures/linkedList.h"
+#include <dataStructrures/linkedList.h>
 #include <pci.h>
 #include <memory.h>
 #include <stdint.h>
@@ -140,6 +140,7 @@ void check_function(uint8_t bus, uint8_t slot, uint8_t function) {
 }
 
 void enumeratePCI() {
+  num_of_used_PCI_bar_pages = 0;
   listPCIDevices = (linkedListNode *)NULL;
   uint8_t function;
   uint8_t bus;
@@ -173,19 +174,27 @@ void print_PCI_devices() {
 
 void* assign_bar(PCIDevice device, uint8_t bar_num) {
   uint16_t offset = PCI_OFFSET_BASE_ADDRESS_0 + sizeof(uint32_t) * bar_num;
-  uint16_t addr = PCI_BAR_START + PAGE_SIZE * num_of_used_PCI_bar_pages;
+  uint32_t addr = PCI_BAR_START + PAGE_SIZE * num_of_used_PCI_bar_pages;
 
   uint32_t orig_reg_val = pci_config_read_dword(device.bus, device.slot, device.function, offset);
   pci_config_write_dword(device.bus, device.slot, device.function, offset, 0xFFFFFFFF);
 
   uint32_t bar_size =
       pci_config_read_dword(device.bus, device.slot, device.function, offset) & 0xFFFFFFF0;
-  
-  map_memory_range(k_ctx, addr, addr+bar_size-1, addr);
+  bar_size = ~bar_size;
+  bar_size += 1;
 
-  uint32_t new_bar_value = (addr & 0xFFFFFFF0) | (orig_reg_val & ~0xFFFFFFF0);
+  if(bar_size == 0){
+    return NULL;
+  }
+  
+  map_memory_range_with_flags(k_ctx, addr, addr+bar_size-1, addr,PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE);
+
+  set_pml4_address((uint64_t *) k_ctx.pml4);
+
+  uint32_t new_bar_value = (addr & 0xFFFFFFF0);
   pci_config_write_dword(device.bus, device.slot, device.function, offset, new_bar_value);
 
-  num_of_used_PCI_bar_pages += bar_size/PAGE_SIZE;
+  num_of_used_PCI_bar_pages += (bar_size+PAGE_SIZE-1)/PAGE_SIZE;
   return (void*) addr;
 }

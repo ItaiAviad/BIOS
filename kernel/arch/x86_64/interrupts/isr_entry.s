@@ -140,6 +140,7 @@ ISR_NOERRCODE 31
 ; IRQs
 ISR_NOERRCODE 32
 ISR_NOERRCODE 33 ; Keyboard
+ISR_NOERRCODE 34
 
 _isr_start:
     jmp $

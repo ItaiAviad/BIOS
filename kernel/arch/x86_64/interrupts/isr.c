@@ -75,6 +75,7 @@ void init_isr_handlers() {
     // IRQs (PIC1 - 0x20-0x27, PIC2 - 0x28-0x2F)
     idt_gate_init(32, handle_32_isr);
     idt_gate_init(33, handle_33_isr);
+    idt_gate_init(34, handle_34_isr);
 
     update_idt();
 }
@@ -99,6 +100,10 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
             buffer_put(inb(PS2_KEYBOARD_PORT_DATA));
 
         pic_send_eoi(isr_num - PIC1_OFFSET); // Send ACK to PIC
+
+        if(isr_num == 34){
+            printf("Isr: %d", isr_num);
+        }
     }
 
     sti(); //ReEnable interrupts

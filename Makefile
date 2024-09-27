@@ -88,7 +88,8 @@ $(FLOPPY_BIN): kernel boot
 	$(DD) if=$(KERNEL_BIN) of=$@ bs=1 seek=$$(stat -c %s $(BOOT_BIN)) conv=notrunc,fsync
 	FILE_SIZE=$$(stat -c %s $@); \
 	PADDING=$$(( $(SECTOR_SIZE) - FILE_SIZE % $(SECTOR_SIZE) )); \
-	$(DD) if=/dev/zero of=$@ bs=1 seek=$$FILE_SIZE count=$$PADDING conv=notrunc,fsync
+	$(DD) if=/dev/zero of=$@ bs=1 seek=$$FILE_SIZE count=$$PADDING conv=notrunc,fsync; \
+	$(DD) if=/dev/zero of=$@ bs=$(SECTOR_SIZE) seek=$$(($$FILE_SIZE + $$PADDING)) count=2048 conv=notrunc,fsync
 
 # Bootloader
 boot: $(BOOT_BIN)
@@ -134,9 +135,9 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 run:
-	qemu-system-x86_64 -m 1G -device ich9-ahci,id=ahci -drive id=disk,file=$(FLOPPY_BIN),if=none,format=raw -device ide-hd,drive=disk,bus=ahci.0
+	qemu-system-x86_64 -m 512M -drive id=disk,file=$(FLOPPY_BIN),if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -boot menu=on
 run_debugger: 
-	qemu-system-x86_64 -drive format=raw,file=$(FLOPPY_BIN) -device ahci,id=ahci -d int -s -S 
+	qemu-system-x86_64 -m 512M -drive id=disk,file=$(FLOPPY_BIN),if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -boot menu=on -s -S
 
 run_debug_bochs:
 	sed 's#$$(FLOPPY_BIN)#$(FLOPPY_BIN)#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG) && sync

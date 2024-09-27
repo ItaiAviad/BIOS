@@ -78,5 +78,6 @@ extern void handle_31_isr();
 // IRQs
 extern void handle_32_isr();
 extern void handle_33_isr();
+extern void handle_34_isr();
 
 #endif // ISR_H

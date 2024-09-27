@@ -181,7 +181,7 @@ typedef volatile struct tagHBA_MEM
 	uint8_t  vendor[0x100-0xA0];
 
 	// 0x100 - 0x10FF, Port control registers
-	HBA_PORT	ports[1];	// 1 ~ 32
+	HBA_PORT	ports[32];	// 1 ~ 32
 } HBA_MEM;
 
 typedef volatile struct tagFIS_SET_DEVICE_BITS {
