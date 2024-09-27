@@ -173,14 +173,13 @@ void print_PCI_devices() {
 }
 
 void* assign_bar(PCIDevice device, uint8_t bar_num) {
-  uint16_t offset = PCI_OFFSET_BASE_ADDRESS_0 + sizeof(uint32_t) * bar_num;
-  uint32_t addr = PCI_BAR_START + PAGE_SIZE * num_of_used_PCI_bar_pages;
+  uint16_t config_space_offset = PCI_OFFSET_BASE_ADDRESS_0 + sizeof(uint32_t) * bar_num;
 
-  uint32_t orig_reg_val = pci_config_read_dword(device.bus, device.slot, device.function, offset);
-  pci_config_write_dword(device.bus, device.slot, device.function, offset, 0xFFFFFFFF);
+  uint32_t orig_reg_val = pci_config_read_dword(device.bus, device.slot, device.function, config_space_offset);
+  pci_config_write_dword(device.bus, device.slot, device.function, config_space_offset, 0xFFFFFFFF);
 
   uint32_t bar_size =
-      pci_config_read_dword(device.bus, device.slot, device.function, offset) & 0xFFFFFFF0;
+      pci_config_read_dword(device.bus, device.slot, device.function, config_space_offset) & 0xFFFFFFF0;
   bar_size = ~bar_size;
   bar_size += 1;
 
@@ -188,13 +187,13 @@ void* assign_bar(PCIDevice device, uint8_t bar_num) {
     return NULL;
   }
   
-  map_memory_range_with_flags(k_ctx, addr, addr+bar_size-1, addr,PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE);
+  map_memory_range_with_flags(k_ctx, orig_reg_val, orig_reg_val+bar_size-1, orig_reg_val,PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE);
 
   set_pml4_address((uint64_t *) k_ctx.pml4);
 
-  uint32_t new_bar_value = (addr & 0xFFFFFFF0);
-  pci_config_write_dword(device.bus, device.slot, device.function, offset, new_bar_value);
+  //uint32_t new_bar_value = (addr & 0xFFFFFFF0);
+  pci_config_write_dword(device.bus, device.slot, device.function, config_space_offset, orig_reg_val);
 
   num_of_used_PCI_bar_pages += (bar_size+PAGE_SIZE-1)/PAGE_SIZE;
-  return (void*) addr;
+  return (void*) orig_reg_val;
 }
