@@ -32,14 +32,14 @@ int kmain(void) {
     // Paging sturctures (PML4T, PDPT, PDT, PT)
     init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
 
-    printf("Mem size: %d\n", get_memory_size_from_smbios());
+    //printf("Mem size: %d\n", get_memory_size_from_smbios());
     
 
     // Kernel Heap - Manage Kernel Dynamic Memory
     printf("HEAP:\n");
     malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
 
-    // printf("heap: %x, dst: %x, dst2: %x\n", heap, dst, dst2);
+    // printf("heap: %d, dst: %d, dst2: %d\n", heap, dst, dst2);
     // char dst[30];
 
     // PIC - Programmable Interrupt Controller (IMPORTANT: Should be after PageFrameAllocator Init)

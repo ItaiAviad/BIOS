@@ -24,7 +24,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
     switch_context(k_ctx);
 
     #ifdef DEBUG
-    printf("%s PML4=%x, PML4[0]=%x, PML4[0][0]=%x, bitmap[PML4/PAGE_SIZE]=%x\n", DEBUG, PML4_KERNEL, ((uint64_t*) PML4_KERNEL)[0], allocator->bitmap[PML4_KERNEL/PAGE_SIZE]);
+    printf("%s PML4=%d, PML4[0]=%d, PML4[0][0]=%d, bitmap[PML4/PAGE_SIZE]=%d\n", DEBUG, PML4_KERNEL, ((uint64_t*) PML4_KERNEL)[0], allocator->bitmap[PML4_KERNEL/PAGE_SIZE]);
     #endif
 }
 
@@ -136,7 +136,7 @@ bool is_page_mapped(uint64_t* pml4, uint64_t virtual_address){
         return false;
     }
     #ifdef DEBUG
-    printf("%s pml4: %x pdpt: %x pd: %x pt: %x pd_index: %x pd[pd_index]: %x pt_index: %x pt[pt_index]: %x\n", DEBUG, pml4, pdpt, pd, pt, pd_index, pd[pd_index], pt_index, pt[pt_index]);
+    printf("%s pml4: %d pdpt: %d pd: %d pt: %d pd_index: %d pd[pd_index]: %d pt_index: %d pt[pt_index]: %d\n", DEBUG, pml4, pdpt, pd, pt, pd_index, pd[pd_index], pt_index, pt[pt_index]);
     #endif
 
     return true;

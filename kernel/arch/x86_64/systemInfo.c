@@ -47,7 +47,7 @@ void parse_srat(acpi_sdt_header *srat, uint64_t *total_memory) {
                 *total_memory += memory_affinity->length;
 
                 // Print memory region details (for debugging)
-                printf("Base Address: %x, Length: %x bytes\n",
+                printf("Base Address: %d, Length: %d bytes\n",
                     memory_affinity->base_address,
                     memory_affinity->length);
             }
@@ -70,7 +70,7 @@ void parse_xsdt(rsdp_descriptor_2 *rsdp, uint64_t *total_memory) {
 
     // Check if the XSDT signature is valid
     if (memcmp(xsdt->header.signature, "XSDT", 4) != 0) {
-        printf("Problem in XSDT parsing: expected 'XSDT', got %x\n");
+        printf("Problem in XSDT parsing: expected 'XSDT', got %d\n");
         return;
     }
 

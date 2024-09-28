@@ -1,4 +1,5 @@
 #include <arch/x86_64/isr.h>
+#include <stdint.h>
 
 // An array of strings in which exception_messages[i] specifies the i-th interrupt error code
 char *isr_exception_messages[] = {
@@ -84,7 +85,7 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
     cli();// Disable interrupts to prevent getting the same interrupt regenerated while handling one 
 
     if (isr_num <= 31) {
-        printf("ISR: %s (%d) called, rip: %d, cr2: %d, error_code: %d \n", isr_exception_messages[isr_num], isr_num, regs->rip, regs->cr2, error_code);
+        printf("ISR: %s (%d) called, rip: %d, cr2: %d, error_code: %d \n", isr_exception_messages[isr_num], isr_num, regs->rip, regs->cr2, (uint64_t)error_code);
         (regs->rip)++;
         if(isr_num == 0){
             return;

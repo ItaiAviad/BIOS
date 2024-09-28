@@ -74,7 +74,7 @@ void* malloc(size_t size) {
     ((malloc_chunk* )new_addr)->fd = new_mchunk.fd;
 
     #ifdef DEBUG
-    printf("%s MALLOC: data: %x, new_addr: %x, new_mchunk.fd: %x\n", DEBUG, new_mchunk.data, new_addr, new_mchunk.fd);
+    printf("%s MALLOC: data: %d, new_addr: %d, new_mchunk.fd: %d\n", DEBUG, new_mchunk.data, new_addr, new_mchunk.fd);
     #endif
 
     return new_mchunk.data;

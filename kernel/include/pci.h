@@ -39,6 +39,8 @@
 #define PCI_OFFSET_MIN_GRANT 0x3E
 #define PCI_OFFSET_MAX_LATENCY 0x3F
 
+
+extern uint64_t pci_alloc_size;
 extern linkedListNode *listPCIDevices;
 
 typedef struct PCIDevice {
@@ -57,6 +59,8 @@ typedef struct PCIDevice {
   uint8_t progIf;
 
 } PCIDevice;
+
+void* pci_allocate_mem(size_t size, size_t alignment);
 
 /**
  * @brief Read from a word at an offset from a pci device config.

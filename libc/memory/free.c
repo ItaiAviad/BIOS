@@ -30,7 +30,7 @@ void free(void* ptr) {
             // kfree(new_mchunk.mchunk_size);
 
             #ifdef DEBUG
-            printf("%s FREE: cur: %x, cur->data: %x\n", DEBUG, cur, cur->data);
+            printf("%s FREE: cur: %d, cur->data: %d\n", DEBUG, cur, cur->data);
             #endif
 
             // Clear data memory

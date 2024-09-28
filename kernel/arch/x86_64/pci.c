@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-size_t num_of_used_PCI_bar_pages;
-linkedListNode *listPCIDevices;
+linkedListNode *listPCIDevices = NULL;
+uint64_t pci_alloc_size = 0;
 
 uint16_t pci_config_read_word(uint8_t bus, uint8_t slot, uint8_t func,
                               uint8_t offset) {
@@ -140,7 +140,6 @@ void check_function(uint8_t bus, uint8_t slot, uint8_t function) {
 }
 
 void enumeratePCI() {
-  num_of_used_PCI_bar_pages = 0;
   listPCIDevices = (linkedListNode *)NULL;
   uint8_t function;
   uint8_t bus;
@@ -165,11 +164,18 @@ void print_PCI_devices() {
   printf("__PCI__\n");
   while (head != NULL) {
     PCIDevice *device = (PCIDevice *)head->data;
-    printf("%x:%x.%d %x %x %x %x, ", device->bus, device->slot, device->function,
+    printf("%d:%d.%d %d %d %d %d, ", device->bus, device->slot, device->function,
            device->vendorId, device->deviceId, device->classCode, device->subclass);
     head = (linkedListNode *)head->next;
   }
   printf("__PCI_END__\n");
+}
+
+void* pci_allocate_mem(size_t size, size_t alignment){
+  void* addr = (void*) aalign(PCI_MEM_START + pci_alloc_size, alignment);
+  pci_alloc_size = (uint64_t) addr + size - PCI_MEM_START + 1;
+  map_memory_range_with_flags(k_ctx, (uint64_t)addr, (uint64_t)addr + size - 1, (uint64_t)addr, PAGE_WRITE | PAGE_PRESENT | PAGE_UNCACHEABLE);
+  return addr;
 }
 
 void* assign_bar(PCIDevice device, uint8_t bar_num) {
@@ -191,9 +197,7 @@ void* assign_bar(PCIDevice device, uint8_t bar_num) {
 
   set_pml4_address((uint64_t *) k_ctx.pml4);
 
-  //uint32_t new_bar_value = (addr & 0xFFFFFFF0);
   pci_config_write_dword(device.bus, device.slot, device.function, config_space_offset, orig_reg_val);
 
-  num_of_used_PCI_bar_pages += (bar_size+PAGE_SIZE-1)/PAGE_SIZE;
   return (void*) orig_reg_val;
 }
