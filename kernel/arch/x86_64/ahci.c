@@ -22,19 +22,20 @@ void volatile initialize_ahci(HBA_MEM *abar, PCIDevice* device) {
 	printf("Ahci reset complete.\n");
 
 
-	// Enable AHCI by setting the AHCI Enable (AE) bit in the Global Host Control (GHC) register
 
 	abar->bohc |= 0b10;
 
 
 	while ((abar->bohc & 0b1) == 1) {
-		//printf("Ahci not ready, value: %d", abar->bohc);
+		printf("Ahci not ready, value: %d", abar->bohc);
     }
 
 	printf("Bios to os hand over done value:%d\n", abar->bohc);
 
 
-	abar->ghc |= (1 << 31);
+	// Enable AHCI by setting the AHCI Enable (AE) bit in the Global Host Control (GHC) register
+	// Enable Interrupts by setting the Interrupt Enable (IE) bit in the Global Host Control (GHC) register
+	abar->ghc |= (1 << 31) | 0b10;
 	while (!(abar->ghc & (1 << 31))) {
 		printf("Ahci not ready, value: %d", abar->ghc & (1 << 31));
     }
@@ -45,8 +46,6 @@ void volatile initialize_ahci(HBA_MEM *abar, PCIDevice* device) {
     printf("AHCI Capabilities: %d\n", abar->cap);
 
 	cmdslots = ((abar->cap >> 8) & 0x1F) + 1;
-
-    // Example: Check and initialize ports if needed
 }
 
 // This function is responsible for setting up all pci devices and registering them in a linked list.
@@ -108,10 +107,10 @@ void probe_port(HBA_MEM *abar)
 	{
 		if (pi & 1)
 		{
+			port_reset((HBA_PORT*)abar->ports+i);
 			int dt = check_type(&abar->ports[i]);
 			if (dt == AHCI_DEV_SATA)
 			{
-				port_reset((HBA_PORT*)abar->ports+i);
 				char buffer[512];
 				printf("SATA drive found at port %d\n", i);
 				port_rebase(abar->ports + i);
