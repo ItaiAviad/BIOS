@@ -22,7 +22,7 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, size_t memory_size
 }
 
 void map_reserved_paging_tables(Context ctx) {
-    volatile uint64_t start = aalign((uint64_t) ctx.pml4, PAGE_SIZE);
+    volatile uint64_t start = aalign_down((uint64_t) ctx.pml4, PAGE_SIZE);
     volatile uint64_t end = aalign((uint64_t) ctx.pml4 + PAGING_SECTION_SIZE, PAGE_SIZE);
     for (uint64_t addr = start; addr < end; addr += PAGE_SIZE) {
         map_page(ctx, addr, addr, PAGE_PRESENT | PAGE_WRITE); // Identity Mapping!
@@ -31,9 +31,9 @@ void map_reserved_paging_tables(Context ctx) {
 }
 
 void map_memory_range_with_flags(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr, uint64_t flags) {
-    volatile uint64_t start = aalign((uint64_t) start_addr, PAGE_SIZE);
+    volatile uint64_t start = aalign_down((uint64_t) start_addr, PAGE_SIZE);
     volatile uint64_t end = aalign((uint64_t) end_addr, PAGE_SIZE);
-    physical_addr = aalign((uint64_t) physical_addr, PAGE_SIZE);
+    physical_addr = aalign_down((uint64_t) physical_addr, PAGE_SIZE);
 
     for (uint64_t addr = start; addr < end; addr += PAGE_SIZE, physical_addr += PAGE_SIZE) {
         map_page(ctx, addr, physical_addr, flags);

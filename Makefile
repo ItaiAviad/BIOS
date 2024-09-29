@@ -135,7 +135,7 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 run:
-	qemu-system-x86_64 -m 512M -hda $(FLOPPY_BIN) -drive id=disk,file=disk.img,if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset -boot menu=on -D log.txt
+	qemu-system-x86_64 -m 512M -hda $(FLOPPY_BIN) -drive id=disk,file=disk.img,if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset -boot menu=on  -no-reboot -D log.txt
 run_debugger: 
 	qemu-system-x86_64 -m 512M -hda $(FLOPPY_BIN) -drive id=disk,file=disk.img,if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset -boot menu=on -s -S
 

@@ -37,14 +37,15 @@ int kmain(void) {
 
     // Kernel Heap - Manage Kernel Dynamic Memory
     printf("HEAP:\n");
-    malloc_state* heap = (malloc_state*) init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
+    init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
 
     // printf("heap: %d, dst: %d, dst2: %d\n", heap, dst, dst2);
     // char dst[30];
 
     // PIC - Programmable Interrupt Controller (IMPORTANT: Should be after PageFrameAllocator Init)
-    // PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
-    pic_init(PIC1_OFFSET, PIC2_OFFSET);
+    // PIC should be initialized at the end of Kernel's initializations to avoid race conditions!s
+
+    // pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
     enumeratePCI();
     print_PCI_devices();
