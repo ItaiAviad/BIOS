@@ -13,24 +13,23 @@ size_t cmdslots;
 void volatile initialize_ahci(HBA_MEM *abar, PCIDevice* device) {
 
 
-	abar->ghc |= 0b11;
-    // Wait for AHCI controller to become ready
-    while (abar->ghc & 0b1) {
-		printf("Ahci not ready, value: %d", abar->ghc);
-    }
-
-	printf("Ahci reset complete.\n");
-
-
-
-	abar->bohc |= 0b10;
-
-
 	while ((abar->bohc & 0b1) == 1) {
 		printf("Ahci not ready, value: %d", abar->bohc);
     }
 
 	printf("Bios to os hand over done value:%d\n", abar->bohc);
+
+	/*abar->ghc |= 0b11;
+    // Wait for AHCI controller to become ready
+    while (abar->ghc & 0b1) {
+		printf("Ahci not ready, value: %d", abar->ghc);
+    }
+
+	printf("Ahci reset complete.\n");*/
+
+
+
+	abar->bohc |= 0b10;
 
 
 	// Enable AHCI by setting the AHCI Enable (AE) bit in the Global Host Control (GHC) register
