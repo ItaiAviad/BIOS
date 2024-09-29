@@ -114,7 +114,6 @@ void probe_port(HBA_MEM *abar)
 				printf("SATA drive found at port %d\n", i);
 				port_rebase(abar->ports + i);
 				read_ahci(abar->ports + i, 0, 1, buffer);
-				//buffer[5] = 0;
 				printf(buffer);
 			}
 			else if (dt == AHCI_DEV_SATAPI)
