@@ -16,3 +16,8 @@ int min(int a, int b) {
 int max(int a, int b) {
     return a < b ? b : a;
 }
+
+int upper_divide(int numerator, int denominator) {
+    return (numerator + denominator - 1) / denominator;
+}
+
