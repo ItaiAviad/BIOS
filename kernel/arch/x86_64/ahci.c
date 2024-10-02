@@ -105,19 +105,16 @@ void probe_port(HBA_MEM *abar) {
                 printf("SATA drive found at port %d\n", i);
                 port_rebase(abar->ports + i);
 
-                ATA_IDENTIFY_DEVICE ata_id = {0};
-                get_identify_sata(abar->ports + i, &ata_id);
+                ATA_IDENTIFY_DEVICE* ata_id = hardware_allocate_mem(sizeof(ATA_IDENTIFY_DEVICE), 0);
+                get_identify_sata(abar->ports + i, ata_id);
 
                 disk *disk = hardware_allocate_mem(sizeof(disk), 0);
-                printf("size: %d", ata_id.total_user_addressable_sectors * SECTOR_SIZE);
 
                 disk->disk_id = (last_disk_id++);
-                disk->disk_size = ata_id.total_user_addressable_sectors * SECTOR_SIZE;
+                disk->disk_size = ata_id->total_user_addressable_sectors * SECTOR_SIZE;
                 disk->disk_type = AHCI_SATA;
                 disk->drive_data.ahci_drive_data.port = abar->ports + i;
                 disk->drive_data.ahci_drive_data.ahci_bar = abar;
-
-                printf("size: %d", disk->disk_size);
 
                 append_node(&list_drives, disk);
 
