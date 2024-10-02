@@ -18,7 +18,7 @@
 #include <arch/x86_64/pit.h>
 #include <arch/x86_64/systemInfo.h>
 #include <pci.h>
-#include <ahci.h>
+#include <disk.h>
 
 int kmain(void) {
     // TTY - Terminal
@@ -50,7 +50,8 @@ int kmain(void) {
     enumeratePCI();
     print_PCI_devices();
 
-    setup_ahci_controllers();
+    enumerateDisks();
+    print_disks();
     
     __asm__ volatile ("hlt");
 
