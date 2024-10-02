@@ -35,5 +35,6 @@ typedef struct disk {
 
 void enumerateDisks();
 void print_disks();
+disk* find_disk(uint64_t id);
 
 #endif
