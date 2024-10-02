@@ -52,6 +52,12 @@ int kmain(void) {
 
     enumerateDisks();
     print_disks();
+
+    char buffer[] = "Hi gal";
+
+    write(0, 0, sizeof(buffer), buffer);
+
+    printf(buffer);
     
     __asm__ volatile ("hlt");
 
