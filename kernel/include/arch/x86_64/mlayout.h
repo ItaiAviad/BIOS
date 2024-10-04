@@ -35,7 +35,7 @@
 #define PAGING_SECTION_SIZE PAGING_SECTION_SIZE_PAGES *PAGE_SIZE
 #define PML4_KERNEL_END (PML4_KERNEL + PAGING_SECTION_SIZE)
 
-#define KERNEL_END_EXTENDED PML4_KERNEL_END // Including all paging structures
+#define KERNEL_END_EXTENDED PML4_KERNEL_END // Kernel + Page Frame Allocator + Paging Tables
 
 // Heap
 // #define KERNEL_HEAP_START 0x200000

@@ -25,6 +25,10 @@
  */
 uint64_t aalign(uint64_t, uint64_t);
 uint64_t aalign_down(uint64_t addr, uint64_t alignment);
+
+#define PAGE_USER    0b100
+#define PAGE_MAP_FLAGS (PAGE_PRESENT | PAGE_WRITE | PAGE_USER)
+
 // ----------------------------------------------
 
 typedef struct {
@@ -102,7 +106,6 @@ void map_reserved_paging_tables(Context ctx);
  * @param start_address 
  * @param end_address 
  * @param physical_addr
- * @param allocator 
  */
 void map_memory_range(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr);
 
@@ -121,25 +124,33 @@ void set_pml4_address(uint64_t* pml4);
  * @brief Map physical address to virtual address (Page aligned)
  * 
  * @param Context 
- * @param allocator 
  * @param virtual_address 
  * @param physical_address 
  * @param flags 
  */
 void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, uint64_t flags);
+/**
+ * @brief Unmap a page
+ * 
+ * @param ctx 
+ * @param virtual_address 
+ */
+void unmap_page(Context ctx, uint64_t virtual_address);
 
 /**
  * @brief Check if a page is mapped
  * 
  * @param pml4 
  * @param virtual_address 
- * @return true 
- * @return false 
+ * @return int64_t* - -0x1 if not mapped, else pointer to PT
  */
-bool is_page_mapped(uint64_t* pml4, uint64_t virtual_address);
+int64_t* is_page_mapped(uint64_t* pml4, uint64_t virtual_address);
 // ----------------------------------------------
 
 // Kernel Heap
+uint64_t kheap_current;
+uint64_t kheap_end;
+uint64_t kheap_current_size_left;
 /**
  * @brief Allocate a chunk of physical memory (map new page(s) if nescessary) to virtual memory
  * 
@@ -147,6 +158,6 @@ bool is_page_mapped(uint64_t* pml4, uint64_t virtual_address);
  * @return void* - virtual memory address (base address for new allocation)
  */
 void *kmalloc(size_t size);
-
+void kfree(void* ptr);
 
 #endif

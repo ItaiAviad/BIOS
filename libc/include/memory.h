@@ -17,6 +17,9 @@
 extern "C" {
 #endif
 
+
+// ----------------------------------------------
+
 __attribute__((unused))
 void* heap_malloc_state_base;
 __attribute__((unused))
@@ -44,6 +47,7 @@ typedef struct __attribute__((__packed__)) malloc_state {
     malloc_chunk* unsorted_bin_head;
     char padding[MALLOC_STATE_PADDING_SIZE];
 } malloc_state;
+// ----------------------------------------------
 
 
 /**

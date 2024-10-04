@@ -102,4 +102,4 @@ number_heads dw 1
 sectors_per_track dw 16
 drive_number db 0
 
-msg_disk_read_failed: db 'Disk Read Failed!', ENDL, 0
+; msg_disk_read_failed: db 'Disk Read Failed!', ENDL, 0

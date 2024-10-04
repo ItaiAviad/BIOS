@@ -144,13 +144,17 @@ void enumeratePCI() {
     uint8_t bus;
 
     uint8_t headerType = getHeaderType(0, 0, 0);
+    printf("222\n");
     if ((headerType & 0x80) == 0) {
         // Single PCI host controller
         check_bus(0);
+    printf("222\n");
     } else {
         // Multiple PCI host controllers
+    printf("222\n");
         for (function = 0; function < 8; function++) {
             if (getVendorId(0, 0, function) != 0xFFFF)
+    printf("222\n");
                 break;
             bus = function;
             check_bus(bus);

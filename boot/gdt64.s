@@ -5,13 +5,84 @@
 ; GDT - https://wiki.osdev.org/Global_Descriptor_Table
 ; GDT Tutorial - https://wiki.osdev.org/GDT_Tutorial
 
-align 4
+align 16
+
+section .bss
+align 16
+tss:
+    resq 1               ; Reserved
+    resq 1               ; RSP0
+    resq 1               ; RSP1
+    resq 1               ; RSP2
+    resq 1               ; Reserved
+    resq 1               ; IST1
+    resq 1               ; IST2
+    resq 1               ; IST3
+    resq 1               ; IST4
+    resq 1               ; IST5
+    resq 1               ; IST6
+    resq 1               ; IST7
+    resq 1               ; Reserved
+    ; dw 0x0000            ; Reserved
+    resw 1               ; Reserved
+    ; dw 0x0000            ; IO Map Base Address
+    resw 1               ; IO Map Base Address
+
+; section .data
+; align 16
+; tss:
+;     dq 0x0               ; Reserved
+;     dq 0x0               ; RSP0
+;     dq 0x0               ; RSP1
+;     dq 0x0               ; RSP2
+;     dq 0x0               ; Reserved
+;     dq 0x0               ; IST1
+;     dq 0x0               ; IST2
+;     dq 0x0               ; IST3
+;     dq 0x0               ; IST4
+;     dq 0x0               ; IST5
+;     dq 0x0               ; IST6
+;     dq 0x0               ; IST7
+;     dq 0x0               ; Reserved
+;     ; dw 0x0000            ; Reserved
+;     dw 0x0               ; Reserved
+;     ; dw 0x0000            ; IO Map Base Address
+;     dw 0x0               ; IO Map B
+
+section .text
+rsp0_value: dd KERNEL_LOAD_ADDR
+[global tss_init]
+tss_init_rsp0:
+    mov eax, [rsp0_value]
+    mov [tss + 4], eax          ; Store RSP0 value in TSS (offset 4)
+    ret
+    ; mov word [tss + 4],  rsp0_value  ; Initialize RSP0
+    ; mov qword [tss + 12], rsp1_value  ; Initialize RSP1
+    ; mov qword [tss + 20], rsp2_value  ; Initialize RSP2
+    ; mov qword [tss + 40], ist1_value  ; Initialize IST1
+    ; mov qword [tss + 48], ist2_value  ; Initialize IST2
+
+section .text
+
+[global tss_init_gdt64]
+tss_init_gdt64:
+    ; Initialize GDT and other setup
+
+    ; Calculate base address parts
+    mov eax, tss                ; Load the address of `tss` into rax
+    mov [tss_base_low], ax      ; Store base (bits 0-15)
+    shr eax, 16                 ; Shift right by 16 bits to get the next part
+    mov [tss_base_mid], al      ; Store base (bits 16-23)
+    shr eax, 8                  ; Shift right by 8 bits to get the next part
+    mov [tss_base_high], al     ; Store base (bits 24-31)
+    mov [tss_base_upper], eax   ; Store base (bits 32-63)
+    ret
 
 gdt64_start:
     dd 0x0
     dd 0x0
 
-gdt64_code:
+gdt64_kcode:
     ; Base:                 0x00000
     ; Limit:                0xFFFFF
     ; 1st Flags:            0b1001
@@ -30,14 +101,14 @@ gdt64_code:
     ;   Reserved - AVL:     0
 
     dw 0xFFFF           ; Limit (bits 0-15)
-    dw 0x0000           ; Base  (bits 0-15)
-    db 0x00             ; Base  (bits 16-23)
-    db 0b10011010       ; 1st Flags, Type flags
-    db 0b10101111       ; 2nd Flags, Limit (bits 16-19)
-    db 0x00             ; Base  (bits 24-31)
+    dw 0x0000           ; Base  (bits 16-31)
+    db 0x00             ; Base  (bits 31-39)
+    db 0b10011010       ; 1st Flags, Type flags (40-47)
+    db 0b10101111       ; 2nd Flags, Limit (bits 48-55)
+    db 0x00             ; Base  (bits 56-63)
 
 
-gdt64_data:
+gdt64_kdata:
     ; Base:                 0x00000
     ; Limit:                0x00000
     ; 1st Flags:            0b1001
@@ -62,12 +133,80 @@ gdt64_data:
     db 0b10100000       ; 2nd Flags, Limit (bits 16-19)
     db 0x00             ; Base  (bits 24-31)
 
+
+gdt64_ucode:
+    ; Base:                 0x00000
+    ; Limit:                0xFFFFF
+    ; 1st Flags:            0b1001
+    ;   P - Present:        1
+    ;   DPL - Privelege:    11
+    ;   S - Descriptor:     1
+    ; Type Flags:           0b1010
+    ;   E - Code:           1
+    ;   DC - Conforming:    0
+    ;   RW - Readable:      1
+    ;   A - Accessed:       0
+    ; 2nd Flags:            0b1100
+    ;   G - Granularity:    1
+    ;   DB - 32bit Default: 0
+    ;   L - 64bit Segment:  1
+    ;   Reserved - AVL:     0
+
+    dw 0xFFFF           ; Limit (bits 0-15)
+    dw 0x0000           ; Base  (bits 0-15)
+    db 0x00             ; Base  (bits 16-23)
+    db 0b11111010       ; 1st Flags, Type flags
+    db 0b10101111       ; 2nd Flags, Limit (bits 16-19)
+    db 0x00             ; Base  (bits 24-31)
+
+
+gdt64_udata:
+    ; Base:                 0x00000
+    ; Limit:                0x00000
+    ; 1st Flags:            0b1001
+    ;   P - Present:        1
+    ;   DPL - Privelege:    11
+    ;   S - Descriptor:     1
+    ; Type Flags:           0b0010
+    ;   E - Code:           0
+    ;   DC - Expand Down:   0
+    ;   RW - Writeable:     1
+    ;   A - Accessed:       0
+    ; 2nd Flags:            0b1100
+    ;   G - Granularity:    1
+    ;   DB - 32bit Default: 0
+    ;   L - 64bit Segment:  1
+    ;   Reserved - AVL:     0
+
+    dw 0xFFFF           ; Limit (bits 0-15)
+    dw 0x0000           ; Base  (bits 0-15)
+    db 0x00             ; Base  (bits 16-23)
+    db 0b11110010       ; 1st Flags, Type flags
+    db 0b10101111       ; 2nd Flags, Limit (bits 16-19)
+    db 0x00             ; Base  (bits 24-31)
+
+tss_entry:
+    dw 0x0067                   ; Limit (104 bytes - 1)
+    dw tss             ; Base (bits 0-15)
+    db 0             ; Base (bits 16-23)
+    db 0b10001001               ; Type: 64-bit TSS (available), DPL=3, Present
+    db 0b00000000               ; Granularity, Limit (bits 16-19)
+    db 0            ; Base (bits 24-31)
+    dd 0           ; Base (bits 32-63) - Upper 32 bits
+    dw 0x0000                   ; Reserved, must be zero
+    dw 0x0000                   ; Reserved, must be zero
+
 gdt64_end:
 
 gdt64_descriptor:
     dw gdt64_end - gdt64_start - 1        ; Size of GDT, one byte less than true size
     dd gdt64_start                         ; Start of the 64 bit gdt
 
+KCODE_SEG64: equ gdt64_kcode - gdt64_start
+KDATA_SEG64: equ gdt64_kdata - gdt64_start
 
-CODE_SEG64: equ gdt64_code - gdt64_start
-DATA_SEG64: equ gdt64_data - gdt64_start
+tss_base_low: dw 0
+tss_base_mid: db 0
+tss_base_high: db 0
+tss_base_upper: dd 0
+

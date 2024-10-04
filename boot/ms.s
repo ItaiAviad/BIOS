@@ -55,24 +55,28 @@ elevate_lm:
     mov eax, cr0
     or eax, 1 << 31
     mov cr0, eax
+
+    ; Setup TSS addresses
+    call tss_init_rsp0
+    call tss_init_gdt64
     
     ; Load 64bit GDT
     lgdt [gdt64_descriptor]
 
     ; Far jump to Long Mode
-    jmp CODE_SEG64:init_lm
+    jmp KCODE_SEG64:init_lm
     
     [bits 64]
     init_lm:
-        
         cli ; Disable Interrupts
 
         ; Set up segment registers
-        mov ax, DATA_SEG64
+        mov ax, KDATA_SEG64
         mov ds, ax
         mov es, ax
         mov fs, ax
         mov gs, ax
         mov ss, ax
         
+        sti
         jmp lm

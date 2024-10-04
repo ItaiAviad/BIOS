@@ -54,7 +54,7 @@ rm:
     ; Read Kernel Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
     mov ax, (bootloader_end - _start) / SECTOR_SIZE ; LBA (sector address/offset)
-    mov cl, KERNEL_SIZE_IN_SECTORS ; # of sectors to read
+    mov cl, TOTAL_SIZE_IN_SECTORS ; # of sectors to read
     mov bx, (KERNEL_LOAD_ADDR) ; Destination address
     call disk_read
 
@@ -74,14 +74,15 @@ hlt:
   jmp $
 
 
-%include "print16.s"
+; %include "print16.s"
 %include "disk.s"
+%include "gdt32.s"
 
-msg_rm_sector: db PREFIX, 'RM Sector loaded!', ENDL, 0
-msg_pm_sector: db PREFIX, 'PM Sector loaded!', ENDL, 0
-msg_lm_sector: db PREFIX, 'LM Sector loaded!', ENDL, 0
-msg_kernel_sector: db PREFIX, 'Kernel Sector loaded!', ENDL, 0
-msg_init_ms: db PREFIX, 'Initializing Mode Switching...', ENDL, 0
+; msg_rm_sector: db PREFIX, 'RM Sector loaded!', ENDL, 0
+; msg_pm_sector: db PREFIX, 'PM Sector loaded!', ENDL, 0
+; msg_lm_sector: db PREFIX, 'LM Sector loaded!', ENDL, 0
+; msg_kernel_sector: db PREFIX, 'Kernel Sector loaded!', ENDL, 0
+; msg_init_ms: db PREFIX, 'Initializing Mode Switching...', ENDL, 0
 
 times 510-($-$$) db 0; Fill up space so that Magic Number will be at addresses: [511-512]
 dw 0xAA55; Magic number
@@ -92,6 +93,12 @@ dw 0xAA55; Magic number
 [bits 32]
 
 pm:
+    ; Move User code
+    mov edi, USER_LOAD_ADDR
+    mov esi, USER_SEEK_FROM_KERNEL_LOAD_ADDR
+    mov ecx, USER_SIZE
+    rep movsb
+
     ; call clear32
     ; mov esi, msg_pm_success ; 32bit Protected Mode success message
     ; call puts32
@@ -150,12 +157,11 @@ vga_extent:   equ 80 * 25 * 2 ; VGA Memory is 80 chars wide by 25 chars tall (on
 style_wb:     equ 0x0A
 style_blue:   equ 0x1F
 
-msg_pm_success: dw PREFIX, '32bit Protected Mode!', ENDL, 0
-msg_cpuid_not_supported: dw PREFIX, 'CPUID not supported!', ENDL, 0
-msg_lm_not_supported: dw PREFIX, 'LM not supported!', ENDL, 0
+; msg_pm_success: dw PREFIX, '32bit Protected Mode!', ENDL, 0
+; msg_cpuid_not_supported: dw PREFIX, 'CPUID not supported!', ENDL, 0
+; msg_lm_not_supported: dw PREFIX, 'LM not supported!', ENDL, 0
 
 ; %include "vga32.s"
-%include "gdt32.s"
 %include "A20.s"
 %include "ms.s"
 
@@ -167,22 +173,22 @@ pm_end:
 [bits 64]
 
 lm:
-    mov rdi, style_blue
+    ; mov rdi, style_blue
     ; mov rsi, msg_lm_success
     ; call puts64
     ; xchg bx, bx
     ; IMPORTANT: Use `jmp` and not `call` as `call` misaligns RSP
-    mov sp, KERNEL_LOAD_ADDR
+    mov sp, KERNEL_STACK_START_ADDR
     mov bp, sp
     jmp KERNEL_LOAD_ADDR
     jmp hlt
 
 ; Constants
-msg_lm_success: db PREFIX, "64bit Long Mode!", 0
+; msg_lm_success: db PREFIX, "64bit Long Mode!", 0
 
-%include "gdt64.s"
 %include "init_paging.s"
-%include "vga64.s"
+; %include "vga64.s"
+%include "gdt64.s"
 
 times (SECTOR_SIZE - (($-lm) % SECTOR_SIZE)) db 0x00
 lm_end:

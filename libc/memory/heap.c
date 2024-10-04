@@ -1,14 +1,15 @@
-#include "arch/x86_64/mmu.h"
+#include <arch/x86_64/mmu.h>
 #include <memory.h>
 #include <stdint.h>
 
-void *init_heap(uint64_t base_addr, uint64_t size) {
-    heap_malloc_state_base = (void *)aalign(base_addr, HEAP_CHUNK_MIN_SIZE_BYTES);
+void* init_heap(uint64_t base_addr, uint64_t size) {
+    heap_malloc_state_base = (void*) aalign(base_addr, HEAP_CHUNK_MIN_SIZE_BYTES);
 
     // Allocate malloc_state (heap:0x0)- Kernel Malloc
     // kmalloc(sizeof(malloc_state));
     // For easier handling of unwanted segmentation in Heap, allocate all heap memory
-    // kmalloc(size);
+    // kmalloc(size); // TODO: Add kmalloc syscall
+
     malloc_state heap;
     heap.heap_base = heap_malloc_state_base;
     heap.heap_total_size = aalign(size, HEAP_CHUNK_MIN_SIZE_BYTES);

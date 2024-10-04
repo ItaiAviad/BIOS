@@ -22,8 +22,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/gal/BIOS/kernel/arch/x86_64/interrupts",
-      "program": "/home/gal/BIOS/kernel/arch/x86_64/interrupts/build/Debug/outDebug",
+      "cwd": "/home/gal/BIOS/kernel",
+      "program": "/home/gal/BIOS/kernel/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

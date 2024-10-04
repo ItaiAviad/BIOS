@@ -2,9 +2,9 @@
 #include <memory.h>
 #include <string.h>
 
-void *malloc(size_t size) {
+void* malloc(size_t size) {
     // Get Heap
-    malloc_state *heap = (malloc_state *)heap_malloc_state_base;
+    malloc_state* heap = (malloc_state*) heap_malloc_state_base;
 
     malloc_chunk new_mchunk;
     size = aalign(size, 0x10); // Align to 16 bytes
@@ -14,7 +14,8 @@ void *malloc(size_t size) {
     // Find a suitable free chunk
     bool found_free = false;
     malloc_chunk *cur = heap->unsorted_bin_head;
-    while (cur != NULL) {
+    while (cur != NULL)
+    {
         if (cur->mchunk_size >= size + sizeof(malloc_chunk)) { // TODO: Split found chunk (if remainder > min_chunk_size)
             // Found a suitable free chunk
             found_free = true;
@@ -53,7 +54,6 @@ void *malloc(size_t size) {
     new_mchunk.fd = heap->mchunk;
     if (new_mchunk.fd != NULL)
         new_mchunk.fd->bk = new_addr;
-
     // Update Heap State (new chunk)
     heap->mchunk = new_addr;
 
@@ -69,6 +69,12 @@ void *malloc(size_t size) {
 
     // Clear data memory
     memset(new_mchunk.data, 0x0, (new_mchunk.mchunk_size - sizeof(malloc_chunk)));
+    
+    ((malloc_chunk* )new_addr)->fd = new_mchunk.fd;
+
+    #ifdef DEBUG
+    printf("%s MALLOC: data: %x, new_addr: %x, new_mchunk.fd: %x\n", DEBUG, new_mchunk.data, new_addr, new_mchunk.fd);
+    #endif
 
     ((malloc_chunk *)new_addr)->fd = new_mchunk.fd;
 
