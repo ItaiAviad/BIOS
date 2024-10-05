@@ -3,7 +3,7 @@
 #include <arch/x86_64/io.h>
 #include <disk.h>
 #include <math.h>
-#include <stdint.h>
+
 #include <stdlib.h>
 #include <string.h>
 

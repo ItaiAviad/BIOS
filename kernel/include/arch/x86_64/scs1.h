@@ -3,8 +3,9 @@
 #define SCS1_H
 
 #include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include <types.h>
+
+
 
 #define PS2_KEYBOARD_PORT_DATA 0x60
 #define PS2_KEYBOARD_PORT_STATUS_REG 0x64

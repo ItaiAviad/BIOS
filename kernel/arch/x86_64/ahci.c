@@ -5,7 +5,7 @@
 #include <ahci.h>
 #include <disk.h>
 #include <pci.h>
-#include <stdint.h>
+
 #include <stdio.h>
 #include <string.h>
 

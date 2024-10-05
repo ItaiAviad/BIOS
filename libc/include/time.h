@@ -3,8 +3,8 @@
 #define _TIME_H 1
 
 #include <sys/cdefs.h>
-#include <stddef.h>
-#include <stdint.h>
+
+
 #include <types.h>
 #include <arch/x86_64/io.h>
 

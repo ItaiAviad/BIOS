@@ -1,6 +1,6 @@
 #include <arch/x86_64/mmu.h>
 #include <memory.h>
-#include <stdint.h>
+
 
 void* init_heap(uint64_t base_addr, uint64_t size) {
     heap_malloc_state_base = (void*) aalign(base_addr, HEAP_CHUNK_MIN_SIZE_BYTES);

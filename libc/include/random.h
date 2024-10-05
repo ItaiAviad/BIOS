@@ -2,9 +2,11 @@
 #ifndef _RANDOM_H
 #define _RANDOM_H 1
 
+
+#include <types.h>
 #include <sys/cdefs.h>
-#include <stddef.h>
-#include <stdint.h>
+
+
 
 #ifdef __cplusplus
 extern "C" {

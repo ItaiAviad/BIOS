@@ -3,8 +3,8 @@
 #define _KERNEL_TTY_H
 
 #include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+
+
 #include <string.h>
 
 #define CURSOR_PORT_COMMAND 0x3D4

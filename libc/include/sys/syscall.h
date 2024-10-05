@@ -5,7 +5,7 @@
 #define SYSCALL_H
 
 #include <types.h>
-#include <stdint.h>
+
 
 #define MSR_EFER 0xC0000080
 #define MSR_STAR 0xC0000081

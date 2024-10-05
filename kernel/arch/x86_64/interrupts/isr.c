@@ -1,5 +1,5 @@
 #include <arch/x86_64/isr.h>
-#include <stdint.h>
+
 
 // An array of strings in which exception_messages[i] specifies the i-th interrupt error code
 char *isr_exception_messages[] = {

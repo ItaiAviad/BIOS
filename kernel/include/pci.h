@@ -4,7 +4,7 @@
 
 #include <arch/x86_64/io.h>
 #include <arch/x86_64/hardwareMem.h>
-#include <stdint.h>
+
 #include <types.h>
 
 #define PCI_CONFIG_ADDRESS 0xCF8

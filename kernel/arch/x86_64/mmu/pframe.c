@@ -1,6 +1,5 @@
 #include <memory.h>
 #include <arch/x86_64/mmu.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <arch/x86_64/mlayout.h>
 #include <string.h>

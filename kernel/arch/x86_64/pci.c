@@ -4,7 +4,7 @@
 #include <arch/x86_64/hardwareMem.h>
 #include <memory.h>
 #include <pci.h>
-#include <stdint.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 

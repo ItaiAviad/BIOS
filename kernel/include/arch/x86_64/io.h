@@ -3,8 +3,8 @@
 #define _KERNEL_IO_H
 
 #include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+
+
 #include <string.h>
 #include <arch/x86_64/pic.h>
 #include <arch/x86_64/scs1.h>

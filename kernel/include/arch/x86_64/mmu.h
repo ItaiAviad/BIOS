@@ -5,8 +5,8 @@
 #define MMU_H
 
 #include <types.h>
-#include <stdint.h>
-#include <stddef.h>
+
+
 #include <stdio.h>
 #include <string.h>
 #include <arch/x86_64/io.h>

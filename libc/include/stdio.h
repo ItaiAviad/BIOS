@@ -4,7 +4,7 @@
 
 #include <sys/cdefs.h>
 #include <stdbool.h>
-#include <stddef.h>
+#include <types.h>
 #include <stdarg.h>
 
 #define EOF (-1)

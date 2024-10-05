@@ -4,8 +4,8 @@
 
 #define MLAYOUT_H
 
-#include <stddef.h>
-#include <stdint.h>
+
+
 #include <stdio.h>
 #include <types.h>
 
@@ -31,7 +31,7 @@
 #define PML4_BOOT 0x1000 // PML4 kernel base address
 // Paging (Kernel)
 #define PML4_KERNEL 0x400000                   // PML4 kernel base address
-#define PAGING_SECTION_SIZE_PAGES 6 * MB_PAGES // 6MB = 0x600000
+#define PAGING_SECTION_SIZE_PAGES 10 * MB_PAGES // 6MB = 0x600000
 #define PAGING_SECTION_SIZE PAGING_SECTION_SIZE_PAGES *PAGE_SIZE
 #define PML4_KERNEL_END (PML4_KERNEL + PAGING_SECTION_SIZE)
 

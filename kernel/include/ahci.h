@@ -5,7 +5,7 @@
 #include <arch/x86_64/hardwareMem.h>
 #include <disk.h>
 #include <pci.h>
-#include <stdint.h>
+
 
 #define AHCI_CONFIG_BAR_NUM 5
 
