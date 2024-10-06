@@ -29,14 +29,30 @@ init_paging:
     ; Set table's pointers (and allocate 4MB of memory)
     mov edi, 0x1000
     mov dword[edi], 0x2007      ; Set PML4T[0] to address 0x2000 (PDPT), flags: 0x0003
-    mov edi, 0x2000             ; Go to PDPT[0]
+    
+    ; mov edi, 0x2000
+    ; mov cr3, edi ; Save PML4T start address in cr3
+    ; xor eax, eax
+    ; mov ecx, 4096
+    ; rep stosd
+    
+    mov edi, 0x2000
     mov dword[edi], 0x3007      ; Set PDPT[0] to address 0x3000 (PDT), flags: 0x0003
+
+    ; mov edi, 0x3000
+    ; mov cr3, edi ; Save PML4T start address in cr3
+    ; xor eax, eax
+    ; mov ecx, 4096
+    ; rep stosd
+
     mov edi, 0x3000             ; Go to PDT[0]
     mov dword[edi], 0x4007      ; Set PDT[0] to address 0x4000 (PT), flags: 0x0003
     mov edi, 0x3008
     mov dword[edi], 0x5007      ; Set PDT[1] to address 0x4000 (PT), flags: 0x0003
     mov edi, 0x3010
     mov dword[edi], 0x6007      ; Set PDT[2] to address 0x4000 (PT), flags: 0x0003
+    ; mov edi, 0x3018
+    ; mov dword[edi], 0x7007      ; Set PDT[2] to address 0x4000 (PT), flags: 0x0003
 
     mov edi, 0x4000             ; Go to PT[0] ; (0MB-2MB)
     mov ebx, 0x00000007         ; EBX has address 0x0000, flags: 0x0003
@@ -70,6 +86,22 @@ init_paging:
         add ebx, 0x1000         ; Increment address of ebx (a+1)
         add edi, 8              ; Increment page table location (8 bytes entries)
         loop .add_page_entry_protected3
+
+
+    ; mov edi, 0x7000             ; Go to PT[2] ; (4MB-6MB)
+    ; mov ebx, 0x00600007         ; EBX has address 0x0000, flags: 0x0003
+    ; mov ecx, 512                ; 512 times (512 entries in a table)
+
+    ; .add_page_entry_protected4:
+    ;     ; a = address, x = index of page table, flags are entry flags
+    ;     mov dword[edi], ebx     ; Write ebx to PT[x] = a.append(flags)
+    ;     add ebx, 0x1000         ; Increment address of ebx (a+1)
+    ;     add edi, 8              ; Increment page table location (8 bytes entries)
+    ;     loop .add_page_entry_protected4
+
+    
+
+    
 
     ; Enable PAE paging
     mov eax, cr4

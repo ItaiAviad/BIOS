@@ -32,7 +32,7 @@ rm:
     ; Read Protected Mode Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
     mov ax, (pm - _start) / SECTOR_SIZE ; LBA (sector address/offset)
-    mov cl, (pm_end - pm) / SECTOR_SIZE ; # of sectors to read
+    mov cl, ((pm_end - pm) + SECTOR_SIZE - 1) / SECTOR_SIZE ; # of sectors to read
     mov bx, pm ; Destination address
     call disk_read
     
@@ -43,7 +43,7 @@ rm:
     ; Read Long Mode Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
     mov ax, (lm - _start) / SECTOR_SIZE ; LBA (sector address/offset)
-    mov cl, (lm_end - lm) / SECTOR_SIZE ; # of sectors to read
+    mov cl, ((lm_end - lm) + SECTOR_SIZE - 1) / SECTOR_SIZE ; # of sectors to read
     mov bx, lm ; Destination address
     call disk_read
 
@@ -53,7 +53,7 @@ rm:
 
     ; Read Kernel Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
-    mov ax, (bootloader_end - _start) / SECTOR_SIZE ; LBA (sector address/offset)
+    mov ax, ((bootloader_end - _start) + SECTOR_SIZE - 1) / SECTOR_SIZE ; LBA (sector address/offset)
     mov cl, TOTAL_SIZE_IN_SECTORS ; # of sectors to read
     mov bx, (KERNEL_LOAD_ADDR) ; Destination address
     call disk_read
