@@ -16,19 +16,12 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, size_t memory_size
 
     // Initialize the allocator
     allocator->num_pages = (memory_size_pages);
-    allocator->bitmap = (uint8_t*) aalign(PAGE_FRAME_ALLOCATOR_START, PAGE_SIZE);
+    allocator->bitmap = (uint8_t*) (PAGE_FRAME_ALLOCATOR_START);
     memset(allocator->bitmap, (char)0, (uint64_t)allocator->num_pages); // Zero bitmap
-    allocator->bitmap[0] = 1; // Set the first page as in use for dealing with NULL values
-    sti();
-}
 
-void map_reserved_paging_tables(Context ctx) {
-    volatile uint64_t start = aalign_down((uint64_t) ctx.pml4, PAGE_SIZE);
-    volatile uint64_t end = aalign((uint64_t) ctx.pml4 + PAGING_SECTION_SIZE, PAGE_SIZE);
-    for (uint64_t addr = start; addr < end; addr += PAGE_SIZE) {
-        map_page(ctx, addr, addr, PAGE_MAP_FLAGS); // Identity Mapping!
-        (&ctx.allocator)->bitmap[addr/PAGE_SIZE] = 0;
-    }
+    memset(allocator->bitmap, (char)1, (PAGE_FRAME_ALLOCATOR_END + PAGE_SIZE) / PAGE_SIZE);
+
+    sti();
 }
 
 void map_memory_range_with_flags(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr, uint64_t flags) {
@@ -38,7 +31,7 @@ void map_memory_range_with_flags(Context ctx, uint64_t start_addr, uint64_t end_
 
     for (uint64_t addr = start; addr < end; addr += PAGE_SIZE, physical_addr += PAGE_SIZE) {
         map_page(ctx, addr, physical_addr, flags);
-        (&ctx.allocator)->bitmap[addr/PAGE_SIZE] = 1;
+        ctx.allocator->bitmap[addr/PAGE_SIZE] = 1;
     }
 }
 
@@ -47,25 +40,18 @@ void map_memory_range(Context ctx, uint64_t start_addr, uint64_t end_addr, uint6
 }
 
 void *allocate_page(Context ctx, bool is_p_struct) {
-    uint64_t i = 0;
     
     uint64_t pml4_start = (uint64_t)ctx.pml4 / PAGE_SIZE;
     uint64_t pml4_end = pml4_start + PAGING_SECTION_SIZE_PAGES;
 
-    for (i = 0; i < (&ctx.allocator)->num_pages; i++) {
-        // Reserve space paging structures
-        if (!is_p_struct && i < pml4_end) {
-            i++;
-            continue;
-        }
-        
-        if ((&ctx.allocator)->bitmap[i] != 1) { // If not all bits are set
-            (&ctx.allocator)->bitmap[i] = 1;      // Mark as used
+    for (uint64_t i = 0; i < (uint64_t)(ctx.allocator->num_pages); i++) {
+        if (!(ctx.allocator->bitmap[i])) { // If not all bits are set
+            ctx.allocator->bitmap[i] = 1;      // Mark as used
             #ifdef DEBUG
             printf("%s: Free page found: %x. Is p_struct: %d\n", DEBUG, i, is_p_struct);
             #endif
             return (void *)((i)*PAGE_SIZE);
-      }
+        }
     }
     return NULL; // Out of memory
 }

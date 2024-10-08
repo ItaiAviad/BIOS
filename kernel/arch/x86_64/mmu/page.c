@@ -1,4 +1,7 @@
+#include "arch/x86_64/mlayout.h"
+#include "math.h"
 #include <arch/x86_64/mmu.h>
+#include <string.h>
 
 void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages) {
     init_page_frame_allocator(allocator, memory_size_pages);
@@ -7,17 +10,15 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
         .start_addr = 0x0,
         .kernel_start_offset = 0x0,
         .memory_size_pages = memory_size_pages,
-        .allocator = *allocator,
+        .allocator = allocator,
         .old_pml4 = (uint64_t*) PML4_BOOT,
         .pml4 = (uint64_t*) PML4_BOOT
     };
-    // Map important pages on Bootloader's PML4 Section (Kernel and Page Frame Allocator)
-    map_memory_range(boot_ctx, 0x0, PAGE_FRAME_ALLOCATOR_END, 0x0);
 
     k_ctx.start_addr = 0x0;
     k_ctx.kernel_start_offset = 0x0;
     k_ctx.memory_size_pages = memory_size_pages;
-    k_ctx.allocator = *allocator;
+    k_ctx.allocator = allocator;
     k_ctx.old_pml4 = (uint64_t*) PML4_BOOT;
     k_ctx.pml4 = (uint64_t*) (k_ctx.start_addr + k_ctx.kernel_start_offset + PML4_KERNEL);
 
@@ -30,8 +31,6 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 
 void switch_context(Context ctx) {
     cli();
-    // Initialize (new) Page Frame Allocator
-    init_page_frame_allocator(&ctx.allocator, ctx.memory_size_pages);
 
     // Map New PML4
     // Map the Page of the NEW PML4T in the OLD PML4T
@@ -39,13 +38,11 @@ void switch_context(Context ctx) {
     // Map self (new) PML4 Page (PML4 Table Page) (IMPORTANT! Not doing so causes page fault on PML4 Table access (not good  ¯\_(ツ)_/¯))
     // map_page(ctx, (uint64_t)ctx.pml4, (uint64_t)ctx.pml4, PAGE_MAP_FLAGS);
     
-    // Map Reserved Paging Tables
-    map_reserved_paging_tables(ctx);
-    
     // Map Kernel (In new PML4)
     // Map Kernel + Page Frame Allocator + Pagign Tables in new Kernel Context
-    map_memory_range(ctx, ctx.start_addr + ctx.kernel_start_offset, ctx.start_addr + ctx.kernel_start_offset + PAGE_FRAME_ALLOCATOR_END, 0x0);
-    map_memory_range(ctx, 0x4000000, 0x4200000, 0x0);
+    memset(ctx.allocator->bitmap, 1, upper_divide(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
+
+    map_memory_range(ctx, ctx.start_addr + ctx.kernel_start_offset, ctx.start_addr + ctx.kernel_start_offset + PAGE_FRAME_ALLOCATOR_END - 1, ctx.start_addr + ctx.kernel_start_offset);
     
     // Switch PML4 to use the (new) s PML4
     set_pml4_address((uint64_t *) ctx.pml4);
@@ -74,7 +71,7 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
 
     uint64_t *pdpt = NULL, *pd = NULL, *pt = NULL;
 
-    (&ctx.allocator)->bitmap[(uint64_t)ctx.pml4/PAGE_SIZE] = 1; // Map page managment structure as in use
+    ctx.allocator->bitmap[(uint64_t)ctx.pml4/PAGE_SIZE] = 1; // Map page managment structure as in use
 
     // Ensure PDPT, PD, and PT entries exist (allocate and zero if necessary)
     if (!(ctx.pml4[pml4_index] & PAGE_PRESENT)) { // Check if PDPT entry exists (in PML4T)
@@ -84,8 +81,8 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
         // Map new self
         map_page(ctx, (uint64_t)ctx.pml4[pml4_index], (uint64_t)ctx.pml4[pml4_index], PAGE_MAP_FLAGS);
     } else {
-        pdpt = (uint64_t*) (ctx.pml4[0] & ~0xFFF);
-        (&ctx.allocator)->bitmap[(uint64_t)pdpt/PAGE_SIZE] = 1;
+        pdpt = (uint64_t*) (ctx.pml4[pml4_index] & ~0xFFF);
+        ctx.allocator->bitmap[(uint64_t)pdpt/PAGE_SIZE] = 1;
     }
     if (!(pdpt[pdpt_index] & PAGE_PRESENT)) { // Check if PDT entry exists (in PDPT)
         pd = allocate_and_zero_page(ctx, true);
@@ -95,7 +92,7 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
         map_page(ctx, (uint64_t)pdpt[pdpt_index], (uint64_t)pdpt[pdpt_index], PAGE_MAP_FLAGS);
     } else {
         pd = (uint64_t*) (pdpt[pdpt_index] & ~0xFFF);
-        (&ctx.allocator)->bitmap[(uint64_t)pd/PAGE_SIZE] = 1;
+        ctx.allocator->bitmap[(uint64_t)pd/PAGE_SIZE] = 1;
     }
     if (!(pd[pd_index] & PAGE_PRESENT)) { // Check if PT entry exists (in PDT)
         pt = allocate_and_zero_page(ctx, true);
@@ -106,7 +103,7 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
         memset(pt, 0, PAGE_SIZE);
     } else {
         pt = (uint64_t*) (pd[pd_index] & ~0xFFF);
-        (&ctx.allocator)->bitmap[(uint64_t)pt/PAGE_SIZE] = 1;
+        ctx.allocator->bitmap[(uint64_t)pt/PAGE_SIZE] = 1;
     }
 
     // Map the physical address to the virtual address in the page table

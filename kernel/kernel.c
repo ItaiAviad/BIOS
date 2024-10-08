@@ -3,12 +3,10 @@
 // libc
 #include <memory.h>
 #include <random.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <unistd.h>
 // arch/x86_64
 #include <arch/x86_64/gdt.h>
 #include <arch/x86_64/io.h>
