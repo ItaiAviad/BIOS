@@ -185,7 +185,7 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
         invlpg(pt_recursive);
         memset(pt_recursive, 0, PAGE_SIZE);
     } else {
-        pt = (uint64_t*) (pd[pd_index] & ~0xFFF);
+        pt = (uint64_t*) (pd_recursive[pd_index] & ~0xFFF);
     }
     invlpg(pt_recursive);
 
