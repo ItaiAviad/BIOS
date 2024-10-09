@@ -1,5 +1,5 @@
-#include "arch/x86_64/mlayout.h"
-#include "math.h"
+#include <arch/x86_64/mlayout.h>
+#include <math.h>
 #include <arch/x86_64/mmu.h>
 #include <string.h>
 
@@ -27,6 +27,22 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
     #ifdef DEBUG
     printf("%s PML4=%d, PML4[0]=%d, PML4[0][0]=%d, bitmap[PML4/PAGE_SIZE]=%d\n", DEBUG, PML4_KERNEL, ((uint64_t*) PML4_KERNEL)[0], allocator->bitmap[PML4_KERNEL/PAGE_SIZE]);
     #endif
+}
+
+
+uint64_t get_addr_from_table_indexes(uint16_t pml4_index, uint16_t pdpt_index, uint16_t pd_index, uint16_t pt_index){
+    return (pml4_index << 39 | pdpt_index << 30 | pd_index << 21 | pt_index << 12) & 0xFFFFFFFFFFFFF000 ;
+}
+
+/**
+* @brief Initialize the PML4 recursive mapping technique.
+*        Maps the recursive entry in the PML4 to the PML4 itself.
+* @param ctx The current paging context that contains the PML4.
+*
+* Note: Ensure the PML4 is already mapped before calling this function (And should be identity mapped).
+*/
+void init_recursive_paging(Context ctx){
+    ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)ctx.pml4 | PAGE_MAP_FLAGS;
 }
 
 void switch_context(Context ctx) {
@@ -69,45 +85,49 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
     uint64_t pd_index = (virtual_address >> 21) & 0x1FF;
     uint64_t pt_index = (virtual_address >> 12) & 0x1FF;
 
+    uint64_t* pml4_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM);
     uint64_t *pdpt = NULL, *pd = NULL, *pt = NULL;
 
-    ctx.allocator->bitmap[(uint64_t)ctx.pml4/PAGE_SIZE] = 1; // Map page managment structure as in use
-
     // Ensure PDPT, PD, and PT entries exist (allocate and zero if necessary)
-    if (!(ctx.pml4[pml4_index] & PAGE_PRESENT)) { // Check if PDPT entry exists (in PML4T)
-        pdpt = allocate_and_zero_page(ctx, true);
-        ctx.pml4[pml4_index] = ((uint64_t) pdpt) | PAGE_MAP_FLAGS;
-        
-        // Map new self
-        map_page(ctx, (uint64_t)ctx.pml4[pml4_index], (uint64_t)ctx.pml4[pml4_index], PAGE_MAP_FLAGS);
+    uint64_t* pdpt_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, pml4_index);
+    if (!(pml4_recursive[pml4_index] & PAGE_PRESENT)) { // Check if PDPT entry exists (in PML4T)
+        pdpt = allocate_page(ctx, true);
+        if(pdpt == NULL){
+            printf("Error, couldn't get pdpt from allocator\n");
+            return;
+        }
+        pml4_recursive[pml4_index] = (uint64_t)pdpt | (uint64_t)PAGE_MAP_FLAGS;
+        memset(pdpt_recursive, 0, PAGE_SIZE);
     } else {
-        pdpt = (uint64_t*) (ctx.pml4[pml4_index] & ~0xFFF);
-        ctx.allocator->bitmap[(uint64_t)pdpt/PAGE_SIZE] = 1;
+        pdpt = (uint64_t*) (pml4_recursive[pml4_index] & ~0xFFF);
     }
-    if (!(pdpt[pdpt_index] & PAGE_PRESENT)) { // Check if PDT entry exists (in PDPT)
-        pd = allocate_and_zero_page(ctx, true);
-        pdpt[pdpt_index] = ((uint64_t) pd) | PAGE_MAP_FLAGS;
-        
-        // Map new self
-        map_page(ctx, (uint64_t)pdpt[pdpt_index], (uint64_t)pdpt[pdpt_index], PAGE_MAP_FLAGS);
+    uint64_t* pd_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, pml4_index, pdpt_index);
+    if (!(pdpt_recursive[pdpt_index] & PAGE_PRESENT)) { // Check if PDT entry exists (in PDPT)
+        pd = allocate_page(ctx, true);
+        if(pd == NULL){
+            printf("Error, couldn't get pd from allocator\n");
+            return;
+        }
+        pdpt_recursive[pdpt_index] = (uint64_t)pd | (uint64_t)PAGE_MAP_FLAGS;
+        memset(pd_recursive, 0, PAGE_SIZE);
     } else {
-        pd = (uint64_t*) (pdpt[pdpt_index] & ~0xFFF);
-        ctx.allocator->bitmap[(uint64_t)pd/PAGE_SIZE] = 1;
+        pd = (uint64_t*) (pdpt_recursive[pdpt_index] & ~0xFFF);
     }
-    if (!(pd[pd_index] & PAGE_PRESENT)) { // Check if PT entry exists (in PDT)
-        pt = allocate_and_zero_page(ctx, true);
-        pd[pd_index] = ((uint64_t) pt) | PAGE_MAP_FLAGS;
-
-        // Map new self
-        map_page(ctx, (uint64_t)pdpt[pdpt_index], (uint64_t)pdpt[pdpt_index], PAGE_MAP_FLAGS);
-        memset(pt, 0, PAGE_SIZE);
+    uint64_t* pt_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, pml4_index, pdpt_index, pd_index);
+    if (!(pd_recursive[pd_index] & PAGE_PRESENT)) { // Check if PT entry exists (in PDT)
+        pt = allocate_page(ctx, true);
+        if(pt == NULL){
+            printf("Error, couldn't get pd from allocator\n");
+            return;
+        }
+        pd_recursive[pd_index] = (uint64_t)pt | (uint64_t)PAGE_MAP_FLAGS;
+        memset(pt_recursive, 0, PAGE_SIZE);
     } else {
         pt = (uint64_t*) (pd[pd_index] & ~0xFFF);
-        ctx.allocator->bitmap[(uint64_t)pt/PAGE_SIZE] = 1;
     }
 
     // Map the physical address to the virtual address in the page table
-    pt[pt_index] = physical_address | flags;
+    pt_recursive[pt_index] = physical_address | flags;
 }
 
 void unmap_page(Context ctx, uint64_t virtual_address) {

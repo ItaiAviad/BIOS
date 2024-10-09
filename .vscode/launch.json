@@ -22,8 +22,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/gal/BIOS/kernel",
-      "program": "/home/gal/BIOS/kernel/build/Debug/outDebug",
+      "cwd": "/home/gal/BIOS/kernel/arch/x86_64/mmu",
+      "program": "/home/gal/BIOS/kernel/arch/x86_64/mmu/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [

@@ -12,6 +12,8 @@
 #include <arch/x86_64/io.h>
 #include <arch/x86_64/mlayout.h>
 
+#define PML4_RECURSIVE_ENTRY_NUM 511
+
 #define PAGE_PRESENT 0b1
 #define PAGE_WRITE   0b10
 #define PAGE_UNCACHEABLE 0b1000
@@ -79,6 +81,18 @@ void deallocate_page(PageFrameAllocator* allocator, void* page);
 // ----------------------------------------------
 
 // Paging
+
+/**
+* @brief Initialize the PML4 recursive mapping technique.
+*        Maps the recursive entry in the PML4 to the PML4 itself.
+* @param ctx The current paging context that contains the PML4.
+*
+* Note: Ensure the PML4 is already mapped before calling this function (And should be identity mapped).
+*/
+void init_recursive_paging(Context ctx);
+
+uint64_t get_addr_from_table_indexes(uint16_t pml4_index, uint16_t pdpt_index, uint16_t pd_index, uint16_t pt_index);
+
 /**
  * @brief Initialize Kernel Paging
  * 

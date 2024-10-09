@@ -40,10 +40,6 @@ void map_memory_range(Context ctx, uint64_t start_addr, uint64_t end_addr, uint6
 }
 
 void *allocate_page(Context ctx, bool is_p_struct) {
-    
-    uint64_t pml4_start = (uint64_t)ctx.pml4 / PAGE_SIZE;
-    uint64_t pml4_end = pml4_start + PAGING_SECTION_SIZE_PAGES;
-
     for (uint64_t i = 0; i < (uint64_t)(ctx.allocator->num_pages); i++) {
         if (!(ctx.allocator->bitmap[i])) { // If not all bits are set
             ctx.allocator->bitmap[i] = 1;      // Mark as used
