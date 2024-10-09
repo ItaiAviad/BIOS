@@ -22,6 +22,8 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
     k_ctx.old_pml4 = (uint64_t*) PML4_BOOT;
     k_ctx.pml4 = (uint64_t*) (k_ctx.start_addr + k_ctx.kernel_start_offset + PML4_KERNEL);
 
+    boot_ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] =  PML4_KERNEL;
+
     switch_context(k_ctx);
 
     #ifdef DEBUG
