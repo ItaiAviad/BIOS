@@ -22,7 +22,15 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
     k_ctx.old_pml4 = (uint64_t*) PML4_BOOT;
     k_ctx.pml4 = (uint64_t*) (k_ctx.start_addr + k_ctx.kernel_start_offset + PML4_KERNEL);
 
-    boot_ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] =  PML4_KERNEL;
+    memset(k_ctx.pml4, 0, PAGE_SIZE);
+
+    boot_ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] =  (uint64_t)PML4_KERNEL | (uint64_t)PAGE_MAP_FLAGS;
+
+    init_recursive_paging(k_ctx);
+
+    flush_tlb();
+
+    invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
 
     switch_context(k_ctx);
 
@@ -32,8 +40,24 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 }
 
 
-uint64_t get_addr_from_table_indexes(uint16_t pml4_index, uint16_t pdpt_index, uint16_t pd_index, uint16_t pt_index){
-    return (pml4_index << 39 | pdpt_index << 30 | pd_index << 21 | pt_index << 12) & 0xFFFFFFFFFFFFF000 ;
+uint64_t get_addr_from_table_indexes(uint16_t pml4_index, uint16_t pdpt_index, uint16_t pd_index, uint16_t pt_index) {
+
+    // Each index contributes 9 bits to the virtual address
+    uint64_t virtual_address = 0;
+
+    // Shift and add each index
+    virtual_address |= ((uint64_t)(pml4_index & 0b111111111) << 39); // PML4 index (bits 39-47)
+    virtual_address |= ((uint64_t)(pdpt_index & 0b111111111) << 30); // PDPT index (bits 30-38)
+    virtual_address |= ((uint64_t)(pd_index & 0b111111111) << 21);   // PD index (bits 21-29)
+    virtual_address |= ((uint64_t)(pt_index & 0b111111111) << 12);   // PT index (bits 12-20)
+
+    // Now sign-extend the 48th bit to ensure canonical addressing
+    if (virtual_address & (1ULL << 47)) {
+        // Sign extend by setting all bits from 48-63 if bit 47 is 1 (kernel space)
+        virtual_address |= 0xFFFF000000000000;
+    }
+
+    return virtual_address; // Return the final 64-bit virtual address
 }
 
 /**
@@ -80,6 +104,31 @@ void set_pml4_address(uint64_t* pml4){
     );
 }
 
+void invlpg(void* addr) {
+    __asm__ volatile (
+        "invlpg [%0]" 
+    ::"r"(addr) : "memory", "rax");
+}
+
+void flush_tlb() {
+    set_pml4_address(get_pml4_address());
+}
+
+uint64_t* get_pml4_address() {
+    uint64_t pml4_address;
+
+    // Use inline assembly to read CR3
+    asm volatile (
+        "mov %0, %%cr3"  // Move the value of CR3 into pml4_address
+        : "=r" (pml4_address)  // Output operand
+        :
+        :
+    );
+
+    return (uint64_t*) pml4_address;  // Return the address as a pointer
+}
+
+
 void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, uint64_t flags) {
     // Calculate indices
     uint64_t pml4_index = (virtual_address >> 39) & 0x1FF;
@@ -88,6 +137,9 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
     uint64_t pt_index = (virtual_address >> 12) & 0x1FF;
 
     uint64_t* pml4_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM);
+    flush_tlb();
+    invlpg(pml4_recursive);
+    invlpg(pml4_recursive+pml4_index);
     uint64_t *pdpt = NULL, *pd = NULL, *pt = NULL;
 
     // Ensure PDPT, PD, and PT entries exist (allocate and zero if necessary)
@@ -99,10 +151,13 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
             return;
         }
         pml4_recursive[pml4_index] = (uint64_t)pdpt | (uint64_t)PAGE_MAP_FLAGS;
+        flush_tlb();
+        invlpg(pdpt_recursive);
         memset(pdpt_recursive, 0, PAGE_SIZE);
     } else {
         pdpt = (uint64_t*) (pml4_recursive[pml4_index] & ~0xFFF);
     }
+    invlpg(pdpt_recursive);
     uint64_t* pd_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, pml4_index, pdpt_index);
     if (!(pdpt_recursive[pdpt_index] & PAGE_PRESENT)) { // Check if PDT entry exists (in PDPT)
         pd = allocate_page(ctx, true);
@@ -111,10 +166,13 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
             return;
         }
         pdpt_recursive[pdpt_index] = (uint64_t)pd | (uint64_t)PAGE_MAP_FLAGS;
+        flush_tlb();
+        invlpg(pd_recursive);
         memset(pd_recursive, 0, PAGE_SIZE);
     } else {
         pd = (uint64_t*) (pdpt_recursive[pdpt_index] & ~0xFFF);
     }
+    invlpg(pd_recursive);
     uint64_t* pt_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, pml4_index, pdpt_index, pd_index);
     if (!(pd_recursive[pd_index] & PAGE_PRESENT)) { // Check if PT entry exists (in PDT)
         pt = allocate_page(ctx, true);
@@ -123,10 +181,13 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
             return;
         }
         pd_recursive[pd_index] = (uint64_t)pt | (uint64_t)PAGE_MAP_FLAGS;
+        flush_tlb();
+        invlpg(pt_recursive);
         memset(pt_recursive, 0, PAGE_SIZE);
     } else {
         pt = (uint64_t*) (pd[pd_index] & ~0xFFF);
     }
+    invlpg(pt_recursive);
 
     // Map the physical address to the virtual address in the page table
     pt_recursive[pt_index] = physical_address | flags;

@@ -20,7 +20,7 @@
 
 // Kernel (Virtual) Memory
 // #define KERNEL_LOAD_ADDRESS ... ==> Defined in Makefile!
-#define KERNEL_END (20 * MB) // 2MB
+#define KERNEL_END (2 * MB) // 2MB
 
 // Kernel Page Frame Allocator
 #define PAGE_FRAME_ALLOCATOR_START KERNEL_END
@@ -30,9 +30,9 @@
 // Paging (Boot)
 #define PML4_BOOT 0x1000 // PML4 kernel base address
 // Paging (Kernel)
-#define PML4_KERNEL 0x400000                   // PML4 kernel base address
+#define PML4_KERNEL 0x400000                  // PML4 kernel base address
 #define PAGING_SECTION_SIZE_PAGES 20 * MB_PAGES // 6MB = 0x600000
-#define PAGING_SECTION_SIZE PAGING_SECTION_SIZE_PAGES *PAGE_SIZE
+#define PAGING_SECTION_SIZE PAGING_SECTION_SIZE_PAGES * PAGE_SIZE
 #define PML4_KERNEL_END (PML4_KERNEL + PAGING_SECTION_SIZE)
 
 #define KERNEL_END_EXTENDED PML4_KERNEL_END // Kernel + Page Frame Allocator + Paging Tables

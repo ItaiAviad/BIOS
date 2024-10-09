@@ -29,7 +29,7 @@ uint64_t aalign(uint64_t, uint64_t);
 uint64_t aalign_down(uint64_t addr, uint64_t alignment);
 
 #define PAGE_USER    0b100
-#define PAGE_MAP_FLAGS (PAGE_PRESENT | PAGE_WRITE | PAGE_USER)
+#define PAGE_MAP_FLAGS (PAGE_PRESENT | PAGE_WRITE)
 
 // ----------------------------------------------
 
@@ -133,6 +133,12 @@ void map_memory_range_with_flags(Context ctx, uint64_t start_addr, uint64_t end_
  * @param pml4 
  */
 void set_pml4_address(uint64_t* pml4);
+
+uint64_t* get_pml4_address();
+
+void invlpg(void* addr);
+
+void flush_tlb();
 
 /**
  * @brief Map physical address to virtual address (Page aligned)

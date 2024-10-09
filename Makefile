@@ -196,7 +196,7 @@ always:
 run:
 	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) -drive id=disk,file=disk.img,if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset  -no-reboot -D log.txt
 run_debugger: 
-	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) -drive id=disk,file=disk.img,if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset  -no-reboot -D log_debug.txt -s -S
+	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) -drive id=disk,file=disk.img,if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset  -no-reboot -s -S
 
 run_debug_bochs:
 	sed 's#$$(FLOPPY_BIN)#$(FLOPPY_BIN)#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG) && sync
