@@ -42,6 +42,8 @@ int kmain(void) {
     kernel_allocator.initialized = 0;
     init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
 
+    // flush_tss();
+
     //printf("Mem size: %d\n", get_memory_size_from_smbios());
     
 

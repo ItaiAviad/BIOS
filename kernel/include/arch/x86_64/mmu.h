@@ -124,7 +124,7 @@ void map_reserved_paging_tables(Context ctx);
 void map_memory_range(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr);
 
 
-void map_memory_range_with_flags(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr, uint64_t flags);
+void map_memory_range_with_flags(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr, uint64_t flags, int set_in_allocator);
 
 /**
  * @brief Set the PML4 Address in the CR3 reg object (Paging Register)

@@ -189,11 +189,11 @@ void *assign_bar(PCIDevice device, uint8_t bar_num) {
         return NULL;
     }
 
-    map_memory_range_with_flags(k_ctx, orig_reg_val, orig_reg_val + bar_size - 1, orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE);
-
-    set_pml4_address((uint64_t *)k_ctx.pml4);
+    map_memory_range_with_flags(k_ctx, orig_reg_val, orig_reg_val + bar_size - 1, orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE, 0);
 
     pci_config_write_dword(device.bus, device.slot, device.function, config_space_offset, orig_reg_val);
 
+    flush_tlb();
+    
     return (void *)orig_reg_val;
 }

@@ -48,14 +48,14 @@ void read(uint64_t disk_id, uint64_t offset, size_t size, uint8_t* buffer) {
             uint8_t* buffer_temp = malloc(size_sectors*SECTOR_SIZE);
 
             // Its kinda a work around but should be ok.
-            map_memory_range_with_flags(k_ctx, (uint64_t)buffer_temp, (uint64_t)buffer_temp + size_sectors*SECTOR_SIZE - 1, (uint64_t)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_UNCACHEABLE);
-            set_pml4_address(k_ctx.pml4);
+            map_memory_range_with_flags(k_ctx, (uint64_t)buffer_temp, (uint64_t)buffer_temp + size_sectors*SECTOR_SIZE - 1, (uint64_t)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_UNCACHEABLE, 1);
+            flush_tlb();
             
             read_ahci(disk->drive_data.ahci_drive_data.port, offset_sectors, size_sectors, buffer_temp);
             
 
-            map_memory_range_with_flags(k_ctx, (uint64_t)buffer_temp, (uint64_t)buffer_temp + size_sectors*SECTOR_SIZE - 1, (uint64_t)buffer_temp, PAGE_WRITE | PAGE_PRESENT);
-            set_pml4_address(k_ctx.pml4);
+            map_memory_range_with_flags(k_ctx, (uint64_t)buffer_temp, (uint64_t)buffer_temp + size_sectors*SECTOR_SIZE - 1, (uint64_t)buffer_temp, PAGE_WRITE | PAGE_PRESENT, 1);
+            flush_tlb();
 
             memcpy(buffer, buffer_temp + (offset_sectors * SECTOR_SIZE - offset), size);
 
@@ -77,15 +77,15 @@ void write(uint64_t disk_id, uint64_t offset, size_t size, uint8_t* buffer) {
             uint8_t* buffer_temp = malloc(size_sectors*SECTOR_SIZE);
 
             // Its kinda a work around but should be ok.
-            map_memory_range_with_flags(k_ctx, (uint64_t)buffer_temp, (uint64_t)buffer_temp + size_sectors*SECTOR_SIZE - 1, (uint64_t)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_UNCACHEABLE);
-            set_pml4_address(k_ctx.pml4);
+            map_memory_range_with_flags(k_ctx, (uint64_t)buffer_temp, (uint64_t)buffer_temp + size_sectors*SECTOR_SIZE - 1, (uint64_t)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_UNCACHEABLE, 1);
+            flush_tlb();
 
             read_ahci(disk->drive_data.ahci_drive_data.port, offset_sectors, size_sectors, buffer_temp);
             memcpy(buffer_temp + (offset_sectors * 512 - offset), buffer, size);
             write_ahci(disk->drive_data.ahci_drive_data.port, offset_sectors, size_sectors, buffer_temp);
 
-            map_memory_range_with_flags(k_ctx, (uint64_t)buffer_temp, (uint64_t)buffer_temp + size_sectors*SECTOR_SIZE - 1, (uint64_t)buffer_temp, PAGE_WRITE | PAGE_PRESENT);
-            set_pml4_address(k_ctx.pml4);
+            map_memory_range_with_flags(k_ctx, (uint64_t)buffer_temp, (uint64_t)buffer_temp + size_sectors*SECTOR_SIZE - 1, (uint64_t)buffer_temp, PAGE_WRITE | PAGE_PRESENT, 1);
+            flush_tlb();
 
             free(buffer_temp);
 

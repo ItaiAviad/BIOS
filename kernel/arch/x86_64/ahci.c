@@ -22,7 +22,7 @@ void volatile initialize_ahci(HBA_MEM *abar, PCIDevice *device) {
 
     printf("Bios to os hand over done value:%d\n", abar->bohc);
 
-    abar->bohc |= 0b10;
+    // abar->bohc |= 0b10;
 
     // Enable AHCI by setting the AHCI Enable (AE) bit in the Global Host Control
     // (GHC) register Enable Interrupts by setting the Interrupt Enable (IE) bit
