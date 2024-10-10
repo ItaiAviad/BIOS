@@ -22,7 +22,7 @@ build/
 *.img
 *_temp
 
-*log
+log.txt
 
 
 # Build results
