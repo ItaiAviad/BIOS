@@ -13,7 +13,7 @@
 #define MB (1024 * 1024)           // = 0x100000
 #define MB_PAGES 0x100           // = 0x100000
 #define GB_PAGES 0x40000         // = 0x40000 (Pages) = 1024 * 1024 * 1024 / (4096)
-#define MEMORY_SIZE_PAGES (100 * MB) // = 2MB (Pages) = 0x200000 (Pages)
+#define MEMORY_SIZE_PAGES (0x200 * MB) // = 2MB (Pages) = 0x200000 (Pages)
 // #define MEMORY_SIZE PAGE_SIZE * MEMORY_SIZE_PAGES // 8GB = 0x200000000
 
 // Virtual Memory:
@@ -28,9 +28,9 @@
 #define PAGE_FRAME_ALLOCATOR_END (PAGE_FRAME_ALLOCATOR_START + PAGE_FRAME_ALLOCATOR_BITMAP_SIZE - 1)
 
 // Paging (Boot)
-#define PML4_BOOT 0x1000 // PML4 kernel base address
+#define PML4_BOOT 0x80000  // PML4 kernel base address
 // Paging (Kernel)
-#define PML4_KERNEL 0x1000000                  // PML4 kernel base address
+#define PML4_KERNEL 0x82000                  // PML4 kernel base address
 #define PAGING_SECTION_SIZE_PAGES 20 * MB_PAGES // 6MB = 0x600000
 #define PAGING_SECTION_SIZE PAGING_SECTION_SIZE_PAGES * PAGE_SIZE
 #define PML4_KERNEL_END (PML4_KERNEL + PAGING_SECTION_SIZE)

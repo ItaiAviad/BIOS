@@ -17,7 +17,7 @@ typedef struct ahciDriveData {
 } ahciDriveData;
 
 typedef enum diskType {
-    AHCI_SATA
+    AHCI_SATA = 0
 } diskType;
 
 typedef union driveData {

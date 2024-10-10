@@ -1,6 +1,9 @@
 ; Bootloader
 ; The SECTOR_SIZE, KERNEL_SIZE_IN_SECTORS, KERNEL_LOAD_ADDR are set in assembly time and provided to nasm via the -D option
 
+%define KERNEL_LOAD_ADDR_SEGMENT KERNEL_LOAD_ADDR / 16
+%define KERNEL_LOAD_ADDR_OFFSET KERNEL_LOAD_ADDR & 0x0FFF
+
 [org 0x7C00] ; BIOS loads the first 512 bits (boot sector) of the device to address 0x7C00
 
 sector_size: equ 512d
@@ -22,7 +25,7 @@ rm:
     mov es, ax
     ; Setup stack
     mov ss, ax
-    mov bp, KERNEL_LOAD_ADDR
+    mov bp, 0x7C00
     mov sp, bp
 
     ; Print Real Mode message
@@ -53,9 +56,11 @@ rm:
 
     ; Read Kernel Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
+    mov bx, (KERNEL_LOAD_ADDR_OFFSET) ; Destination address offset
+    mov ax, (KERNEL_LOAD_ADDR_SEGMENT) ; Destination address
+    mov es, ax
     mov ax, ((bootloader_end - _start) + SECTOR_SIZE - 1) / SECTOR_SIZE ; LBA (sector address/offset)
     mov cl, TOTAL_SIZE_IN_SECTORS ; # of sectors to read
-    mov bx, (KERNEL_LOAD_ADDR) ; Destination address
     call disk_read
 
     ;Print Kernel Sectors message
@@ -93,11 +98,6 @@ dw 0xAA55; Magic number
 [bits 32]
 
 pm:
-    ; Move User code
-    mov edi, USER_LOAD_ADDR
-    mov esi, USER_SEEK_FROM_KERNEL_LOAD_ADDR
-    mov ecx, USER_SIZE
-    rep movsb
 
     ; call clear32
     ; mov esi, msg_pm_success ; 32bit Protected Mode success message

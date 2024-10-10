@@ -17,19 +17,23 @@ size_t cmdslots;
 void volatile initialize_ahci(HBA_MEM *abar, PCIDevice *device) {
 
     while ((abar->bohc & 0b1) == 1) {
-        printf("Ahci not ready, value: %d", abar->bohc);
+        printf("Ahci not ready, value: %d\n", abar->bohc);
     }
 
     printf("Bios to os hand over done value:%d\n", abar->bohc);
 
-    // abar->bohc |= 0b10;
+    abar->bohc |= 0b10;
+
+    while(abar->bohc & 0b10 ){
+        printf("Abar still reseting\n");
+    }
 
     // Enable AHCI by setting the AHCI Enable (AE) bit in the Global Host Control
     // (GHC) register Enable Interrupts by setting the Interrupt Enable (IE) bit
     // in the Global Host Control (GHC) register
     abar->ghc |= (1 << 31) | 0b10;
     while (!(abar->ghc & (1 << 31))) {
-        printf("Ahci not ready, value: %d", abar->ghc & (1 << 31));
+        printf("Ahci not ready, value: %d\n", abar->ghc & (1 << 31));
     }
 
     // Check capabilities and configure ports
@@ -108,15 +112,15 @@ void probe_port(HBA_MEM *abar) {
                 ATA_IDENTIFY_DEVICE* ata_id = hardware_allocate_mem(sizeof(ATA_IDENTIFY_DEVICE), 0);
                 get_identify_sata(abar->ports + i, ata_id);
 
-                disk *disk = hardware_allocate_mem(sizeof(disk), 0);
+                disk *disk_curr = hardware_allocate_mem(sizeof(disk), 0);
 
-                disk->disk_id = (last_disk_id++);
-                disk->disk_size = ata_id->total_user_addressable_sectors * SECTOR_SIZE;
-                disk->disk_type = AHCI_SATA;
-                disk->drive_data.ahci_drive_data.port = abar->ports + i;
-                disk->drive_data.ahci_drive_data.ahci_bar = abar;
+                disk_curr->disk_id = (last_disk_id++);
+                disk_curr->disk_size = ata_id->total_user_addressable_sectors * SECTOR_SIZE;
+                disk_curr->disk_type = AHCI_SATA;
+                disk_curr->drive_data.ahci_drive_data.port = abar->ports + i;
+                disk_curr->drive_data.ahci_drive_data.ahci_bar = abar;
 
-                append_node(&list_drives, disk);
+                append_node(&list_drives, disk_curr);
 
             } else if (dt == AHCI_DEV_SATAPI) {
                 printf("SATAPI drive found at port %d\n", i);

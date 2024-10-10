@@ -3,23 +3,23 @@
 init_paging:
     pushad
     ; Clear the memory area using rep stosd
-    mov edi, 0x1000
+    mov edi, 0x80000
     xor eax, eax
     mov ecx, 4096
     rep stosd
 
     ; Setup PML4T
-    mov edi, 0x1000
-    mov dword[edi], 0x2003      ; PML4T[0] points to PDPT at 0x2000, flags: present + writable
+    mov edi, 0x80000
+    mov dword[edi], 0x81003     ; PML4T[0] points to PDPT at 0x2000, flags: present + writable
 
     ; Setup PDPT for 1GB pages
 
-    mov edi, 0x2000
+    mov edi, 0x81000 
     xor eax, eax
     mov ecx, 4096
     rep stosd
 
-    mov edi, 0x2000
+    mov edi, 0x81000
 
     mov dword[edi], 0x00000083  ; PDPT[0] points to 0x0000000000 (1GB page), flags: present + writable + large page
     mov dword[edi+8], 0x40000083 ; PDPT[1] points to 0x4000000000 (1GB page), flags: present + writable + large page
@@ -32,7 +32,7 @@ init_paging:
     mov cr4, eax
 
     ; Load PML4T address into CR3
-    mov eax, 0x1000
+    mov eax, 0x80000
     mov cr3, eax
     
     popad

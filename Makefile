@@ -8,8 +8,8 @@ endif
 
 SECTOR_SIZE := 512
 
-KERNEL_LOAD_ADDR := 0xF000
-KERNEL_STACK_START_ADDR := $(KERNEL_LOAD_ADDR)
+KERNEL_LOAD_ADDR := 0x90000
+KERNEL_STACK_START_ADDR := 0x80000
 USER_LOAD_ADDR := 0x400F000
 
 ### Directories
@@ -109,8 +109,7 @@ $(FLOPPY_BIN): user kernel boot
 	$(DD) if=$(BOOT_BIN) of=$@ conv=notrunc,fsync
 	# Write kernel to disk
 	$(DD) if=$(KERNEL_BIN) of=$@ bs=1 seek=$$(stat -c %s $(BOOT_BIN)) conv=notrunc,fsync
-	USER_SEEK=$$((($$(stat -c %s $(BOOT_BIN)) + $$(stat -c %s $(KERNEL_BIN))) / $(SECTOR_SIZE) * $(SECTOR_SIZE) + $(SECTOR_SIZE))); \
-	$(DD) if=$(USER_BIN) of=$@ bs=1 seek=$$((USER_SEEK)) conv=notrunc,fsync
+	sync
 	FILE_SIZE=$$(stat -c %s $@); \
 	PADDING=$$(( $(SECTOR_SIZE) - FILE_SIZE % $(SECTOR_SIZE) )); \
 	$(DD) if=/dev/zero of=$@ bs=1 seek=$$FILE_SIZE count=$$PADDING conv=notrunc,fsync; \

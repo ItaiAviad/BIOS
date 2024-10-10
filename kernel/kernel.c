@@ -25,9 +25,12 @@ extern void jump_usermode();
 int kmain(void) {
     // TTY - Terminal
     terminal_initialize();
-    
+
     // ISR - Interrupt Service Routines
     init_isr_handlers();
+
+
+    printf("v1\n");
 
     // Flush TSS
     // flush_tss();
@@ -36,13 +39,13 @@ int kmain(void) {
     // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
 
+
     // Initialize Kernel Paging:
     // Page Frame Allocator - Manage Physical Memory
     // Paging sturctures (PML4T, PDPT, PDT, PT)
     kernel_allocator.initialized = 0;
     init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
 
-    // flush_tss();
 
     //printf("Mem size: %d\n", get_memory_size_from_smbios());
     
