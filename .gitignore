@@ -22,6 +22,8 @@ build/
 *.img
 *_temp
 
+*log
+
 
 # Build results
 [Dd]ebug/

@@ -33,7 +33,7 @@ int kmain(void) {
     printf("v1\n");
 
     // Flush TSS
-    // flush_tss();
+    flush_tss();
 
     // PIC - Programmable Interrupt Controller
     // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!

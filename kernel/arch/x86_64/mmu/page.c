@@ -22,6 +22,10 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
     k_ctx.old_pml4 = (uint64_t*) PML4_BOOT;
     k_ctx.pml4 = (uint64_t*) PML4_KERNEL;
 
+    allocator->bitmap[(uint64_t)boot_ctx.pml4 / PAGE_SIZE] = 1; // Mark pml4 boot as allocated
+
+    allocator->bitmap[(uint64_t)(boot_ctx.pml4+PAGE_SIZE) / PAGE_SIZE] = 1; // Mark pdpt boot as allocated
+
     memset(k_ctx.pml4, 0, PAGE_SIZE);
 
     boot_ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] =  (uint64_t)PML4_KERNEL | (uint64_t)PAGE_MAP_FLAGS;
@@ -33,6 +37,12 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
     invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
 
     switch_context(k_ctx);
+
+    // We can reuse the pages after switching to the kernel's pml4
+
+    allocator->bitmap[(uint64_t)boot_ctx.pml4 / PAGE_SIZE] = 0; // Mark pml4 boot as not allocated
+
+    allocator->bitmap[(uint64_t)(boot_ctx.pml4+PAGE_SIZE) / PAGE_SIZE] = 0; // Mark pdpt boot as not allocated
 
     #ifdef DEBUG
     printf("%s PML4=%d, PML4[0]=%d, PML4[0][0]=%d, bitmap[PML4/PAGE_SIZE]=%d\n", DEBUG, PML4_KERNEL, ((uint64_t*) PML4_KERNEL)[0], allocator->bitmap[PML4_KERNEL/PAGE_SIZE]);
