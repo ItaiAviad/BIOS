@@ -1,6 +1,7 @@
 [bits 32]
 
 init_paging:
+    cli
     pushad
     ; Clear the memory area using rep stosd
     mov edi, 0x80000
@@ -36,4 +37,5 @@ init_paging:
     mov cr3, eax
     
     popad
+    sti
     ret

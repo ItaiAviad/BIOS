@@ -103,7 +103,7 @@ void check_device(uint8_t bus, uint8_t device) {
 }
 
 void check_bus(uint8_t bus) {
-    uint8_t device;
+    uint8_t device = {0};
 
     for (device = 0; device < 32; device++) {
         check_device(bus, device);
@@ -111,9 +111,9 @@ void check_bus(uint8_t bus) {
 }
 
 void check_function(uint8_t bus, uint8_t slot, uint8_t function) {
-    uint8_t baseClass;
-    uint8_t subClass;
-    uint8_t secondaryBus;
+    uint8_t baseClass = 0;
+    uint8_t subClass = 0;
+    uint8_t secondaryBus = 0;
 
     baseClass = getClassCode(bus, slot, function);
     subClass = getSubclass(bus, slot, function);
@@ -122,7 +122,7 @@ void check_function(uint8_t bus, uint8_t slot, uint8_t function) {
         check_bus(secondaryBus);
     } else {
 
-        PCIDevice *pciDevice = malloc(sizeof(PCIDevice));
+        PCIDevice *pciDevice = hardware_allocate_mem(sizeof(PCIDevice), 0);
         pciDevice->bus = bus;
         pciDevice->slot = slot;
         pciDevice->function = function;
@@ -140,8 +140,8 @@ void check_function(uint8_t bus, uint8_t slot, uint8_t function) {
 
 void enumeratePCI() {
     listPCIDevices = (linkedListNode *)NULL;
-    uint8_t function;
-    uint8_t bus;
+    uint8_t function = 0;
+    uint8_t bus = 0;
 
     uint8_t headerType = getHeaderType(0, 0, 0);
     printf("222\n");
@@ -167,7 +167,7 @@ void print_PCI_devices() {
     printf("__PCI__\n");
     while (head != NULL) {
         PCIDevice *device = (PCIDevice *)head->data;
-        printf("%d:%d.%d %d %d %d %d, ", device->bus, device->slot, device->function,
+        printf("%x:%x.%x %x %x %x %x, ", device->bus, device->slot, device->function,
                device->vendorId, device->deviceId, device->classCode, device->subclass);
         head = (linkedListNode *)head->next;
     }
@@ -191,9 +191,9 @@ void *assign_bar(PCIDevice device, uint8_t bar_num) {
 
     map_memory_range_with_flags(k_ctx, orig_reg_val, orig_reg_val + bar_size - 1, orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE, 0);
 
-    pci_config_write_dword(device.bus, device.slot, device.function, config_space_offset, orig_reg_val);
-
     flush_tlb();
+
+    pci_config_write_dword(device.bus, device.slot, device.function, config_space_offset, orig_reg_val);
     
     return (void *)orig_reg_val;
 }

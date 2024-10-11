@@ -95,9 +95,7 @@ int printf(const char* format, ...) {
             memset(tmp, 0, 64 + 1);
             itoa(i, tmp, 16); // Int to string
             // Add '0x'
-            memmove(str + 2, tmp, strlen(tmp) + 1);
-            str[0] = '0';
-            str[1] = 'x';
+            memmove(str, tmp, strlen(tmp) + 1);
             // print(tmp, strlen(tmp));
             size_t len = strlen(str);
             if (maxrem < len) {

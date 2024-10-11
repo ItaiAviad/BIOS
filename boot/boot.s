@@ -16,8 +16,6 @@ _start:
 [bits 16]
 
 rm:
-    ; Disable Interrupts
-    cli
 
     ; Setup data segment
     mov ax, 0
@@ -62,6 +60,9 @@ rm:
     mov ax, ((bootloader_end - _start) + SECTOR_SIZE - 1) / SECTOR_SIZE ; LBA (sector address/offset)
     mov cl, TOTAL_SIZE_IN_SECTORS ; # of sectors to read
     call disk_read
+
+    mov ax, 0
+    mov es, ax
 
     ;Print Kernel Sectors message
     ; mov si, msg_kernel_sector
