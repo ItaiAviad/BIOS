@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-linkedListNode *listPCIDevices = NULL;
+linkedListNode *list_pci_devices = NULL;
 
 uint16_t pci_config_read_word(uint8_t bus, uint8_t slot, uint8_t func,
                               uint8_t offset) {
@@ -87,15 +87,15 @@ void pci_config_write_dword(uint8_t bus, uint8_t slot, uint8_t func,
 void check_device(uint8_t bus, uint8_t device) {
     uint8_t function = 0;
 
-    uint16_t vendorID = getVendorId(bus, device, function);
+    uint16_t vendorID = get_vendor_id(bus, device, function);
     if (vendorID == 0xFFFF)
         return; // Device doesn't exist
     check_function(bus, device, function);
-    uint8_t headerType = getHeaderType(bus, device, function);
+    uint8_t headerType = get_header_type(bus, device, function);
     if ((headerType & 0x80) != 0) {
         // It's a multi-function device, so check remaining functions
         for (function = 1; function < 8; function++) {
-            if (getVendorId(bus, device, function) != 0xFFFF) {
+            if (get_vendor_id(bus, device, function) != 0xFFFF) {
                 check_function(bus, device, function);
             }
         }
@@ -111,15 +111,15 @@ void check_bus(uint8_t bus) {
 }
 
 void check_function(uint8_t bus, uint8_t slot, uint8_t function) {
-    uint8_t baseClass = 0;
-    uint8_t subClass = 0;
-    uint8_t secondaryBus = 0;
+    uint8_t base_class = 0;
+    uint8_t sub_class = 0;
+    uint8_t secondary_bus = 0;
 
-    baseClass = getClassCode(bus, slot, function);
-    subClass = getSubclass(bus, slot, function);
-    if ((baseClass == 0x6) && (subClass == 0x4)) {
-        secondaryBus = getSubclass(bus, slot, function);
-        check_bus(secondaryBus);
+    base_class = get_class_code(bus, slot, function);
+    sub_class = get_subclass(bus, slot, function);
+    if ((base_class == 0x6) && (sub_class == 0x4)) {
+        secondary_bus = get_subclass(bus, slot, function);
+        check_bus(secondary_bus);
     } else {
 
         PCIDevice *pciDevice = hardware_allocate_mem(sizeof(PCIDevice), 0);
@@ -127,23 +127,23 @@ void check_function(uint8_t bus, uint8_t slot, uint8_t function) {
         pciDevice->slot = slot;
         pciDevice->function = function;
 
-        pciDevice->vendorId = getVendorId(bus, slot, function);
-        pciDevice->deviceId = getProductId(bus, slot, function);
+        pciDevice->vendorId = get_vendor_id(bus, slot, function);
+        pciDevice->deviceId = get_product_id(bus, slot, function);
 
-        pciDevice->classCode = getClassCode(bus, slot, function);
-        pciDevice->subclass = getSubclass(bus, slot, function);
-        pciDevice->progIf = getProgIf(bus, slot, function);
+        pciDevice->classCode = get_class_code(bus, slot, function);
+        pciDevice->subclass = get_subclass(bus, slot, function);
+        pciDevice->progIf = get_prog_if(bus, slot, function);
 
-        append_node(&listPCIDevices, (void *)pciDevice);
+        append_node(&list_pci_devices, (void *)pciDevice);
     }
 }
 
-void enumeratePCI() {
-    listPCIDevices = (linkedListNode *)NULL;
+void enumerate_pci() {
+    list_pci_devices = (linkedListNode *)NULL;
     uint8_t function = 0;
     uint8_t bus = 0;
 
-    uint8_t headerType = getHeaderType(0, 0, 0);
+    uint8_t headerType = get_header_type(0, 0, 0);
     printf("222\n");
     if ((headerType & 0x80) == 0) {
         // Single PCI host controller
@@ -153,7 +153,7 @@ void enumeratePCI() {
         // Multiple PCI host controllers
     printf("222\n");
         for (function = 0; function < 8; function++) {
-            if (getVendorId(0, 0, function) != 0xFFFF)
+            if (get_vendor_id(0, 0, function) != 0xFFFF)
     printf("222\n");
                 break;
             bus = function;
@@ -162,8 +162,8 @@ void enumeratePCI() {
     }
 }
 
-void print_PCI_devices() {
-    linkedListNode *head = (linkedListNode *)listPCIDevices;
+void print_pci_devices() {
+    linkedListNode *head = (linkedListNode *)list_pci_devices;
     printf("__PCI__\n");
     while (head != NULL) {
         PCIDevice *device = (PCIDevice *)head->data;
@@ -189,7 +189,7 @@ void *assign_bar(PCIDevice device, uint8_t bar_num) {
         return NULL;
     }
 
-    map_memory_range_with_flags(k_ctx, orig_reg_val, orig_reg_val + bar_size - 1, orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE, 0);
+    map_memory_range_with_flags(k_ctx, (void*) orig_reg_val, (void*) orig_reg_val + bar_size - 1, (void*) orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE, 0);
 
     flush_tlb();
 

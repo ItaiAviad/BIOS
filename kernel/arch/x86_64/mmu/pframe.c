@@ -41,7 +41,7 @@ void map_memory_range(Context ctx, void* start_addr, void* end_addr, void* physi
     map_memory_range_with_flags(ctx, start_addr, end_addr, physical_addr, PAGE_PRESENT | PAGE_WRITE, 1);
 }
 
-void *allocate_page(Context ctx, bool is_p_struct) {
+void* allocate_page(Context ctx) {
     for (uint64_t i = 0; i < (uint64_t)(ctx.allocator->num_pages); i++) {
         if (!(ctx.allocator->bitmap[i])) { // If not all bits are set
             ctx.allocator->bitmap[i] = 1;  // Mark as used
@@ -54,8 +54,8 @@ void *allocate_page(Context ctx, bool is_p_struct) {
     return NULL; // Out of memory
 }
 
-void *allocate_and_zero_page(Context ctx, bool is_p_struct) {
-    void *page = allocate_page(ctx, is_p_struct);
+void *allocate_and_zero_page(Context ctx) {
+    void *page = allocate_page(ctx);
     if (page != NULL) {
         memset(page, 0, PAGE_SIZE);
     }

@@ -158,7 +158,7 @@ void map_page(Context ctx, void* virtual_address, void* physical_address, uint64
     // Ensure PDPT, PD, and PT entries exist (allocate and zero if necessary)
     uint64_t* pdpt_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, pml4_index);
     if (!(pml4_recursive[pml4_index] & PAGE_PRESENT)) { // Check if PDPT entry exists (in PML4T)
-        pdpt = allocate_page(ctx, true);
+        pdpt = allocate_page(ctx);
         if(pdpt == NULL){
             printf("Error, couldn't get pdpt from allocator\n");
             return;
@@ -172,7 +172,7 @@ void map_page(Context ctx, void* virtual_address, void* physical_address, uint64
     invlpg(pdpt_recursive);
     uint64_t* pd_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, pml4_index, pdpt_index);
     if (!(pdpt_recursive[pdpt_index] & PAGE_PRESENT)) { // Check if PDT entry exists (in PDPT)
-        pd = allocate_page(ctx, true);
+        pd = allocate_page(ctx);
         if(pd == NULL){
             printf("Error, couldn't get pd from allocator\n");
             return;
@@ -186,7 +186,7 @@ void map_page(Context ctx, void* virtual_address, void* physical_address, uint64
     invlpg(pd_recursive);
     uint64_t* pt_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, pml4_index, pdpt_index, pd_index);
     if (!(pd_recursive[pd_index] & PAGE_PRESENT)) { // Check if PT entry exists (in PDT)
-        pt = allocate_page(ctx, true);
+        pt = allocate_page(ctx);
         if(pt == NULL){
             printf("Error, couldn't get pd from allocator\n");
             return;

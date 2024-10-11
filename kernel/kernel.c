@@ -63,12 +63,12 @@ int kmain(void) {
     // pic_init(PIC1_OFFSET, PIC2_OFFSET);
     printf("AFTER INIT HEAP\n");
 
-    enumeratePCI();
+    enumerate_pci();
     printf("111\n");
-    print_PCI_devices();
+    print_pci_devices();
     printf("111\n");
 
-    enumerateDisks();
+    enumerate_disks();
     printf("111\n");
     print_disks();
     printf("111\n");

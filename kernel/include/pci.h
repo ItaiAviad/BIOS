@@ -39,7 +39,7 @@
 #define PCI_OFFSET_MIN_GRANT 0x3E
 #define PCI_OFFSET_MAX_LATENCY 0x3F
 
-extern linkedListNode *listPCIDevices;
+extern linkedListNode *list_pci_devices;
 
 typedef struct PCIDevice {
     //  Device localization data:
@@ -105,15 +105,15 @@ void pci_config_write_dword(uint8_t bus, uint8_t slot, uint8_t func,
  * @param bus
  * @param slot
  */
-uint8_t pciCheckDevice(uint8_t bus, uint8_t slot);
+uint8_t pci_check_device(uint8_t bus, uint8_t slot);
 
 /**
  * @brief Go through all available pci devices and add them to the
  * listPCIDevices list.
  */
-void enumeratePCI();
+void enumerate_pci();
 
-void print_PCI_devices();
+void print_pci_devices();
 
 void *assign_bar(PCIDevice device, uint8_t bar_num);
 
@@ -123,120 +123,119 @@ void check_bus(uint8_t bus);
 
 void check_device(uint8_t bus, uint8_t device);
 
-static inline uint16_t getVendorId(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint16_t get_vendor_id(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_VENDOR_ID);
 }
 
-static inline uint16_t getProductId(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint16_t get_product_id(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_DEVICE_ID);
 }
 
-static inline uint16_t getCommand(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint16_t get_command(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_COMMAND);
 }
 
-static inline uint16_t getStatus(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint16_t get_status(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_STATUS);
 }
 
-static inline uint8_t getRevisionId(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint8_t get_revision_id(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_REVISION_ID) & 0xFF;
 }
 
-static inline uint8_t getProgIf(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint8_t get_prog_if(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_PROG_IF) & 0xFF;
 }
 
-static inline uint8_t getSubclass(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint8_t get_subclass(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_SUBCLASS) & 0xFF;
 }
 
-static inline uint8_t getClassCode(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint8_t get_class_code(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_CLASS_CODE) & 0xFF;
 }
-static inline uint8_t getCacheLineSize(uint8_t bus, uint8_t slot, uint8_t func) {
+
+static inline uint8_t get_cache_line_size(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_CACHE_LINE_SIZE) & 0xFF;
 }
 
-static inline uint8_t getLatencyTimer(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint8_t get_latency_timer(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_LATENCY_TIMER) & 0xFF;
 }
 
-static inline uint8_t getHeaderType(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint8_t get_header_type(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_HEADER_TYPE) & 0xFF;
 }
 
-static inline uint8_t getBIST(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint8_t get_bist(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_BIST) & 0xFF;
 }
 
-static inline uint32_t getBar0(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint32_t get_bar0(uint8_t bus, uint8_t slot, uint8_t func) {
     uint8_t offset = PCI_OFFSET_BASE_ADDRESS_0;
     return pci_config_read_dword(bus, slot, func, offset);
 }
 
-static inline uint32_t getBar1(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint32_t get_bar1(uint8_t bus, uint8_t slot, uint8_t func) {
     uint8_t offset = PCI_OFFSET_BASE_ADDRESS_1;
     return pci_config_read_dword(bus, slot, func, offset);
 }
 
-static inline uint32_t getBar2(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint32_t get_bar2(uint8_t bus, uint8_t slot, uint8_t func) {
     uint8_t offset = PCI_OFFSET_BASE_ADDRESS_2;
     return pci_config_read_dword(bus, slot, func, offset);
 }
 
-static inline uint32_t getBar3(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint32_t get_bar3(uint8_t bus, uint8_t slot, uint8_t func) {
     uint8_t offset = PCI_OFFSET_BASE_ADDRESS_3;
     return pci_config_read_dword(bus, slot, func, offset);
 }
 
-static inline uint32_t getBar4(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint32_t get_bar4(uint8_t bus, uint8_t slot, uint8_t func) {
     uint8_t offset = PCI_OFFSET_BASE_ADDRESS_4;
     return pci_config_read_dword(bus, slot, func, offset);
 }
 
-static inline uint32_t getBar5(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint32_t get_bar5(uint8_t bus, uint8_t slot, uint8_t func) {
     uint8_t offset = PCI_OFFSET_BASE_ADDRESS_5;
     return pci_config_read_dword(bus, slot, func, offset);
 }
 
-static inline uint32_t getCardbusCISPointer(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint32_t get_cardbus_cis_pointer(uint8_t bus, uint8_t slot, uint8_t func) {
     uint8_t offset = PCI_OFFSET_CARD_BUS_CIS_POINTER;
     return pci_config_read_dword(bus, slot, func, offset);
 }
 
-static inline uint16_t getSubsystemVendorId(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint16_t get_subsystem_vendor_id(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_SUBSYSTEM_VENDOR_ID);
 }
 
-static inline uint16_t getSubsystemId(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint16_t get_subsystem_id(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_SUBSYSTEM_ID);
 }
 
-static inline uint32_t getExpensionRomBaseAddr(uint8_t bus, uint8_t slot,
-                                               uint8_t func) {
+static inline uint32_t get_expansion_rom_base_addr(uint8_t bus, uint8_t slot, uint8_t func) {
     uint8_t offset = PCI_OFFSET_EXPANSION_ROM_BASE_ADDRESS;
     return pci_config_read_dword(bus, slot, func, offset);
 }
 
-static inline uint8_t getCapabilitiesPointer(uint8_t bus, uint8_t slot, uint8_t func) {
-    return pci_config_read_word(bus, slot, func, PCI_OFFSET_CAPABILITY_POINTER) &
-           0xFF;
+static inline uint8_t get_capabilities_pointer(uint8_t bus, uint8_t slot, uint8_t func) {
+    return pci_config_read_word(bus, slot, func, PCI_OFFSET_CAPABILITY_POINTER) & 0xFF;
 }
 
-static inline uint8_t getInterruptLine(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint8_t get_interrupt_line(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_INTERRUPT_LINE) & 0xFF;
 }
 
-static inline uint8_t getInterruptPin(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint8_t get_interrupt_pin(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_INTERRUPT_PIN) & 0xFF;
 }
 
-static inline uint8_t getMinGrant(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint8_t get_min_grant(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_MIN_GRANT) & 0xFF;
 }
 
-static inline uint8_t getMaxLatency(uint8_t bus, uint8_t slot, uint8_t func) {
+static inline uint8_t get_max_latency(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_MAX_LATENCY) & 0xFF;
 }
 

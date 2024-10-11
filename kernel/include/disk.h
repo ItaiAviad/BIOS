@@ -33,7 +33,7 @@ typedef struct disk {
     uint64_t disk_size;
 } disk;
 
-void enumerateDisks();
+void enumerate_disks();
 void print_disks();
 disk* find_disk(uint64_t id);
 

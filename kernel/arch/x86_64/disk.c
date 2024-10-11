@@ -11,7 +11,7 @@ linkedListNode *list_drives = NULL;
 
 uint64_t last_disk_id = 0;
 
-void enumerateDisks() {
+void enumerate_disks() {
     setup_ahci_controllers();
 }
 

@@ -46,7 +46,7 @@ void volatile initialize_ahci(HBA_MEM *abar, PCIDevice *device) {
 // This function sets up all ahci disks and adds them to the linked list of
 // drives
 void setup_ahci_controllers() {
-    linkedListNode *head = listPCIDevices;
+    linkedListNode *head = list_pci_devices;
     while (head) {
         PCIDevice *device = (PCIDevice *)head->data;
         if ((device->classCode == 0x06 || device->classCode == 0x01) &&

@@ -69,8 +69,8 @@ void init_page_frame_allocator(PageFrameAllocator* allocator, size_t memory_size
  * @param Context
  * @return void* - physical memory address
  */
-void* allocate_page(Context ctx, bool is_p_struct);
-void* allocate_and_zero_page(Context ctx, bool is_p_struct);
+void* allocate_page(Context ctx);
+void* allocate_and_zero_page(Context ctx);
 /**
  * @brief Free a page from a frame
  * 

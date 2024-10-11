@@ -25,7 +25,7 @@ void *kmalloc(size_t size) {
     // Allocate new page(s)
     uint64_t allocation_addr = kheap_current;
     for (size_t i = 0; i < num_pages; i++) {
-        void *page = allocate_page(k_ctx, false);
+        void *page = allocate_page(k_ctx);
         if (page == NULL) {
             #ifdef DEBUG
             printf("%s: GOT NULL PAGE!\n", DEBUG);
@@ -33,7 +33,7 @@ void *kmalloc(size_t size) {
             return NULL; // Out of memory
         }
         // Map page at end of heap
-        map_page(k_ctx, kheap_end, (uint64_t)page, PAGE_MAP_FLAGS);
+        map_page(k_ctx, (void*) kheap_end, page, PAGE_MAP_FLAGS);
         memset((void*) kheap_end, 0, PAGE_SIZE);
         kheap_end += PAGE_SIZE;
         kheap_current_size_left += PAGE_SIZE;
