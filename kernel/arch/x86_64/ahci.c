@@ -220,7 +220,7 @@ int find_cmdslot(HBA_PORT *port) {
     return -1;
 }
 
-bool get_identify_sata(HBA_PORT *port, uint16_t *buf) {
+bool get_identify_sata(volatile HBA_PORT *port, uint16_t *buf) {
     port->is = (uint32_t)-1; // Clear pending interrupt bits
     int spin = 0;            // Spin lock timeout counter
     int slot = find_cmdslot(port);
@@ -281,7 +281,7 @@ bool get_identify_sata(HBA_PORT *port, uint16_t *buf) {
     return true;
 }
 
-bool write_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf) {
+bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf) {
     port->is = (uint32_t)-1; // Clear pending interrupt bits
     int spin = 0;            // Spin lock timeout counter
     int slot = find_cmdslot(port);
@@ -366,7 +366,7 @@ bool write_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf) {
     return true;
 }
 
-bool read_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf)
+bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf)
 {
 	port->is = (uint32_t) -1;		// Clear pending interrupt bits
 	int spin = 0; // Spin lock timeout counter

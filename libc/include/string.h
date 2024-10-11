@@ -41,7 +41,7 @@ void* memmove(void*, const void*, size_t);
  * 
  * @return void* 
  */
-void* memset(void*, char, uint64_t);
+void* memset(void*, char, size_t);
 /**
  * @brief Get length of a string (until `\0`)
  * 

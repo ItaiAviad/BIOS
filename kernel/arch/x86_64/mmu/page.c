@@ -26,6 +26,8 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 
     allocator->bitmap[(uint64_t)(boot_ctx.pml4+PAGE_SIZE) / PAGE_SIZE] = 1; // Mark pdpt boot as allocated
 
+    invlpg(k_ctx.pml4);
+
     memset(k_ctx.pml4, 0, PAGE_SIZE);
 
     boot_ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] =  (uint64_t)PML4_KERNEL | (uint64_t)PAGE_MAP_FLAGS;

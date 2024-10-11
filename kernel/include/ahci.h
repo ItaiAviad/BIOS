@@ -535,7 +535,7 @@ static int check_type(HBA_PORT *port);
 * @arg[out] buffer The buffer which the disks data will be put into 
 * @return If the operation was a success
 */
-bool get_identify_sata(HBA_PORT *port, uint16_t *buf);
+bool get_identify_sata(volatile HBA_PORT *port, uint16_t *buf);
 
 // Reset the port via the ports registers
 void port_reset(HBA_PORT *port);
@@ -556,7 +556,7 @@ void probe_port(HBA_MEM *abar);
 * @return If the operation was successful
 
 */
-bool read_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf);
+bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf);
 
 /**
 * @brief Write a count number of sectors from a port(Disk) from the buffer
@@ -568,6 +568,6 @@ bool read_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf);
 * @return If the operation was successful
 
 */
-bool write_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf);
+bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf);
 
 #endif

@@ -10,7 +10,6 @@ SECTOR_SIZE := 512
 
 KERNEL_LOAD_ADDR := 0x90000
 KERNEL_STACK_START_ADDR := 0x80000
-USER_LOAD_ADDR := 0x400F000
 
 ### Directories
 BOOT_DIR := boot
@@ -102,7 +101,7 @@ all: build
 
 # Build Disk (Floppy Image)
 build: $(FLOPPY_BIN)
-$(FLOPPY_BIN): user kernel boot
+$(FLOPPY_BIN): kernel boot
 	# Write zeroes to disk
 	$(DD) if=/dev/zero of=$@ conv=notrunc,fsync count=65536
 	# Write bootloader to disk
@@ -117,16 +116,13 @@ $(FLOPPY_BIN): user kernel boot
 
 # Bootloader
 boot: $(BOOT_BIN)
-$(BOOT_BIN): always kernel user
+$(BOOT_BIN): always kernel
 	$(NASM) $(BOOT_S) -I $(BOOT_DIR)  \
 		-DSECTOR_SIZE=$(SECTOR_SIZE) \
 		-DKERNEL_SIZE_IN_SECTORS=$$(($(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))'))) \
-		-DTOTAL_SIZE_IN_SECTORS=$$(($(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))') + $(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(USER_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))'))) \
+		-DTOTAL_SIZE_IN_SECTORS=$(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))')\
 		-DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) \
 		-DKERNEL_STACK_START_ADDR=$(KERNEL_STACK_START_ADDR) \
-		-DUSER_LOAD_ADDR=$(USER_LOAD_ADDR) \
-		-DUSER_SIZE=$$(($(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(USER_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE) * $(SECTOR_SIZE)))'))) \
-		-DUSER_SEEK_FROM_KERNEL_LOAD_ADDR=$$(($(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE) * $(SECTOR_SIZE)))')))\
 		-f bin -o $@
 
 # Kernel
