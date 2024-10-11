@@ -24,10 +24,10 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, size_t memory_size
     sti();
 }
 
-void map_memory_range_with_flags(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr, uint64_t flags, int set_in_allocator) {
+void map_memory_range_with_flags(Context ctx, void* start_addr, void* end_addr, void* physical_addr, uint64_t flags, int set_in_allocator) {
     volatile uint64_t start = aalign_down((uint64_t)start_addr, PAGE_SIZE);
     volatile uint64_t end = aalign((uint64_t)end_addr, PAGE_SIZE);
-    physical_addr = aalign_down((uint64_t)physical_addr, PAGE_SIZE);
+    physical_addr = (void*) aalign_down((uint64_t)physical_addr, PAGE_SIZE);
 
     for (uint64_t addr = start; addr < end; addr += PAGE_SIZE, physical_addr += PAGE_SIZE) {
         map_page(ctx, addr, physical_addr, flags);
@@ -37,7 +37,7 @@ void map_memory_range_with_flags(Context ctx, uint64_t start_addr, uint64_t end_
     }
 }
 
-void map_memory_range(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr) {
+void map_memory_range(Context ctx, void* start_addr, void* end_addr, void* physical_addr) {
     map_memory_range_with_flags(ctx, start_addr, end_addr, physical_addr, PAGE_PRESENT | PAGE_WRITE, 1);
 }
 

@@ -47,6 +47,8 @@ void* malloc(size_t size) {
         new_addr = sbrk(new_mchunk.mchunk_size); // Heap old end address
 
         new_mchunk.data = new_addr + sizeof(malloc_chunk);
+
+        map_memory_range(k_ctx, new_addr, new_mchunk.data + data_size - 1, new_addr);
     }
 
     // Link - Allocated Doubly Linked List (Put new chunk at start of linked list)

@@ -189,7 +189,7 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 run:
-	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) -drive id=disk,file=disk.img,if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset  -no-reboot -D log.txt
+	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) -drive id=disk,file=disk.img,if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset,in_asm,guest_errors  -no-reboot -D log.txt
 run_debugger: 
 	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) -drive id=disk,file=disk.img,if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset  -no-reboot -D log_debug.txt -s -S
 

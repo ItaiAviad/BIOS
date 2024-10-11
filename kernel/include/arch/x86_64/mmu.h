@@ -121,10 +121,10 @@ void map_reserved_paging_tables(Context ctx);
  * @param end_address 
  * @param physical_addr
  */
-void map_memory_range(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr);
+void map_memory_range(Context ctx, void* start_addr, void* end_addr, void* physical_addr);
 
 
-void map_memory_range_with_flags(Context ctx, uint64_t start_addr, uint64_t end_addr, uint64_t physical_addr, uint64_t flags, int set_in_allocator);
+void map_memory_range_with_flags(Context ctx, void* start_addr, void* end_addr, void* physical_addr, uint64_t flags, int set_in_allocator);
 
 /**
  * @brief Set the PML4 Address in the CR3 reg object (Paging Register)
@@ -148,7 +148,7 @@ void flush_tlb();
  * @param physical_address 
  * @param flags 
  */
-void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, uint64_t flags);
+void map_page(Context ctx, void* virtual_address, void* physical_address, uint64_t flags);
 /**
  * @brief Unmap a page
  * 

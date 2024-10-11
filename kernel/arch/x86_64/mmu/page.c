@@ -35,12 +35,11 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 
     init_recursive_paging(k_ctx);
 
-    cli();
-    flush_tlb();
-
     invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
 
     switch_context(k_ctx);
+
+    cli();
 
     // We can reuse the pages after switching to the kernel's pml4
 
@@ -144,14 +143,13 @@ uint64_t* get_pml4_address() {
 }
 
 
-void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, uint64_t flags) {
+void map_page(Context ctx, void* virtual_address, void* physical_address, uint64_t flags) {
 
-    cli();
     // Calculate indices
-    uint64_t pml4_index = (virtual_address >> 39) & 0x1FF;
-    uint64_t pdpt_index = (virtual_address >> 30) & 0x1FF;
-    uint64_t pd_index = (virtual_address >> 21) & 0x1FF;
-    uint64_t pt_index = (virtual_address >> 12) & 0x1FF;
+    uint64_t pml4_index = ((uint64_t)virtual_address >> 39) & 0x1FF;
+    uint64_t pdpt_index = ((uint64_t)virtual_address >> 30) & 0x1FF;
+    uint64_t pd_index = ((uint64_t)virtual_address >> 21) & 0x1FF;
+    uint64_t pt_index = ((uint64_t)virtual_address >> 12) & 0x1FF;
 
     uint64_t* pml4_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM);
     invlpg(pml4_recursive);
@@ -202,8 +200,7 @@ void map_page(Context ctx, uint64_t virtual_address, uint64_t physical_address, 
     invlpg(pt_recursive);
 
     // Map the physical address to the virtual address in the page table
-    pt_recursive[pt_index] = physical_address | flags;
-    sti();
+    pt_recursive[pt_index] = (uint64_t) physical_address | flags;
 }
 
 void unmap_page(Context ctx, uint64_t virtual_address) {
