@@ -35,6 +35,8 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 
     init_recursive_paging(k_ctx);
 
+    flush_tlb();
+
     invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
 
     switch_context(k_ctx);
@@ -53,7 +55,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 }
 
 
-uint64_t get_addr_from_table_indexes(uint16_t pml4_index, uint16_t pdpt_index, uint16_t pd_index, uint16_t pt_index) {
+uint64_t* get_addr_from_table_indexes(uint16_t pml4_index, uint16_t pdpt_index, uint16_t pd_index, uint16_t pt_index) {
 
     // Each index contributes 9 bits to the virtual address
     uint64_t virtual_address = 0;
@@ -97,8 +99,8 @@ void switch_context(Context ctx) {
     // Map Kernel + Page Frame Allocator + Pagign Tables in new Kernel Context
     memset(ctx.allocator->bitmap, 1, upper_divide(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
 
-    map_memory_range(ctx, ctx.start_addr + ctx.kernel_start_offset, ctx.start_addr + ctx.kernel_start_offset + PAGE_FRAME_ALLOCATOR_END - 1, ctx.start_addr + ctx.kernel_start_offset);
-    map_memory_range(ctx, (uint64_t)ctx.pml4, PAGE_SIZE, (uint64_t)ctx.pml4);
+    map_memory_range(ctx, (void*)MBR_LOAD_ADDR, PAGE_FRAME_ALLOCATOR_END - 1, (void*)MBR_LOAD_ADDR);
+    map_memory_range(ctx, (void*)ctx.pml4, ctx.pml4+PAGE_SIZE-1, (void*)ctx.pml4);
     // Switch PML4 to use the (new) s PML4
     cli();
     set_pml4_address((uint64_t *) ctx.pml4);

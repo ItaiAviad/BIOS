@@ -91,7 +91,7 @@ void deallocate_page(PageFrameAllocator* allocator, void* page);
 */
 void init_recursive_paging(Context ctx);
 
-uint64_t get_addr_from_table_indexes(uint16_t pml4_index, uint16_t pdpt_index, uint16_t pd_index, uint16_t pt_index);
+uint64_t* get_addr_from_table_indexes(uint16_t pml4_index, uint16_t pdpt_index, uint16_t pd_index, uint16_t pt_index);
 
 /**
  * @brief Initialize Kernel Paging

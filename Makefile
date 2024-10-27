@@ -82,7 +82,7 @@ LD := x86_64-elf-ld
 INCLUDES := -I$(LIBC_INCLUDE) -I$(KERNEL_INCLUDE)
 # MISC_FLAGS = -DCURRENT_YEAR=$(shell date --utc | awk '{print $$7}')
 # MISC_FLAGS += -DTIMEZONE=\"$(shell date --utc | awk '{print $$6}')\"
-MISC_FLAGS = -DKERNEL_STACK_START_ADDR=$(KERNEL_STACK_START_ADDR) -DCURRENT_YEAR=$(shell $(SHELL) -c "date -u +%Y")
+MISC_FLAGS = -D KERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) -DKERNEL_STACK_START_ADDR=$(KERNEL_STACK_START_ADDR) -DCURRENT_YEAR=$(shell $(SHELL) -c "date -u +%Y")
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
 endif

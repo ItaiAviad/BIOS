@@ -30,7 +30,7 @@ void map_memory_range_with_flags(Context ctx, void* start_addr, void* end_addr, 
     physical_addr = (void*) aalign_down((uint64_t)physical_addr, PAGE_SIZE);
 
     for (uint64_t addr = start; addr < end; addr += PAGE_SIZE, physical_addr += PAGE_SIZE) {
-        map_page(ctx, addr, physical_addr, flags);
+        map_page(ctx, (void *)addr, physical_addr, flags);
         if (set_in_allocator) {
             ctx.allocator->bitmap[addr / PAGE_SIZE] = 1;
         }
