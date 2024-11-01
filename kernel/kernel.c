@@ -29,9 +29,6 @@ int kmain(void) {
     // ISR - Interrupt Service Routines
     init_isr_handlers();
 
-
-    printf("v1\n");
-
     // Flush TSS
     flush_tss();
 
