@@ -29,7 +29,7 @@ uint64_t aalign(uint64_t, uint64_t);
 uint64_t aalign_down(uint64_t addr, uint64_t alignment);
 
 #define PAGE_USER    0b100
-#define PAGE_MAP_FLAGS (PAGE_PRESENT | PAGE_WRITE)
+#define PAGE_MAP_FLAGS (PAGE_PRESENT | PAGE_WRITE | PAGE_USER)
 
 // ----------------------------------------------
 

@@ -53,6 +53,6 @@ void write(uint64_t disk_id, uint64_t offset, size_t size, void* buffer);
 * @param[in] size The amount of bytes to read
 * @param[out] buffer The buffer to output to
 */
-void read(uint64_t disk_id, uint64_t offset, size_t size, uint8_t* buffer);
+void read(uint64_t disk_id, uint64_t offset, size_t size, void* buffer);
 
 #endif

@@ -38,7 +38,7 @@ void map_memory_range_with_flags(Context ctx, void* start_addr, void* end_addr, 
 }
 
 void map_memory_range(Context ctx, void* start_addr, void* end_addr, void* physical_addr) {
-    map_memory_range_with_flags(ctx, start_addr, end_addr, physical_addr, PAGE_PRESENT | PAGE_WRITE, 1);
+    map_memory_range_with_flags(ctx, start_addr, end_addr, physical_addr, PAGE_MAP_FLAGS, 1);
 }
 
 void* allocate_page(Context ctx) {

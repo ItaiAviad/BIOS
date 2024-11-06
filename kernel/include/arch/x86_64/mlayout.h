@@ -13,7 +13,7 @@
 #define MB (1024 * 1024)           // = 0x100000
 #define MB_PAGES 0x100           // = 0x100000
 #define GB_PAGES 0x40000         // = 0x40000 (Pages) = 1024 * 1024 * 1024 / (4096)
-#define MEMORY_SIZE_PAGES (0x100 * MB) // = 2MB (Pages) = 0x200000 (Pages)
+#define MEMORY_SIZE_PAGES (0x60 * MB) // = 2MB (Pages) = 0x200000 (Pages)
 // #define MEMORY_SIZE PAGE_SIZE * MEMORY_SIZE_PAGES // 8GB = 0x200000000
 
 // Virtual Memory:
@@ -36,7 +36,7 @@
 
 // Heap
 // #define KERNEL_HEAP_START 0x200000
-#define KERNEL_HEAP_START (0x25 * MB) // 16 MB
+#define KERNEL_HEAP_START (0x20 * MB) // 16 MB
 #define KERNEL_HEAP_SIZE_PAGES 0x4  // 4 Pages
 
 #define HARDWARE_MEM_START (KERNEL_HEAP_START + KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE)

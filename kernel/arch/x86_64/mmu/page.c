@@ -33,9 +33,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 
     boot_ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)PML4_KERNEL | (uint64_t)PAGE_MAP_FLAGS;
 
-    printf("111\n");
     init_recursive_paging(k_ctx);
-    printf("222\n");
 
     flush_tlb();
 

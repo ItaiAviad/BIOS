@@ -22,6 +22,12 @@
 #include <disk.h>
 
 extern void jump_usermode();
+void user_init();
+
+#ifndef USER_LOAD_ADDR
+USER_LOAD_ADDR = 0x4000000;
+#endif
+
 int kmain(void) {
     // TTY - Terminal
     terminal_initialize();
@@ -70,19 +76,21 @@ int kmain(void) {
     enumerate_disks();
     print_disks();
 
-    char buffer[] = "Hi gal";
+    // char buffer[] = "Hi gal";
+    // write(0, 0, sizeof(buffer), buffer);
 
-    write(0, 0, sizeof(buffer), buffer);
-
+    // usermode
+    user_init();
     
     __asm__ volatile ("hlt");
 
     return 0;
 }
 
-void test_user_function(){
-    // printf("%d\n", 1);
-    // __asm__ volatile("cli");
-    while (true) {
-    }
+void user_init() {
+    size_t len = 0x1000;
+    map_memory_range(k_ctx, (void*) USER_LOAD_ADDR, (void*) USER_LOAD_ADDR + len, (void*) USER_LOAD_ADDR);
+    read(0, 0, len, (void*) USER_LOAD_ADDR);
+
+    jump_usermode();
 }

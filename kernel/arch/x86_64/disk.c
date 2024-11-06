@@ -46,7 +46,7 @@ disk *find_disk(uint64_t id) {
     return device;
 }
 
-void read(uint64_t disk_id, uint64_t offset, size_t size, uint8_t* buffer) {
+void read(uint64_t disk_id, uint64_t offset, size_t size, void* buffer) {
 
     disk *disk = find_disk(disk_id);
 

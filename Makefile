@@ -39,6 +39,7 @@ KERNEL_BIN := $(BUILD_DIR)/kernel.bin
 KERNEL_INCLUDE := $(KERNEL_DIR)/include
 
 # User
+USER_LOAD_ADDR = 0x4000000# (1024 * 1024 * 0x40)
 USER_S := $(shell find $(USER_DIR) -name '*.s')
 USER_C := $(shell find $(USER_DIR) -name '*.c')
 USER_LD_ORG := $(USER_DIR)/ulink.ld
@@ -72,6 +73,9 @@ USER_OBJ := $(patsubst %, $(OBJ_DIR)/%, $(USER_SRC_S:.s=.o)) \
 		$(patsubst %, $(OBJ_DIR)/%, $(USER_SRC_C:.c=.o))
 		# $(OBJ_LIBC)
 
+# Disks
+DISK = disk.img
+
 ### Constants
 SHELL := /bin/bash
 CC := x86_64-elf-gcc
@@ -82,12 +86,13 @@ LD := x86_64-elf-ld
 INCLUDES := -I$(LIBC_INCLUDE) -I$(KERNEL_INCLUDE)
 # MISC_FLAGS = -DCURRENT_YEAR=$(shell date --utc | awk '{print $$7}')
 # MISC_FLAGS += -DTIMEZONE=\"$(shell date --utc | awk '{print $$6}')\"
-MISC_FLAGS = -D KERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) -DKERNEL_STACK_START_ADDR=$(KERNEL_STACK_START_ADDR) -DCURRENT_YEAR=$(shell $(SHELL) -c "date -u +%Y")
+MISC_FLAGS = -DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) -DKERNEL_STACK_START_ADDR=$(KERNEL_STACK_START_ADDR) \
+			-DUSER_LOAD_ADDR=$(USER_LOAD_ADDR) -DCURRENT_YEAR=$(shell $(SHELL) -c "date -u +%Y")
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
 endif
 CFLAGS := -ffreestanding -m64 -masm=intel -Wall -g -Wextra $(INCLUDES) $(MISC_FLAGS)
-NASMFLAGS := -f elf64 -g
+NASMFLAGS := -f elf64 -g -DUSER_LOAD_ADDR=$(USER_LOAD_ADDR)
 LDFLAGS_KERNEL := -T $(KERNEL_LD) $(INCLUDES)
 LDFLAGS_USER := -T $(USER_LD) $(INCLUDES)
 LIBC_FLAGS := $(CFLAGS) -D__is_libc
@@ -101,10 +106,10 @@ all: build
 
 # Build Disk (Floppy Image)
 build: $(FLOPPY_BIN)
-$(FLOPPY_BIN): kernel boot
+$(FLOPPY_BIN): kernel boot user
 	# Write zeroes to disk
 	$(DD) if=/dev/zero of=$@ conv=notrunc,fsync count=65536
-	# Write bootloader to disk
+	# Writer bootloader to disk
 	$(DD) if=$(BOOT_BIN) of=$@ conv=notrunc,fsync
 	# Write kernel to disk
 	$(DD) if=$(KERNEL_BIN) of=$@ bs=1 seek=$$(stat -c %s $(BOOT_BIN)) conv=notrunc,fsync
@@ -113,6 +118,10 @@ $(FLOPPY_BIN): kernel boot
 	PADDING=$$(( $(SECTOR_SIZE) - FILE_SIZE % $(SECTOR_SIZE) )); \
 	$(DD) if=/dev/zero of=$@ bs=1 seek=$$FILE_SIZE count=$$PADDING conv=notrunc,fsync; \
 	$(DD) if=/dev/zero of=$@ bs=$(SECTOR_SIZE) seek=$$(($$FILE_SIZE + $$PADDING)) count=2048 conv=notrunc,fsync
+
+	# Write user code to disk
+	$(DD) if=/dev/zero of=$(DISK) count=1024
+	$(DD) if=$(USER_BIN) of=$(DISK) conv=notrunc
 
 # Bootloader
 boot: $(BOOT_BIN)
@@ -127,7 +136,6 @@ $(BOOT_BIN): always kernel
 
 # Kernel
 kernel: $(KERNEL_BIN)
-
 $(KERNEL_BIN): $(KERNEL_ELF)
 	objcopy -O binary $(KERNEL_ELF) $@
 
@@ -139,7 +147,6 @@ $(KERNEL_ELF): always $(KERNEL_OBJ)
 
 # User
 user: $(USER_BIN)
-
 $(USER_BIN): $(USER_ELF)
 	objcopy -O binary $(USER_ELF) $@
 
@@ -148,7 +155,6 @@ $(USER_ELF): always $(USER_OBJ)
 	sed 's/$$(USER_LOAD_ADDR)/$(USER_LOAD_ADDR)/g' $(USER_LD_ORG) > $(USER_LD) && sync
 	$(LD) $(LDFLAGS_USER) $(USER_OBJ) -o $@
 	rm $(USER_LD)
-
 
 
 # Objects (Assembling)
@@ -189,9 +195,9 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 run:
-	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) -drive id=disk,file=disk.img,if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset,in_asm,guest_errors  -no-reboot -D log.txt
+	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) -drive id=disk,file=$(DISK),if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset,in_asm,guest_errors  -no-reboot -D log.txt
 run_debugger: 
-	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) -drive id=disk,file=disk.img,if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset  -no-reboot -D log_debug.txt -s -S
+	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) -drive id=disk,file=$(DISK),if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset  -no-reboot -D log_debug.txt -s -S
 
 run_debug_bochs:
 	sed 's#$$(FLOPPY_BIN)#$(FLOPPY_BIN)#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG) && sync
