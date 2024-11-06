@@ -144,17 +144,13 @@ void enumerate_pci() {
     uint8_t bus = 0;
 
     uint8_t headerType = get_header_type(0, 0, 0);
-    printf("222\n");
     if ((headerType & 0x80) == 0) {
         // Single PCI host controller
         check_bus(0);
-    printf("222\n");
     } else {
         // Multiple PCI host controllers
-    printf("222\n");
         for (function = 0; function < 8; function++) {
             if (get_vendor_id(0, 0, function) != 0xFFFF)
-    printf("222\n");
                 break;
             bus = function;
             check_bus(bus);
@@ -164,14 +160,20 @@ void enumerate_pci() {
 
 void print_pci_devices() {
     linkedListNode *head = (linkedListNode *)list_pci_devices;
+    #ifdef DEBUG
     printf("__PCI__\n");
+    #endif
     while (head != NULL) {
+        #ifdef DEBUG
         PCIDevice *device = (PCIDevice *)head->data;
         printf("%x:%x.%x %x %x %x %x, ", device->bus, device->slot, device->function,
                device->vendorId, device->deviceId, device->classCode, device->subclass);
+        #endif
         head = (linkedListNode *)head->next;
     }
+    #ifdef DEBUG
     printf("__PCI_END__\n");
+    #endif
 }
 
 void *assign_bar(PCIDevice device, uint8_t bar_num) {
@@ -189,11 +191,11 @@ void *assign_bar(PCIDevice device, uint8_t bar_num) {
         return NULL;
     }
 
-    map_memory_range_with_flags(k_ctx, (void*) orig_reg_val, (void*) orig_reg_val + bar_size - 1, (void*) orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE, 0);
+    map_memory_range_with_flags(k_ctx, (void*) (uint64_t) orig_reg_val, (void*) (uint64_t) orig_reg_val + bar_size - 1, (void*) (uint64_t) orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE, 0);
 
     flush_tlb();
 
     pci_config_write_dword(device.bus, device.slot, device.function, config_space_offset, orig_reg_val);
     
-    return (void *)orig_reg_val;
+    return (void *)(uint64_t) orig_reg_val;
 }

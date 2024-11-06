@@ -61,4 +61,4 @@ syscall_entry:
     pop r15                 ; Restore r15
 
     ; Return to user space
-    sysretq
+    ; sysretq

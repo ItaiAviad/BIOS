@@ -17,24 +17,33 @@ void enumerate_disks() {
 
 void print_disks() {
     linkedListNode *head = (linkedListNode *)list_drives;
+    #ifdef DEBUG
     printf("__DRIVES__\n");
+    #endif
     while (head != NULL) {
+        #ifdef DEBUG
         disk *device = (disk *)head->data;
         printf("id: %d, size: %d, type: %d\n", device->disk_id, (uint64_t)device->disk_size, device->disk_type);
+        #endif
         head = (linkedListNode *)head->next;
     }
+    #ifdef DEBUG
     printf("__DRIVES__END__\n");
+    #endif
 }
 
 disk *find_disk(uint64_t id) {
     linkedListNode *head = (linkedListNode *)list_drives;
+    disk *device;
     while (head != NULL) {
-        disk *device = (disk *)head->data;
+        device = (disk *)head->data;
         if (device->disk_id == id) {
             return device;
         }
         head = (linkedListNode *)head->next;
     }
+
+    return device;
 }
 
 void read(uint64_t disk_id, uint64_t offset, size_t size, uint8_t* buffer) {
@@ -66,7 +75,7 @@ void read(uint64_t disk_id, uint64_t offset, size_t size, uint8_t* buffer) {
     }
 }
 
-void write(uint64_t disk_id, uint64_t offset, size_t size, uint8_t* buffer) {
+void write(uint64_t disk_id, uint64_t offset, size_t size, void* buffer) {
 
     disk *disk = find_disk(disk_id);
 

@@ -50,6 +50,6 @@ void *kmalloc(size_t size) {
     return (void *)allocation_addr;
 }
 
-void kfree(void* ptr) {
+void kfree(__attribute__((unused)) void* ptr) {
     // Kernel Free - Optional (Heap can just stay the same without freeing)
 }

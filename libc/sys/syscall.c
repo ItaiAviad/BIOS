@@ -25,6 +25,6 @@ void init_syscall() {
 }
 
 void syscall_handler(struct pt_regs *regs) {
-    uint64_t syscall_number = regs->rax;
+    __attribute__((unused)) uint64_t syscall_number = regs->rax;
 }
 #endif

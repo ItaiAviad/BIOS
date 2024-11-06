@@ -25,9 +25,11 @@ extern void jump_usermode();
 int kmain(void) {
     // TTY - Terminal
     terminal_initialize();
+    printf("Terminal\n");
 
     // ISR - Interrupt Service Routines
     init_isr_handlers();
+    printf("ISRs\n");
 
     // Flush TSS
     flush_tss();
@@ -35,6 +37,7 @@ int kmain(void) {
     // PIC - Programmable Interrupt Controller
     // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
+    printf("PIC\n");
 
 
     // Initialize Kernel Paging:
@@ -42,14 +45,15 @@ int kmain(void) {
     // Paging sturctures (PML4T, PDPT, PDT, PT)
     kernel_allocator.initialized = 0;
     init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
+    printf("Kernel Paging\n");
 
 
     //printf("Mem size: %d\n", get_memory_size_from_smbios());
     
 
     // Kernel Heap - Manage Kernel Dynamic Memory
-    printf("HEAP:\n");
     init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
+    printf("Heap\n");
 
     // printf("heap: %d, dst: %d, dst2: %d\n", heap, dst, dst2);
     // char dst[30];
@@ -58,23 +62,18 @@ int kmain(void) {
     // PIC should be initialized at the end of Kernel's initializations to avoid race conditions!s
 
     // pic_init(PIC1_OFFSET, PIC2_OFFSET);
-    printf("AFTER INIT HEAP\n");
 
     enumerate_pci();
-    printf("111\n");
     print_pci_devices();
-    printf("111\n");
 
+    // Setup AHCI and enumerate Disks
     enumerate_disks();
-    printf("111\n");
     print_disks();
-    printf("111\n");
 
     char buffer[] = "Hi gal";
 
     write(0, 0, sizeof(buffer), buffer);
 
-    printf(buffer);
     
     __asm__ volatile ("hlt");
 

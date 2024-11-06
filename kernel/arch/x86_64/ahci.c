@@ -14,13 +14,15 @@
 linkedListNode *ahci_devices = NULL;
 size_t cmdslots;
 
-void volatile initialize_ahci(HBA_MEM *abar, PCIDevice *device) {
+void initialize_ahci(HBA_MEM *abar, __attribute__((unused)) PCIDevice *device) {
 
     while ((abar->bohc & 0b1) == 1) {
         printf("Ahci not ready, value: %d\n", abar->bohc);
     }
 
+    #ifdef DEBUG
     printf("Bios to os hand over done value:%d\n", abar->bohc);
+    #endif
 
     abar->bohc |= 0b10;
 
@@ -37,8 +39,11 @@ void volatile initialize_ahci(HBA_MEM *abar, PCIDevice *device) {
     }
 
     // Check capabilities and configure ports
+    printf("AHCI\n");
+    #ifdef DEBUG
     printf("AHCI GHC: %d\n", abar->ghc);
     printf("AHCI Capabilities: %d\n", abar->cap);
+    #endif
 
     cmdslots = ((abar->cap >> 8) & 0x1F) + 1;
 }
@@ -56,7 +61,9 @@ void setup_ahci_controllers() {
                 head = head->next;
                 continue;
             }
+            #ifdef DEBUG
             printf("Abar addr: %d\n", abar);
+            #endif
             uint16_t command_reg = pci_config_read_dword(
                 device->bus, device->slot, device->function, PCI_OFFSET_COMMAND);
             command_reg |= (uint16_t)AHCI_PCI_CMD_REG_BITS;
@@ -73,7 +80,7 @@ void setup_ahci_controllers() {
 }
 
 // Check device type returns the ata device type at the given port
-static int check_type(HBA_PORT *port) {
+int check_type(HBA_PORT *port) {
     uint32_t ssts = port->ssts;
 
     uint8_t ipm = (ssts >> 8) & 0x0F;
@@ -99,7 +106,9 @@ static int check_type(HBA_PORT *port) {
 void probe_port(HBA_MEM *abar) {
     // Search disk in implemented ports
     uint32_t pi = abar->pi;
+    #ifdef DEBUG
     printf("Pi: %d\n", pi);
+    #endif
     int i = 0;
     while (i < 32) {
         if (pi & 1) {
@@ -110,15 +119,15 @@ void probe_port(HBA_MEM *abar) {
                 port_rebase(abar->ports + i);
 
                 ATA_IDENTIFY_DEVICE* ata_id = hardware_allocate_mem(sizeof(ATA_IDENTIFY_DEVICE), 0);
-                get_identify_sata(abar->ports + i, ata_id);
+                get_identify_sata(abar->ports + i, (uint16_t*) ata_id);
 
                 disk *disk_curr = hardware_allocate_mem(sizeof(disk), 0);
 
                 disk_curr->disk_id = (last_disk_id++);
                 disk_curr->disk_size = ata_id->total_user_addressable_sectors * SECTOR_SIZE;
                 disk_curr->disk_type = AHCI_SATA;
-                disk_curr->drive_data.ahci_drive_data.port = abar->ports + i;
-                disk_curr->drive_data.ahci_drive_data.ahci_bar = abar;
+                disk_curr->drive_data.ahci_drive_data.port = (struct HBA_PORT*) (abar->ports + i);
+                disk_curr->drive_data.ahci_drive_data.ahci_bar = (struct HBA_MEM*) abar;
 
                 append_node(&list_drives, disk_curr);
 
@@ -129,7 +138,9 @@ void probe_port(HBA_MEM *abar) {
             } else if (dt == AHCI_DEV_PM) {
                 printf("PM drive found at port %d\n", i);
             } else {
+                #ifdef DEBUG
                 printf("No drive found at port %d\n", i);
+                #endif
             }
         }
 
@@ -211,7 +222,7 @@ void port_rebase(HBA_PORT *port) {
 int find_cmdslot(HBA_PORT *port) {
     // If not set in SACT and CI, the slot is free
     uint32_t slots = (port->sact | port->ci);
-    for (int i = 0; i < cmdslots; i++) {
+    for (size_t i = 0; i < cmdslots; i++) {
         if ((slots & 1) == 0)
             return i;
         slots >>= 1;
@@ -281,7 +292,7 @@ bool get_identify_sata(volatile HBA_PORT *port, uint16_t *buf) {
     return true;
 }
 
-bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf) {
+bool write_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf) {
     port->is = (uint32_t)-1; // Clear pending interrupt bits
     int spin = 0;            // Spin lock timeout counter
     int slot = find_cmdslot(port);
@@ -366,7 +377,7 @@ bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t
     return true;
 }
 
-bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf)
+bool read_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf)
 {
 	port->is = (uint32_t) -1;		// Clear pending interrupt bits
 	int spin = 0; // Spin lock timeout counter

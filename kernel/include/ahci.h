@@ -229,7 +229,7 @@ typedef struct tagFIS_REG_H2D {
 
 //_________________HBA_______________
 
-typedef volatile struct tagHBA_PORT {
+typedef volatile struct HBA_PORT {
     uint64_t clb;       // 0x00, command list base address, 1K-byte aligned
     uint64_t fb;        // 0x08, FIS base address, 256-byte aligned
     uint32_t is;        // 0x10, interrupt status
@@ -516,7 +516,7 @@ typedef struct __attribute__((packed)) {
                                         MICROCODE command for mode 03h */
     unsigned short words236_254[19]; /* Reserved */
     unsigned short integrity;        /* Cheksum, Signature */
-};
+} UNNAMED_STRUCT;
 
 /** @brief This function sets up all ahci disks and adds them to the linked list of
 drives*/
@@ -527,7 +527,7 @@ void setup_ahci_controllers();
 * @arg[in] port
 * @return The disks type
 */
-static int check_type(HBA_PORT *port);
+int check_type(HBA_PORT *port);
 
 /** 
 * @brief Get the disks ata identify that
@@ -556,7 +556,7 @@ void probe_port(HBA_MEM *abar);
 * @return If the operation was successful
 
 */
-bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf);
+bool read_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf);
 
 /**
 * @brief Write a count number of sectors from a port(Disk) from the buffer
@@ -568,6 +568,6 @@ bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t 
 * @return If the operation was successful
 
 */
-bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf);
+bool write_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf);
 
 #endif
