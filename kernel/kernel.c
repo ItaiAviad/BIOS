@@ -88,9 +88,13 @@ int kmain(void) {
 }
 
 void user_init() {
-    size_t len = 0x1000;
+    size_t len = 0x6000;
     map_memory_range(k_ctx, (void*) USER_LOAD_ADDR, (void*) USER_LOAD_ADDR + len, (void*) USER_LOAD_ADDR);
     read(0, 0, len, (void*) USER_LOAD_ADDR);
 
-    jump_usermode();
+    #if defined(__is_libk)
+    init_syscall();
+    #endif
+
+   jump_usermode();
 }

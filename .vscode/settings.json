@@ -78,6 +78,12 @@
     "*.inc": "c",
     "mmu.h": "c",
     "mlayout.h": "c",
-    "math.h": "c"
+    "math.h": "c",
+    "pic.h": "c",
+    "memory.h": "c",
+    "compare": "cpp",
+    "cstdint": "cpp",
+    "format": "cpp",
+    "syscall.h": "c"
 }
 }

@@ -27,7 +27,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 
     allocator->bitmap[(uint64_t)(boot_ctx.pml4+PAGE_SIZE) / PAGE_SIZE] = 1; // Mark pdpt boot as allocated
 
-    invlpg(k_ctx.pml4);
+    // invlpg(k_ctx.pml4);
 
     memset(k_ctx.pml4, 0, PAGE_SIZE);
 
@@ -35,9 +35,9 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 
     init_recursive_paging(k_ctx);
 
-    flush_tlb();
+    // flush_tlb();
 
-    invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
+    // invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
 
     switch_context(k_ctx);
 

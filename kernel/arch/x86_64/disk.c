@@ -49,6 +49,8 @@ disk *find_disk(uint64_t id) {
 void read(uint64_t disk_id, uint64_t offset, size_t size, void* buffer) {
 
     disk *disk = find_disk(disk_id);
+    printf("disk port: %x, %x, %x\n", disk->drive_data.ahci_drive_data.port, disk->drive_data.ahci_drive_data.ahci_bar, disk->drive_data.ahci_drive_data.port->clb);
+    printf("disk port more: %x\n", ((HBA_CMD_HEADER*)disk->drive_data.ahci_drive_data.port->clb)->ctba);
 
     switch (disk->disk_type) {
         case AHCI_SATA: {// Use a temporary buffer in order to use non sector aligned offsets
@@ -56,13 +58,13 @@ void read(uint64_t disk_id, uint64_t offset, size_t size, void* buffer) {
             uint64_t size_sectors = upper_divide(size, SECTOR_SIZE);
             uint8_t* buffer_temp = malloc(size_sectors*SECTOR_SIZE);
 
-            // Its kinda a work around but should be ok.
+            // It's kinda a work around but should be ok.
             map_memory_range_with_flags(k_ctx, (void*)buffer_temp, (void*)buffer_temp + size_sectors*SECTOR_SIZE - 1, (void*)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_UNCACHEABLE, 1);
             flush_tlb();
             
+            printf("%x, %x, %x\n", offset_sectors, size_sectors, buffer_temp);
             read_ahci(disk->drive_data.ahci_drive_data.port, offset_sectors, size_sectors, buffer_temp);
             
-
             map_memory_range_with_flags(k_ctx, (void*)buffer_temp, (void*)buffer_temp + size_sectors*SECTOR_SIZE - 1, (void*)buffer_temp, PAGE_WRITE | PAGE_PRESENT, 1);
             flush_tlb();
 

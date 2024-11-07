@@ -292,7 +292,7 @@ bool get_identify_sata(volatile HBA_PORT *port, uint16_t *buf) {
     return true;
 }
 
-bool write_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf) {
+bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf) {
     port->is = (uint32_t)-1; // Clear pending interrupt bits
     int spin = 0;            // Spin lock timeout counter
     int slot = find_cmdslot(port);
@@ -377,21 +377,24 @@ bool write_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf) {
     return true;
 }
 
-bool read_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf)
+bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf)
 {
 	port->is = (uint32_t) -1;		// Clear pending interrupt bits
 	int spin = 0; // Spin lock timeout counter
 	int slot = find_cmdslot(port);
 	if (slot == -1)
 		return false;
+    printf("port in read_ahci: %x, %x\n", port->clb, ((HBA_CMD_HEADER*)port->clb)->ctba);
 	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)port->clb;
 	cmdheader += slot;
 	cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(uint32_t);	// Command FIS size
 	cmdheader->w = 0;		// Read from device
 	cmdheader->prdtl = (uint16_t)((count-1)>>4) + 1;	// PRDT entries count
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*)(cmdheader->ctba);
-	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) +
- 		(cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
+    printf("1111\n");
+    printf("%x, %x\n", cmdtbl, sizeof(HBA_CMD_TBL) + (cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
+	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) + (cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
+    printf("2222\n");
 	// 8K bytes (16 sectors) per PRDT
 	int i;
 	for (i=0; i<cmdheader->prdtl-1; i++)
@@ -402,6 +405,7 @@ bool read_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf)
 		buf += 4*1024;	// 4K words
 		count -= 16;	// 16 sectors
 	}
+    printf("2222+\n");
 	// Last entry
 	cmdtbl->prdt_entry[i].dba = (uint64_t) buf;
 	cmdtbl->prdt_entry[i].dbc = (count<<9)-1;	// 512 bytes per sector
@@ -419,6 +423,7 @@ bool read_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf)
 	cmdfis->lba4 = (uint8_t)(start >> 32);
 	cmdfis->lba5 = (uint8_t)(start >> 40);
 	cmdfis->count = count;
+    printf("2222++\n");
 	// The below loop waits until the port is no longer busy before issuing a new command
 	while ((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)))
 	{
@@ -431,6 +436,7 @@ bool read_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf)
 		}
 		io_wait();
 	}
+    printf("2222+++\n");
 	port->ci = 1<<slot;	// Issue command
 	// Wait for completion
 	while (1)
@@ -445,6 +451,7 @@ bool read_ahci(HBA_PORT *port, uint64_t start, uint32_t count, uint8_t *buf)
 			return 0;
 		}
 	}
+    printf("3333\n");
 	// Check again
 	if (port->is & HBA_PxIS_TFES)
 	{

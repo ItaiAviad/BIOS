@@ -48,7 +48,10 @@ void* malloc(size_t size) {
 
         new_mchunk.data = new_addr + sizeof(malloc_chunk);
 
+        // TODO! Use kmalloc syscall instead of map_memory_range
+        #if defined(__is_libk)
         map_memory_range(k_ctx, new_addr, new_mchunk.data + data_size - 1, new_addr);
+        #endif
     }
 
     // Link - Allocated Doubly Linked List (Put new chunk at start of linked list)
@@ -63,7 +66,8 @@ void* malloc(size_t size) {
     // If new, allocate memory (if needed) memcpy header to new memory location
     if (!found_free) {
         // Map page(s) if nescessary - Kernel Malloc
-        kmalloc(new_mchunk.mchunk_size);
+        // TODO! Implement kmalloc syscall
+        // kmalloc(new_mchunk.mchunk_size);
 
         // Paste malloc chunk data to memory
         memcpy(new_addr, &new_mchunk, sizeof(malloc_chunk));

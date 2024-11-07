@@ -1,6 +1,6 @@
 #include <sys/syscall.h>
 
-#if defined(__is_libk)
+// #if defined(__is_libk)
 void enable_syscall() {
     uint64_t efer = read_msr(MSR_EFER);
     efer |= EFER_SCE; // Set the SCE bit to enable syscall/sysret
@@ -27,4 +27,4 @@ void init_syscall() {
 void syscall_handler(struct pt_regs *regs) {
     __attribute__((unused)) uint64_t syscall_number = regs->rax;
 }
-#endif
+// #endif

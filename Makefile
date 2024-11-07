@@ -63,15 +63,15 @@ KERNEL_SRC_C := $(KERNEL_C) # $(LIBC_C)
 USER_SRC_S := $(USER_S)
 USER_SRC_C := $(USER_C)
 
-OBJ_LIBC := $(patsubst %, $(OBJ_DIR)/%, $(LIBC_C:.c=.libc.o))
+OBJ_LIBC := $(patsubst %, $(OBJ_DIR)/%, $(LIBC_C:.c=.libc.o)) $(patsubst %, $(OBJ_DIR)/%, $(LIBC_S:.s=.libc.o)) 
 OBJ_LIBK := $(patsubst %, $(OBJ_DIR)/%, $(LIBC_C:.c=.libk.o)) $(patsubst %, $(OBJ_DIR)/%, $(LIBC_S:.s=.libk.o)) 
 # OBJ_KERNEL := $(patsubst %, $(OBJ_DIR)/%, $(KERNEL_S:.s=.o)) $(patsubst %, $(OBJ_DIR)/%, $(KERNEL_C:.c=.o))
 KERNEL_OBJ := $(patsubst %, $(OBJ_DIR)/%, $(KERNEL_SRC_S:.s=.o)) \
 		$(patsubst %, $(OBJ_DIR)/%, $(KERNEL_SRC_C:.c=.o)) \
 		$(OBJ_LIBK)
 USER_OBJ := $(patsubst %, $(OBJ_DIR)/%, $(USER_SRC_S:.s=.o)) \
-		$(patsubst %, $(OBJ_DIR)/%, $(USER_SRC_C:.c=.o))
-		# $(OBJ_LIBC)
+		$(patsubst %, $(OBJ_DIR)/%, $(USER_SRC_C:.c=.o)) \
+		$(OBJ_LIBC)
 
 # Disks
 DISK = disk.img
@@ -120,7 +120,7 @@ $(FLOPPY_BIN): kernel boot user
 	$(DD) if=/dev/zero of=$@ bs=$(SECTOR_SIZE) seek=$$(($$FILE_SIZE + $$PADDING)) count=2048 conv=notrunc,fsync
 
 	# Write user code to disk
-	$(DD) if=/dev/zero of=$(DISK) count=1024
+	$(DD) if=/dev/zero of=$(DISK) count=2048 # 1MB
 	$(DD) if=$(USER_BIN) of=$(DISK) conv=notrunc
 
 # Bootloader
