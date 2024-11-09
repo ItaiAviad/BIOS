@@ -26,15 +26,15 @@ void init_syscall() {
     configure_segments();
 }
 
+// x86_64 calling conventions: https://x64.syscall.sh/
 void syscall_handler(pt_regs *regs) {
     long number = regs->rax;
-    printf("rax: %x\n", regs->rax);
-    printf("rdi: %x\n", regs->rdi);
-    printf("rsi: %x\n", regs->rsi);
-    printf("rdx: %x\n", regs->rdx);
-    printf("r10: %x\n", regs->r10);
-    printf("r8: %x\n", regs->r8);
-    printf("r9: %x\n", regs->r9);
-    printf("syscall number: %x\n", number);
+    
+    // int SYS_T_LEN = sizeof(SYSCALL_TABLE) / sizeof(SYSCALL_TABLE[0]);
+    // if (number >= SYS_T_LEN || SYSCALL_TABLE[number] == NULL) {
+    //     return -1;
+    // }
+
+    // return SYSCALL_TABLE[number](regs->rdi, regs->rsi, regs->rdx, regs->r10);
 }
 #endif

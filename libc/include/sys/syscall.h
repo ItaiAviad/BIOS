@@ -61,7 +61,14 @@ enum SYSCALL_NR {
     sys_printf
 };
 
-// #if defined(__is_libk)
+#if defined(__is_libk)
+// typedef uint64_t (*syscall_t)(uint64_t, uint64_t, uint64_t, uint64_t);
+// syscall_t SYSCALL_TABLE[] = {
+//     [0] = getchar,
+//     [1] = printf
+// };
+#endif
+
 static inline uint64_t read_msr(uint32_t msr) {
     uint64_t value;
     __asm__ volatile ("rdmsr" : "=A"(value) : "c"(msr));
@@ -76,9 +83,8 @@ void enable_syscall();
 extern void syscall_entry();
 void configure_segments();
 
-void syscall_handler(struct pt_regs *regs);
+void syscall_handler(pt_regs *regs);
 void init_syscall();
-#endif
 
 #define SYSCALL_ARGS_MAX 6
 
@@ -105,4 +111,4 @@ static inline uint64_t syscall(long number, ...) {
     return ret;
 }
 
-// #endif__asm__
+#endif

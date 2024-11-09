@@ -93,8 +93,6 @@ void user_init() {
     read(0, 0, len, (void*) USER_LOAD_ADDR);
 
     init_syscall();
-    printf("syscall handler: %x\n", syscall_handler);
-    printf("msr efer: %b\n", read_msr(MSR_EFER));
 
     jump_usermode();
 }
