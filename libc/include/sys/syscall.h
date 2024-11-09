@@ -5,6 +5,7 @@
 #define SYSCALL_H
 
 #include <types.h>
+#include <stdarg.h>
 #include <stdio.h>
 
 #define MSR_EFER 0xC0000080
@@ -79,19 +80,28 @@ void syscall_handler(struct pt_regs *regs);
 void init_syscall();
 #endif
 
-uint64_t syscall(enum SYSCALL_NR syscall_number, uint64_t arg0, uint64_t arg1, uint64_t arg2) {
+#define SYSCALL_ARGS_MAX 6
+
+static inline uint64_t syscall(long number, ...) {
     uint64_t ret;
-    printf("syscall: %d, arg0: %d, arg1: %d, arg2: %d\n", (uint64_t)syscall_number, arg0, arg1, arg2);
+
+    va_list args;
+    va_start(args, number);
+    
+    // push args
+    __asm__ volatile("push %0;" : : "r"(number));
+    for (int i = 0; i < SYSCALL_ARGS_MAX; i++) {
+        uint64_t arg = va_arg(args, uint64_t);
+        __asm__ volatile("push %0;" : : "r"(arg));
+    }
+
     __asm__ volatile (
-        "movq %1, %%rdi;"   // First argument
-        "movq %3, %%rsi;"   // Second argument
-        "movq %4, %%rdx;"   // Third argument
-        "movq %1, %%rax;"   // Syscall number
         "syscall;"          // Make the syscall
         : "=a"(ret)         // Output: rax holds the return value
-        : "r"((uint64_t) syscall_number), "r"(arg0), "r"(arg1), "r"(arg2)  // Inputs
-        : "rdi", "rsi", "rdx", "rcx", "r11", "memory"  // Clobbered registers
     );
+
+    va_end(args);
+
     return ret;
 }
 

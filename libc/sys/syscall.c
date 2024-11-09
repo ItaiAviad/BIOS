@@ -26,12 +26,15 @@ void init_syscall() {
     configure_segments();
 }
 
-void syscall_handler(struct pt_regs *regs) {
-    __attribute__((unused)) uint64_t syscall_number = regs->rax;
+void syscall_handler(pt_regs *regs) {
+    long number = regs->rax;
+    printf("rax: %x\n", regs->rax);
     printf("rdi: %x\n", regs->rdi);
     printf("rsi: %x\n", regs->rsi);
     printf("rdx: %x\n", regs->rdx);
-    printf("rax: %x\n", regs->rax);
-    printf("in syscall: %x\n", syscall_number);
+    printf("r10: %x\n", regs->r10);
+    printf("r8: %x\n", regs->r8);
+    printf("r9: %x\n", regs->r9);
+    printf("syscall number: %x\n", number);
 }
 #endif

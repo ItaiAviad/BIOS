@@ -5,9 +5,15 @@ section .text
 [global syscall_entry]
 syscall_entry:
     cli
-    ; Save all general-purpose registers
-    ; pop rax
+    pop r9
+    pop r8
+    pop r10
+    pop rdx
+    pop rsi
+    pop rdi
+    pop rax
 
+    ; Save all general-purpose registers
     push r15                ; Save r15
     push r14                ; Save r14
     push r13                ; Save r13
