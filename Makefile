@@ -63,15 +63,15 @@ KERNEL_SRC_C := $(KERNEL_C) # $(LIBC_C)
 USER_SRC_S := $(USER_S)
 USER_SRC_C := $(USER_C)
 
-OBJ_LIBC := $(patsubst %, $(OBJ_DIR)/%, $(LIBC_C:.c=.libc.o)) $(patsubst %, $(OBJ_DIR)/%, $(LIBC_S:.s=.libc.o))
+OBJ_LIBC := $(patsubst %, $(OBJ_DIR)/%, $(LIBC_C:.c=.libc.o)) # $(patsubst %, $(OBJ_DIR)/%, $(LIBC_S:.s=.libc.o))
 OBJ_LIBK := $(patsubst %, $(OBJ_DIR)/%, $(LIBC_C:.c=.libk.o)) $(patsubst %, $(OBJ_DIR)/%, $(LIBC_S:.s=.libk.o))
 # OBJ_KERNEL := $(patsubst %, $(OBJ_DIR)/%, $(KERNEL_S:.s=.o)) $(patsubst %, $(OBJ_DIR)/%, $(KERNEL_C:.c=.o))
 KERNEL_OBJ := $(patsubst %, $(OBJ_DIR)/%, $(KERNEL_SRC_S:.s=.o)) \
 		$(patsubst %, $(OBJ_DIR)/%, $(KERNEL_SRC_C:.c=.o)) \
 		$(OBJ_LIBK)
 USER_OBJ := $(patsubst %, $(OBJ_DIR)/%, $(USER_SRC_S:.s=.o)) \
-		$(patsubst %, $(OBJ_DIR)/%, $(USER_SRC_C:.c=.o))
-		# $(OBJ_LIBC)
+		$(patsubst %, $(OBJ_DIR)/%, $(USER_SRC_C:.c=.o)) \
+		$(OBJ_LIBC)
 
 # Disks
 DISK = disk.img
@@ -199,9 +199,9 @@ run:
 	-drive file=$(FLOPPY_BIN),format=raw,if=floppy \
 	-drive id=disk,file=$(DISK),format=raw,if=none \
 	-device ahci,id=ahci \
-	-device ide-hd,drive=disk,bus=ahci.0 \
-	-d int,cpu_reset,in_asm,guest_errors \
-	-no-reboot -D log.txt
+	-device ide-hd,drive=disk,bus=ahci.0
+	# -d int,cpu_reset,in_asm,guest_errors \
+	# -no-reboot -D log.txt
 
 run_debugger: 
 	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) -drive id=disk,file=$(DISK),if=none  -device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 -d int,cpu_reset  -no-reboot -D log_debug.txt -s -S

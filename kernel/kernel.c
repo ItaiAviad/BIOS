@@ -69,8 +69,6 @@ int kmain(void) {
     // usermode
     user_init();
     
-    __asm__ volatile ("hlt");
-
     return 0;
 }
 

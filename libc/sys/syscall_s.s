@@ -19,7 +19,7 @@ syscall_entry:
     push r13                ; Save r13
     push r12                ; Save r12
     push rbp                ; Save rbp (base pointer)
-    push rsp
+    ; push rsp
     push rbx                ; Save rbx (base register)
     push r11                ; Save r11 (saved by `syscall` instruction)
     push r10                ; Save r10
@@ -65,7 +65,7 @@ syscall_entry:
     pop r10                 ; Restore r10
     pop r11                 ; Restore r11
     pop rbx                 ; Restore rbx
-    pop rsp
+    ; pop rsp
     pop rbp                 ; Restore rbp
     pop r12                 ; Restore r12
     pop r13                 ; Restore r13

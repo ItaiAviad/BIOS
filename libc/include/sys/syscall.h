@@ -25,7 +25,7 @@ typedef struct pt_regs {
     uint64_t r10;
     uint64_t r11;
     uint64_t rbx;
-    uint64_t rsp;
+    // uint64_t rsp;
     uint64_t rbp;
     uint64_t r12;
     uint64_t r13;
@@ -67,7 +67,7 @@ enum SYSCALL_NR {
 //     [0] = getchar,
 //     [1] = printf
 // };
-#endif
+// #endif
 
 static inline uint64_t read_msr(uint32_t msr) {
     uint64_t value;
@@ -84,6 +84,7 @@ extern void syscall_entry();
 void configure_segments();
 
 void syscall_handler(pt_regs *regs);
+#endif
 void init_syscall();
 
 #define SYSCALL_ARGS_MAX 6
@@ -101,10 +102,10 @@ static inline uint64_t syscall(long number, ...) {
         __asm__ volatile("push %0;" : : "r"(arg));
     }
 
-    __asm__ volatile (
-        "syscall;"          // Make the syscall
-        : "=a"(ret)         // Output: rax holds the return value
-    );
+    // __asm__ volatile (
+    //     "syscall;"          // Make the syscall
+    //     : "=a"(ret)         // Output: rax holds the return value
+    // );
 
     va_end(args);
 

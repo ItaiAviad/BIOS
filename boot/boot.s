@@ -77,7 +77,7 @@ rm:
     
 hlt:
   cli
-  jmp $
+;   jmp $
 
 
 ; %include "print16.s"
