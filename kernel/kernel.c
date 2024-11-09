@@ -88,13 +88,13 @@ int kmain(void) {
 }
 
 void user_init() {
-    size_t len = 0x6000;
+    size_t len = 0x1000;
     map_memory_range(k_ctx, (void*) USER_LOAD_ADDR, (void*) USER_LOAD_ADDR + len, (void*) USER_LOAD_ADDR);
     read(0, 0, len, (void*) USER_LOAD_ADDR);
 
-    #if defined(__is_libk)
     init_syscall();
-    #endif
+    printf("syscall handler: %x\n", syscall_handler);
+    printf("msr efer: %b\n", read_msr(MSR_EFER));
 
-   jump_usermode();
+    jump_usermode();
 }

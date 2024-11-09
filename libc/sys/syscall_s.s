@@ -1,9 +1,13 @@
-section .text
-[global syscall_entry]
+[bits 64]
 [extern syscall_handler]
 
+section .text
+[global syscall_entry]
 syscall_entry:
+    cli
     ; Save all general-purpose registers
+    ; pop rax
+
     push r15                ; Save r15
     push r14                ; Save r14
     push r13                ; Save r13
@@ -63,4 +67,5 @@ syscall_entry:
     pop r15                 ; Restore r15
 
     ; Return to user space
+    sti
     sysret

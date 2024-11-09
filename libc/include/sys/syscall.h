@@ -5,7 +5,7 @@
 #define SYSCALL_H
 
 #include <types.h>
-
+#include <stdio.h>
 
 #define MSR_EFER 0xC0000080
 #define MSR_STAR 0xC0000081
@@ -56,6 +56,7 @@ typedef struct pt_regs {
 } pt_regs;
 
 enum SYSCALL_NR {
+    sys_getchar,
     sys_printf
 };
 
@@ -66,8 +67,8 @@ static inline uint64_t read_msr(uint32_t msr) {
     return value;
 }
 
-static inline void write_msr(uint32_t msr, uint64_t value) {
-    __asm__ volatile ("wrmsr" :: "c"(msr), "A"(value));
+static inline void write_msr(uint32_t msr, uint32_t lo, uint32_t hi) {
+    __asm__ volatile("wrmsr" : : "a"(lo), "d"(hi), "c"(msr));
 }
 
 void enable_syscall();
@@ -76,22 +77,22 @@ void configure_segments();
 
 void syscall_handler(struct pt_regs *regs);
 void init_syscall();
-// #endif
+#endif
 
-static inline uint64_t syscall(enum SYSCALL_NR syscall_number, uint64_t arg0, uint64_t arg1, uint64_t arg2) {
+uint64_t syscall(enum SYSCALL_NR syscall_number, uint64_t arg0, uint64_t arg1, uint64_t arg2) {
     uint64_t ret;
+    printf("syscall: %d, arg0: %d, arg1: %d, arg2: %d\n", (uint64_t)syscall_number, arg0, arg1, arg2);
     __asm__ volatile (
-        "movq %1, %%rax;"  // Syscall number
-        "movq %2, %%rdi;"  // First argument
-        "movq %3, %%rsi;"  // Second argument
-        "movq %4, %%rdx;"  // Third argument
-        "syscall;"         // Make the syscall
-        "movq %%rax, %0;"  // Return value
-        : "=r"(ret)        // Output
+        "movq %1, %%rdi;"   // First argument
+        "movq %3, %%rsi;"   // Second argument
+        "movq %4, %%rdx;"   // Third argument
+        "movq %1, %%rax;"   // Syscall number
+        "syscall;"          // Make the syscall
+        : "=a"(ret)         // Output: rax holds the return value
         : "r"((uint64_t) syscall_number), "r"(arg0), "r"(arg1), "r"(arg2)  // Inputs
-        : "rax", "rdi", "rsi", "rdx", "rcx", "r11", "memory"    // Clobbered registers
+        : "rdi", "rsi", "rdx", "rcx", "r11", "memory"  // Clobbered registers
     );
     return ret;
 }
 
-#endif
+// #endif__asm__

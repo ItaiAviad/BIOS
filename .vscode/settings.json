@@ -84,6 +84,7 @@
     "compare": "cpp",
     "cstdint": "cpp",
     "format": "cpp",
-    "syscall.h": "c"
+    "syscall.h": "c",
+    "interrupts.h": "c"
 }
 }
