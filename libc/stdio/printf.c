@@ -105,6 +105,31 @@ int printf(const char* format, ...) {
             if (!print(str, len))
 				return -1;
 			written += len;
+        } else if (*format == 'p') {
+            format++;
+            int64_t i = va_arg(parameters, int64_t);
+            if (!maxrem) {
+                // TODO: Set errno to EOVERFLOW.
+                return -1;
+            }
+            char str[64 + 2 + 1]; // +1 - for '\0', +2 - for '0x'
+            memset(str, 0, 64 + 2 + 1);
+            char tmp[64 + 1];
+            memset(tmp, 0, 64 + 1);
+            itoa(i, tmp, 16); // Int to string
+            // Add '0x'
+            str[0] = '0';
+            str[1] = 'x';
+            memmove(str + 2, tmp, strlen(tmp) + 1);
+            // print(tmp, strlen(tmp));
+            size_t len = strlen(str);
+            if (maxrem < len) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+            if (!print(str, len))
+				return -1;
+			written += len;
         } else if (*format == 'b') {
             format++;
             int64_t i = va_arg(parameters, int64_t);

@@ -42,19 +42,19 @@ void *sbrk(size_t increment) {
 void print_heap(void) {
     malloc_state *heap = (malloc_state *)heap_malloc_state_base;
 
-    printf("heap_base: %d, tsize: %d, end: %d\n", heap->heap_base, heap->heap_total_size, heap_end);
+    printf("heap_base: %p, tsize: %p, end: %p\n", heap->heap_base, heap->heap_total_size, heap_end);
 
     printf("Allocated Chunks:\n");
     malloc_chunk *cur = heap->mchunk;
     while (cur != NULL) {
-        printf("ptr: %d, size: %d, fd: %d, bk: %d, data: %d\n", cur, cur->mchunk_size, cur->fd, cur->bk, cur->data);
+        printf("ptr: %p, size: %p, fd: %p, bk: %p, data: %p\n", cur, cur->mchunk_size, cur->fd, cur->bk, cur->data);
         cur = cur->fd;
     }
 
     printf("Unsorted Bin Chunks (Free):\n");
     cur = heap->unsorted_bin_head;
     while (cur != NULL) {
-        printf("ptr: %d, size: %d, fd: %d, bk: %d, data: %d\n", cur, cur->mchunk_size, cur->fd, cur->bk, cur->data);
+        printf("ptr: %p, size: %p, fd: %p, bk: %p, data: %p\n", cur, cur->mchunk_size, cur->fd, cur->bk, cur->data);
         cur = cur->fd;
     }
 }

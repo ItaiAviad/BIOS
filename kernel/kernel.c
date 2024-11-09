@@ -45,29 +45,16 @@ int kmain(void) {
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
     printf("PIC\n");
 
-
     // Initialize Kernel Paging:
     // Page Frame Allocator - Manage Physical Memory
     // Paging sturctures (PML4T, PDPT, PDT, PT)
     kernel_allocator.initialized = 0;
     init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
-    printf("Kernel Paging\n");
-
-
-    //printf("Mem size: %d\n", get_memory_size_from_smbios());
-    
+    printf("Kernel Paging\n"); 
 
     // Kernel Heap - Manage Kernel Dynamic Memory
     init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
-    printf("Heap\n");
-
-    // printf("heap: %d, dst: %d, dst2: %d\n", heap, dst, dst2);
-    // char dst[30];
-
-    // PIC - Programmable Interrupt Controller (IMPORTANT: Should be after PageFrameAllocator Init)
-    // PIC should be initialized at the end of Kernel's initializations to avoid race conditions!s
-
-    // pic_init(PIC1_OFFSET, PIC2_OFFSET);
+    printf("Heap: %p\n", kheap_current);
 
     enumerate_pci();
     print_pci_devices();
@@ -88,7 +75,7 @@ int kmain(void) {
 }
 
 void user_init() {
-    size_t len = 0x1000;
+    size_t len = 0x20000;
     map_memory_range(k_ctx, (void*) USER_LOAD_ADDR, (void*) USER_LOAD_ADDR + len, (void*) USER_LOAD_ADDR);
     read(0, 0, len, (void*) USER_LOAD_ADDR);
 

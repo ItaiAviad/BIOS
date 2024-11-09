@@ -17,7 +17,7 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, size_t memory_size
     // Initialize the allocator
     allocator->num_pages = (memory_size_pages);
     allocator->bitmap = (uint8_t *)(PAGE_FRAME_ALLOCATOR_START);
-    memset(allocator->bitmap, (char)0, (uint64_t)allocator->num_pages); // Zero bitmap
+    // memset(allocator->bitmap, (char)0, (uint64_t)allocator->num_pages); // Zero bitmap = UNNECESSARY
 
     memset(allocator->bitmap, (char)1, (PAGE_FRAME_ALLOCATOR_END + PAGE_SIZE) / PAGE_SIZE);
 
