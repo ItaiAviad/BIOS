@@ -47,6 +47,7 @@ void syscall_handler(pt_regs *regs) {
         return;
     }
 
-    SYSCALL_TABLE[number](regs->rdi); 
+    // SYSCALL_TABLE[number](regs->rdi); 
+    printf(regs->rdi);
 }
 #endif

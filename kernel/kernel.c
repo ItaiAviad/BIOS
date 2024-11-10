@@ -68,7 +68,7 @@ int kmain(void) {
 
     // getchar();
     // usermode
-    // user_init();
+    user_init();
     
     while (1) {}
     return 0;

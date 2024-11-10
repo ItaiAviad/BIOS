@@ -4,6 +4,8 @@
 #include <string.h>
 
 void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages) {
+    init_page_frame_allocator(allocator, memory_size_pages);
+
     cli();
     Context boot_ctx = {
         .start_addr = 0x0,
@@ -15,17 +17,11 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
     };
 
     k_ctx.start_addr = 0x0;
-    k_ctx.is_kernel = 1;
-    k_ctx.kernel_start_offset = KERNEL_LOAD_ADDR;
-    k_ctx.binary_offset = BINARY_CODE_OFFSET;
-    k_ctx.stack = KERNEL_STACK;
-    k_ctx.heap = KERNEL_HEAP_START;
+    k_ctx.kernel_start_offset = 0x0;
     k_ctx.memory_size_pages = memory_size_pages;
     k_ctx.allocator = allocator;
     k_ctx.old_pml4 = (uint64_t*) PML4_BOOT;
     k_ctx.pml4 = (uint64_t*) PML4_KERNEL;
-
-    init_page_frame_allocator(k_ctx, allocator, memory_size_pages);
 
     allocator->bitmap[(uint64_t)boot_ctx.pml4 / PAGE_SIZE] = 1; // Mark pml4 boot as allocated
 
@@ -43,9 +39,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 
     // invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
 
-    // printf("111\n");
     switch_context(k_ctx);
-    // printf("999\n");
 
     cli();
 
@@ -95,58 +89,21 @@ void init_recursive_paging(Context ctx){
 void switch_context(Context ctx) {
     cli();
 
-    // Page Frame Allocator (needs to be mapped by previous context)
-    // init_page_frame_allocator(ctx, ctx.allocator, ctx.memory_size_pages);
-    // printf("222\n");
-    // init_recursive_paging(ctx);
-
     // Map New PML4
     // Map the Page of the NEW PML4T in the OLD PML4T
     // map_page((uint64_t *) ctx.old_pml4, &ctx.allocator, (uint64_t)ctx.pml4, (uint64_t)ctx.pml4, PAGE_MAP_FLAGS);
     // Map self (new) PML4 Page (PML4 Table Page) (IMPORTANT! Not doing so causes page fault on PML4 Table access (not good  ¯\_(ツ)_/¯))
     // map_page(ctx, (uint64_t)ctx.pml4, (uint64_t)ctx.pml4, PAGE_MAP_FLAGS);
-
-    // Map binary code
-    // if (!ctx.is_kernel)
-        // map_memory_range(ctx, (void*) (ctx.binary_offset), (void*) (ctx.binary_offset + BINARY_CODE_SIZE), (void*) (ctx.start_addr));
-    // printf("333\n");
-
-    // memset(ctx.allocator->bitmap, 1, upper_divide(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
     
-    // Mark Kernel + Page Frame Allocator + Paging Tables in new Context
-    // map_memory_range(ctx, (void*) (ctx.kernel_start_offset),
-    //                 (void*) (ctx.kernel_start_offset + KERNEL_END),
-    //                 (void*) (KERNEL_LOAD_ADDR));
-    // printf("444\n");
-    // map_memory_range(ctx, (void*) (ctx.kernel_start_offset + PAGE_FRAME_ALLOCATOR_START),
-    //                 (void*) (ctx.kernel_start_offset + PAGE_FRAME_ALLOCATOR_END),
-    //                 (void*) (ctx.start_addr + ctx.kernel_start_offset + PAGE_FRAME_ALLOCATOR_START));
-    // printf("555\n");
-    // memset(ctx.allocator->bitmap, 1, upper_divide((int)ctx.allocator->bitmap, PAGE_SIZE));
-
     // Map Kernel (In new PML4)
-    // map_memory_range(ctx, (void*)MBR_LOAD_ADDR, (void*) PAGE_FRAME_ALLOCATOR_END, (void*)MBR_LOAD_ADDR);
+    // Map Kernel + Page Frame Allocator + Pagign Tables in new Kernel Context
+    memset(ctx.allocator->bitmap, 1, upper_divide(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
 
-    // Map new PML4
-    // map_memory_range(ctx, (void*)(ctx.pml4), (ctx.pml4 + PAGE_SIZE), (void*)ctx.pml4);
-    // printf("6666\n");
-
-
-    map_memory_range(ctx, (void*)MBR_LOAD_ADDR, (void*) PAGE_FRAME_ALLOCATOR_END, (void*)MBR_LOAD_ADDR);
-    map_memory_range(ctx, (void*)ctx.pml4, ctx.pml4 + PAGE_SIZE, (void*)ctx.pml4);
+    map_memory_range(ctx, (void*)MBR_LOAD_ADDR, (void*) PAGE_FRAME_ALLOCATOR_END - 1, (void*)MBR_LOAD_ADDR);
+    map_memory_range(ctx, (void*)ctx.pml4, ctx.pml4+PAGE_SIZE-1, (void*)ctx.pml4);
     // Switch PML4 to use the (new) s PML4
-
-    // Stack
-    
-    // Heap
-
-    // printf("7777\n");
-
-    // Switch PML4 to use the new PML4
+    cli();
     set_pml4_address((uint64_t *) ctx.pml4);
-    // printf("8888\n");
-
-
     sti();
 }
 

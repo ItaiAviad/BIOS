@@ -6,7 +6,7 @@
 
 extern uint64_t __end;
 
-void init_page_frame_allocator(Context ctx, PageFrameAllocator *allocator, size_t memory_size_pages) {
+void init_page_frame_allocator(PageFrameAllocator *allocator, size_t memory_size_pages) {
     cli();
     // Allocate pages for the allocator via allocator_bitmap_init and then copy to the new larger allocator bitmap
     if (allocator->initialized)
@@ -17,11 +17,9 @@ void init_page_frame_allocator(Context ctx, PageFrameAllocator *allocator, size_
     // Initialize the allocator
     allocator->num_pages = (memory_size_pages);
     allocator->bitmap = (uint8_t *)(PAGE_FRAME_ALLOCATOR_START);
-    // allocator->bitmap = (uint8_t *)(ctx.start_addr + ctx.kernel_start_offset + PAGE_FRAME_ALLOCATOR_START);
     // memset(allocator->bitmap, (char)0, (uint64_t)allocator->num_pages); // Zero bitmap = UNNECESSARY
 
-    memset(allocator->bitmap, (char)1, upper_divide(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
-    // memset((uint8_t*) ((uint64_t)allocator->bitmap + ctx.kernel_start_offset), 1, upper_divide(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
+    memset(allocator->bitmap, (char)1, (PAGE_FRAME_ALLOCATOR_END + PAGE_SIZE) / PAGE_SIZE);
 
     sti();
 }
@@ -67,10 +65,6 @@ void *allocate_and_zero_page(Context ctx) {
 void deallocate_page(PageFrameAllocator *allocator, void *page) {
     uint64_t page_index = (uint64_t)page / PAGE_SIZE;
     allocator->bitmap[page_index / 64] &= ~(1ULL << (page_index % 64)); // Mark as free
-}
-
-void mark_pages() {
-
 }
 
 
