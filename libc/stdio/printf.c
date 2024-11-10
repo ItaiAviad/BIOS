@@ -19,6 +19,11 @@ int printf(const char* format, ...) {
     va_start(parameters, format);
 
     int written = 0;
+    print(" X ", 3);
+    // char str[64 + 1];
+    // memset(str, 0, 64 + 1);
+    // itoa(format, str, 10);
+    // print(str, strlen(str));
 
     while (*format != '\0') {
         size_t maxrem = INT_MAX - written;
@@ -167,6 +172,8 @@ int printf(const char* format, ...) {
 			format += len;
 		}
 	}
+
+    print(" Y ", 3);
 
 	va_end(parameters);
 	return written;

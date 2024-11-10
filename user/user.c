@@ -4,7 +4,9 @@
 int umain(void) {
     // char* mymsg = "HELLO THERE";
     // init_syscall();
-    // syscall(sys_printf, 0x41, 0x42, 0x43);
+    // char* buff = "HELLOOOO\n";
+    // syscall(sys_printf, buff);
+    // syscall(sys_getchar);
     // printf("%s\n", mymsg);
     while (1) {}
     return 0;

@@ -53,7 +53,7 @@ int kmain(void) {
     printf("Kernel Paging\n"); 
 
     // Kernel Heap - Manage Kernel Dynamic Memory
-    init_heap(KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
+    init_heap(k_ctx, KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
     printf("Heap: %p\n", kheap_current);
 
     enumerate_pci();
@@ -66,9 +66,11 @@ int kmain(void) {
     // char buffer[] = "Hi gal";
     // write(0, 0, sizeof(buffer), buffer);
 
+    // getchar();
     // usermode
-    user_init();
+    // user_init();
     
+    while (1) {}
     return 0;
 }
 

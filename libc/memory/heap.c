@@ -2,7 +2,7 @@
 #include <memory.h>
 
 
-void* init_heap(uint64_t base_addr, uint64_t size) {
+void* init_heap(Context ctx, uint64_t base_addr, uint64_t size) {
     heap_malloc_state_base = (void*) aalign(base_addr, HEAP_CHUNK_MIN_SIZE_BYTES);
 
     // Allocate malloc_state (heap:0x0)- Kernel Malloc
@@ -17,8 +17,8 @@ void* init_heap(uint64_t base_addr, uint64_t size) {
     heap.unsorted_bin_head = NULL;
     // TODO (IMPORTANT!): Use `kmalloc` (above) as a syscall
     #if defined(__is_libk)
-    map_memory_range(k_ctx, heap_malloc_state_base, heap_malloc_state_base + sizeof(malloc_state), heap_malloc_state_base);
-    map_memory_range(k_ctx, (void*) base_addr, (void*) (base_addr + heap.heap_total_size), (void*) base_addr);
+    map_memory_range(ctx, heap_malloc_state_base, heap_malloc_state_base + sizeof(malloc_state), heap_malloc_state_base);
+    map_memory_range(ctx, (void*) base_addr, (void*) (base_addr + heap.heap_total_size), (void*) base_addr);
     #endif
     memset(&heap.padding, 0x0, MALLOC_STATE_PADDING_SIZE);
     memcpy(heap_malloc_state_base, (void *)&heap, sizeof(malloc_state));

@@ -16,16 +16,26 @@
 #define MEMORY_SIZE_PAGES (0x60 * MB) // = 2MB (Pages) = 0x200000 (Pages)
 // #define MEMORY_SIZE PAGE_SIZE * MEMORY_SIZE_PAGES // 8GB = 0x200000000
 
+
 // Virtual Memory:
 
 // Kernel (Virtual) Memory
+
 // #define KERNEL_LOAD_ADDRESS ... ==> Defined in Makefile!
+#ifndef KERNEL_LOAD_ADDR
+#define KERNEL_LOAD_ADDR 0x90000
+#endif
+#define KERNEL_STACK 0xF000
+
 #define KERNEL_END (3 * MB) // 2MB
 
 // Kernel Page Frame Allocator
 #define PAGE_FRAME_ALLOCATOR_START KERNEL_END
 #define PAGE_FRAME_ALLOCATOR_BITMAP_SIZE ((MEMORY_SIZE_PAGES + PAGE_SIZE - 1) / PAGE_SIZE)
 #define PAGE_FRAME_ALLOCATOR_END (PAGE_FRAME_ALLOCATOR_START + PAGE_FRAME_ALLOCATOR_BITMAP_SIZE - 1)
+
+#define BINARY_CODE_OFFSET 0x0
+#define BINARY_CODE_SIZE (2 * MB)
 
 #define MBR_LOAD_ADDR 0x7c00
 

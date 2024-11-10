@@ -37,12 +37,19 @@ typedef struct Context {
     uint64_t kernel_start_offset; // Different for a process
     uint64_t memory_size_pages; // Total memory size (in pages) for context
     PageFrameAllocator* allocator;
+
+    uint64_t* binary_offset;
+    uint64_t* stack;
+    uint64_t* heap;
+
     uint64_t* old_pml4;
     uint64_t* pml4;
+
+    bool is_kernel;
 } Context;
 
-__attribute__((unused))
-Context k_ctx;
+__attribute__((unused)) Context k_ctx;
+__attribute__((unused)) Context u_ctx;
 // ----------------------------------------------
 
 // Page Frame Allocator
@@ -52,7 +59,7 @@ Context k_ctx;
  * @param allocator 
  * @param memory_size_pages Total Memory Size in Pages (for the entire OS)
  */
-void init_page_frame_allocator(PageFrameAllocator* allocator, size_t memory_size);
+void init_page_frame_allocator(Context ctx, PageFrameAllocator* allocator, size_t memory_size);
 /**
  * @brief Allocate a page to a frame
  * 
@@ -92,9 +99,9 @@ uint64_t* get_addr_from_table_indexes(uint16_t pml4_index, uint16_t pdpt_index, 
 void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages);
 
 /**
- * @brief Switch context (Paging tables)
+ * @brief Switch context
  * 
- * @param ctx 
+ * @param ctx new context
  */
 void switch_context(Context ctx);
 /**
