@@ -311,19 +311,19 @@ bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t
            sizeof(HBA_CMD_TBL) + (cmdheader->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));
 
     // 8K bytes (16 sectors) per PRDT
-    int i;
+    int i, count_temp = count;
     for (i = 0; i < cmdheader->prdtl - 1; i++) {
         cmdtbl->prdt_entry[i].dba = (uint64_t)buf;
         cmdtbl->prdt_entry[i].dbc =
             PRDT_WRITE_SIZE_PER_ENTRY - 1; // Number of bytes per prdt
         cmdtbl->prdt_entry[i].i = 1;
         buf += PRDT_WRITE_SIZE_PER_ENTRY;
-        count -= PRDT_WRITE_SIZE_PER_ENTRY / SECTOR_SIZE;
+        count_temp -= PRDT_WRITE_SIZE_PER_ENTRY / SECTOR_SIZE;
     }
     // Last entry
     cmdtbl->prdt_entry[i].dba = (uint64_t)buf;
     cmdtbl->prdt_entry[i].dbc =
-        (count << 9) - 1; // Calculate number of sectors remaining.
+        (count_temp << 9) - 1; // Calculate number of sectors remaining.
 
     // Setup command
     FIS_REG_H2D *cmdfis = (FIS_REG_H2D *)(&cmdtbl->cfis);
@@ -388,22 +388,23 @@ bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t 
 	cmdheader += slot;
 	cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(uint32_t);	// Command FIS size
 	cmdheader->w = 0;		// Read from device
-	cmdheader->prdtl = (uint16_t)((count-1)>>4) + 1;	// PRDT entries count
+	cmdheader->prdtl = upper_divide(count, PRDT_READ_SIZE_PER_ENTRY /
+                                               SECTOR_SIZE);	// PRDT entries count
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*)(cmdheader->ctba);
 	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) + (cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
 	// 8K bytes (16 sectors) per PRDT
-	int i;
+	int i, count_temp = count;
 	for (i=0; i<cmdheader->prdtl-1; i++)
 	{
 		cmdtbl->prdt_entry[i].dba = (uint64_t)buf;
-		cmdtbl->prdt_entry[i].dbc = 8*1024-1;	// 8K bytes (this value should always be set to 1 less than the actual value)
+		cmdtbl->prdt_entry[i].dbc = PRDT_READ_SIZE_PER_ENTRY-1;	// 8K bytes (this value should always be set to 1 less than the actual value)
 		cmdtbl->prdt_entry[i].i = 1;
-		buf += 4*1024;	// 4K words
-		count -= 16;	// 16 sectors
+		buf += PRDT_READ_SIZE_PER_ENTRY;
+		count_temp -= PRDT_READ_SIZE_PER_ENTRY / SECTOR_SIZE;	// 16 sectors
 	}
 	// Last entry
 	cmdtbl->prdt_entry[i].dba = (uint64_t) buf;
-	cmdtbl->prdt_entry[i].dbc = (count<<9)-1;	// 512 bytes per sector
+	cmdtbl->prdt_entry[i].dbc = (count_temp<<9)-1;
 	cmdtbl->prdt_entry[i].i = 1;
 	// Setup command
 	FIS_REG_H2D *cmdfis = (FIS_REG_H2D*)(&cmdtbl->cfis);

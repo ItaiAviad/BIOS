@@ -25,7 +25,7 @@ extern void jump_usermode();
 void user_init();
 
 #ifndef USER_LOAD_ADDR
-USER_LOAD_ADDR = 0x4000000;
+#define USER_LOAD_ADDR 0x4000000;
 #endif
 
 int kmain(void) {
