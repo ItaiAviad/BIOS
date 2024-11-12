@@ -7,3 +7,4 @@ section .entry
 global _kentry
 _kentry:
 	call kmain
+    jmp $

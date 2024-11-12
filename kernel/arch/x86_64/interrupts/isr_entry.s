@@ -143,4 +143,4 @@ ISR_NOERRCODE 33 ; Keyboard
 ISR_NOERRCODE 34
 
 _isr_start:
-    ; jmp $
+    jmp $

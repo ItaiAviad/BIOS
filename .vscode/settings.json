@@ -85,6 +85,7 @@
     "cstdint": "cpp",
     "format": "cpp",
     "syscall.h": "c",
-    "interrupts.h": "c"
+    "interrupts.h": "c",
+    "limits.h": "c"
 }
 }

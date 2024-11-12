@@ -2,7 +2,7 @@
 #include <memory.h>
 
 
-void* init_heap(Context ctx, uint64_t base_addr, uint64_t size) {
+void* init_heap(__attribute__((unused)) Context ctx, uint64_t base_addr, uint64_t size) {
     heap_malloc_state_base = (void*) aalign(base_addr, HEAP_CHUNK_MIN_SIZE_BYTES);
 
     // Allocate malloc_state (heap:0x0)- Kernel Malloc

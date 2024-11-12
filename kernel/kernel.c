@@ -25,7 +25,7 @@ extern void jump_usermode();
 void user_init();
 
 #ifndef USER_LOAD_ADDR
-#define USER_LOAD_ADDR 0x4000000;
+#define USER_LOAD_ADDR 0x4000000
 #endif
 
 int kmain(void) {
@@ -38,12 +38,14 @@ int kmain(void) {
     printf("ISRs\n");
 
     // Flush TSS
-    flush_tss();
+    // flush_tss();
 
     // PIC - Programmable Interrupt Controller
     // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
     printf("PIC\n");
+    printf("time now: %d\n", time());
+    date();
 
     // Initialize Kernel Paging:
     // Page Frame Allocator - Manage Physical Memory
@@ -53,22 +55,24 @@ int kmain(void) {
     printf("Kernel Paging\n"); 
 
     // Kernel Heap - Manage Kernel Dynamic Memory
-    init_heap(k_ctx, KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
-    printf("Heap: %p\n", kheap_current);
+    // init_heap(k_ctx, KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
+    // printf("Heap: %p\n", kheap_current);
 
-    enumerate_pci();
-    print_pci_devices();
+    // enumerate_pci();
+    // print_pci_devices();
 
     // Setup AHCI and enumerate Disks
-    enumerate_disks();
-    print_disks();
+    // enumerate_disks();
+    // print_disks();
 
     // char buffer[] = "Hi gal";
     // write(0, 0, sizeof(buffer), buffer);
 
     // getchar();
     // usermode
-    user_init();
+    // user_init();
+
+    getchar();
     
     while (1) {}
     return 0;

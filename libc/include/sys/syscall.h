@@ -69,13 +69,16 @@ enum SYSCALL_NR {
 
 #if defined(__is_libk)
 // Syscall Table
-#define __NR_syscalls 256
-// typedef uint64_t (*syscall_t)();
-typedef long syscall_t();
-typedef void (*funcptr)();
-static const funcptr SYSCALL_TABLE[] = {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wincompatible-pointer-types"
+
+// #define __NR_syscalls 256
+typedef void (*syscall_t)();
+static const syscall_t __attribute__((unused)) SYSCALL_TABLE[] = {
     [sys_printf] = printf
 };
+
+#pragma GCC diagnostic pop
 // #endif
 
 static inline uint64_t read_msr(uint32_t msr) {
@@ -100,24 +103,14 @@ void init_syscall();
 #define SYSCALL_ARGS_MAX 12
 
 /**
- * @brief Executes a system call with the specified number and arguments.
- *
- * This function performs a syscall instruction. The arguments are processed using
- * variadic arguments (va_list). The syscall uses x86_64 calling conventions
- * where the syscall number is placed in the RAX register, and the first three
- * arguments are placed in the RDI, RSI, and RDX registers respectively.
+ * @brief A variadic function of `syscall()`
  * 
- * @Note: For now is limited to 6 arguments (rdi, rsi, rdx, r10, r8, r9)
- *
- * @param number The syscall number to execute.
- * @param ... A variable number of arguments to pass to the syscall.
- * @return uint64_t The return value of the syscall.
+ * @param number 
+ * @param args 
+ * @return uint64_t 
  */
-static inline uint64_t syscall(volatile long number, ...) {
+static uint64_t syscall_variadic(long number, va_list args) {
     volatile uint64_t ret;
-
-    va_list args;
-    va_start(args, number);
     
     // push args
     // volatile uint64_t arg;
@@ -147,6 +140,47 @@ static inline uint64_t syscall(volatile long number, ...) {
     // for (int i = 0; i < SYSCALL_ARGS_MAX - SYSCALL_REGS_MAX; ++i) {
     //     __asm__ volatile("pop %0;" : "=r"(arg));
     // }
+
+    return ret;
+}
+
+
+/**
+ * @brief Executes a system call with the specified number and arguments.
+ *
+ * This function performs a syscall instruction. The arguments are processed using
+ * variadic arguments (va_list). The syscall uses x86_64 calling conventions
+ * where the syscall number is placed in the RAX register, and the first three
+ * arguments are placed in the RDI, RSI, and RDX registers respectively.
+ * 
+ * @Note: For now is limited to 6 arguments (rdi, rsi, rdx, r10, r8, r9)
+ *
+ * @param number The syscall number to execute.
+ * @param ... A variable number of arguments to pass to the syscall.
+ * @return uint64_t The return value of the syscall.
+ */
+static inline uint64_t syscall(long number, ...) {
+    va_list args;
+    va_start(args, number);
+
+    volatile uint64_t ret = syscall_variadic(number, args);
+    // volatile uint64_t ret;
+    
+    // push args
+    // volatile uint64_t rdi = va_arg(args, uint64_t);
+    // volatile uint64_t rsi = va_arg(args, uint64_t);
+    // volatile uint64_t rdx = va_arg(args, uint64_t);
+    // volatile uint64_t r10 = va_arg(args, uint64_t);
+    // volatile uint64_t r8 = va_arg(args, uint64_t);
+    // volatile uint64_t r9 = va_arg(args, uint64_t);
+
+    // // Push r10, r8, r9
+    // __asm__ volatile("push %0;" : : "r"(r10));
+    // __asm__ volatile("push %0;" : : "r"(r8));
+    // __asm__ volatile("push %0;" : : "r"(r9));
+
+    // // rax, rdi, rsi, rdx, syscall
+    // __asm__ volatile("syscall" : "=a"(ret) : "a"(number), "D"(rdi), "S"(rsi), "d"(rdx) : "memory","cc");
 
     va_end(args);
 

@@ -7,4 +7,4 @@ section .entry
 [global _uentry]
 _uentry:
 	call umain
-	; jmp $
+	jmp $

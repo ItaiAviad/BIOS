@@ -30,11 +30,6 @@ void init_syscall() {
 void syscall_handler(pt_regs *regs) {
     long number = regs->rax;
     printf("syscall number: %p\n", number);
-    // printf(regs->rdi);
-    // for (int i = 0; i < 10; ++i) {
-    //     printf("%d\n", ((char*)(regs->rdi))[i]);
-    // }
-    // printf("BRUH\n");
     printf("rdi: %p\n", regs->rdi);
     printf("rsi: %p\n", regs->rsi);
     printf("rdx: %p\n", regs->rdx);
@@ -47,7 +42,7 @@ void syscall_handler(pt_regs *regs) {
         return;
     }
 
-    // SYSCALL_TABLE[number](regs->rdi); 
-    printf(regs->rdi);
+    SYSCALL_TABLE[number](regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9); 
 }
+
 #endif

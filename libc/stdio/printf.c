@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <types.h>
+#include <sys/syscall.h>
 
+#if defined(__is_libk)
 static bool print(const char* data, size_t length) {
     const unsigned char* bytes = (const unsigned char*) data;
     for (size_t i = 0; i < length; i++)
@@ -13,17 +15,27 @@ static bool print(const char* data, size_t length) {
             return false;
     return true;
 }
+#endif
 
 int printf(const char* format, ...) {
+    volatile int res;
+
     va_list parameters;
     va_start(parameters, format);
 
+    #if defined(__is_libk)
+
+    char str[64 + 1];
+    memset(str, 0, 64 + 1);
+    itoa(format, str, 10);
+    print(str, strlen(str));
     int written = 0;
-    print(" X ", 3);
-    // char str[64 + 1];
-    // memset(str, 0, 64 + 1);
-    // itoa(format, str, 10);
-    // print(str, strlen(str));
+
+    if (!format) {
+        const char* err_msg = "printf error: format is 0x0\n";
+        print(err_msg, strlen(err_msg));
+        return -1;
+    }
 
     while (*format != '\0') {
         size_t maxrem = INT_MAX - written;
@@ -173,8 +185,14 @@ int printf(const char* format, ...) {
 		}
 	}
 
-    print(" Y ", 3);
+    res = written;
 
+    #else
+    // Syscall
+    res = syscall_variadic(sys_printf, parameters);
+
+    #endif
 	va_end(parameters);
-	return written;
+
+	return res;
 }
