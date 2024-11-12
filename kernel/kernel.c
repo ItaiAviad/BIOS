@@ -68,7 +68,6 @@ int kmain(void) {
     // char buffer[] = "Hi gal";
     // write(0, 0, sizeof(buffer), buffer);
 
-    // getchar();
     // usermode
     // user_init();
 

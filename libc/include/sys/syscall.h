@@ -163,24 +163,24 @@ static inline uint64_t syscall(long number, ...) {
     va_list args;
     va_start(args, number);
 
-    volatile uint64_t ret = syscall_variadic(number, args);
-    // volatile uint64_t ret;
+    // volatile uint64_t ret = syscall_variadic(number, args);
+    volatile uint64_t ret;
     
     // push args
-    // volatile uint64_t rdi = va_arg(args, uint64_t);
-    // volatile uint64_t rsi = va_arg(args, uint64_t);
-    // volatile uint64_t rdx = va_arg(args, uint64_t);
-    // volatile uint64_t r10 = va_arg(args, uint64_t);
-    // volatile uint64_t r8 = va_arg(args, uint64_t);
-    // volatile uint64_t r9 = va_arg(args, uint64_t);
+    volatile uint64_t rdi = va_arg(args, uint64_t);
+    volatile uint64_t rsi = va_arg(args, uint64_t);
+    volatile uint64_t rdx = va_arg(args, uint64_t);
+    volatile uint64_t r10 = va_arg(args, uint64_t);
+    volatile uint64_t r8 = va_arg(args, uint64_t);
+    volatile uint64_t r9 = va_arg(args, uint64_t);
 
-    // // Push r10, r8, r9
-    // __asm__ volatile("push %0;" : : "r"(r10));
-    // __asm__ volatile("push %0;" : : "r"(r8));
-    // __asm__ volatile("push %0;" : : "r"(r9));
+    // Push r10, r8, r9
+    __asm__ volatile("push %0;" : : "r"(r10));
+    __asm__ volatile("push %0;" : : "r"(r8));
+    __asm__ volatile("push %0;" : : "r"(r9));
 
-    // // rax, rdi, rsi, rdx, syscall
-    // __asm__ volatile("syscall" : "=a"(ret) : "a"(number), "D"(rdi), "S"(rsi), "d"(rdx) : "memory","cc");
+    // rax, rdi, rsi, rdx, syscall
+    __asm__ volatile("syscall" : "=a"(ret) : "a"(number), "D"(rdi), "S"(rsi), "d"(rdx) : "memory","cc");
 
     va_end(args);
 

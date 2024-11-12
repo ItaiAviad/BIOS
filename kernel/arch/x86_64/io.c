@@ -129,7 +129,6 @@ void special_key_press(uint16_t scan_code) {
 char wait_key() {
     irq_clear_mask(IRQ_KEYBOARD);
     
-    printf("IN WAIT KEY\n");
     while (buffer_is_empty()) {}
     printf("AFTE WAIT KEY\n");
 

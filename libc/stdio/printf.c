@@ -25,10 +25,6 @@ int printf(const char* format, ...) {
 
     #if defined(__is_libk)
 
-    char str[64 + 1];
-    memset(str, 0, 64 + 1);
-    itoa(format, str, 10);
-    print(str, strlen(str));
     int written = 0;
 
     if (!format) {
