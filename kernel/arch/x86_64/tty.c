@@ -3,13 +3,13 @@
 
 #include <arch/x86_64/vga.h>
 
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
+static const int64_t VGA_WIDTH = 80;
+static const int64_t VGA_HEIGHT = 25;
 static const size_t VGA_EXTENT = 80 * 25;
 static uint16_t* const VGA_MEMORY = (uint16_t*) 0xB8000;
 
-static size_t terminal_row; // y position
-static size_t terminal_column; // x position
+static int64_t terminal_row; // y position
+static int64_t terminal_column; // x position
 static uint8_t terminal_color;
 static uint16_t* terminal_buffer;
 
@@ -85,8 +85,8 @@ void terminal_initialize(void) {
 	terminal_column = 0;
 	terminal_color = vga_entry_color(VGA_COLOR_LIGHT_GREEN, VGA_COLOR_BLACK);
 	terminal_buffer = VGA_MEMORY;
-	for (size_t y = 0; y < VGA_HEIGHT; y++) {
-		for (size_t x = 0; x < VGA_WIDTH; x++) {
+	for (int64_t y = 0; y < VGA_HEIGHT; y++) {
+		for (int64_t x = 0; x < VGA_WIDTH; x++) {
 			const size_t index = y * VGA_WIDTH + x;
 			terminal_buffer[index] = vga_entry(' ', terminal_color);
 		}
@@ -111,6 +111,7 @@ void terminal_putchar(char c) {
 
         if (++current_row >= VGA_HEIGHT) {
             terminal_scroll_line_down();
+            terminal_column = -1;
         }
         else {
             update_cursor(-1, current_row);
@@ -134,9 +135,9 @@ void terminal_putchar(char c) {
     }
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT)
-            terminal_row = terminal_row;
-			// terminal_row = 0;
+		if (++terminal_row == VGA_HEIGHT) {
+            terminal_scroll_line_down();
+        }
 	}
 }
 
@@ -169,5 +170,5 @@ void terminal_scroll_line_down() {
         terminal_buffer[pos] = vga_entry(' ', terminal_color);
     }
 
-    update_cursor(-1, VGA_HEIGHT - 1);
+    update_cursor(0, VGA_HEIGHT - 1);
 }

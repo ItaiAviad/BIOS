@@ -44,8 +44,6 @@ int kmain(void) {
     // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
     printf("PIC\n");
-    printf("time now: %d\n", time());
-    date();
 
     // Initialize Kernel Paging:
     // Page Frame Allocator - Manage Physical Memory
@@ -65,6 +63,8 @@ int kmain(void) {
     enumerate_disks();
     print_disks();
 
+    cli();
+
     // usermode
     user_init();
     
@@ -73,11 +73,15 @@ int kmain(void) {
 }
 
 void user_init() {
+    cli();
+
     size_t len = 0x20000;
     map_memory_range(k_ctx, (void*) USER_LOAD_ADDR, (void*) USER_LOAD_ADDR + len, (void*) USER_LOAD_ADDR);
     read(0, 0, len, (void*) USER_LOAD_ADDR);
 
     init_syscall();
+
+    sti();
 
     jump_usermode();
 }

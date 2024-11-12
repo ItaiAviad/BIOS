@@ -7,6 +7,8 @@
 #include <types.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <string.h>
+#include <time.h>
 
 #define MSR_EFER 0xC0000080
 #define MSR_STAR 0xC0000081
@@ -31,30 +33,6 @@ typedef struct pt_regs {
     uint64_t r13;
     uint64_t r14;
     uint64_t r15;
-    // Additional arguments
-    // uint64_t arg11;
-    // uint64_t arg10;
-    // uint64_t arg9;
-    // uint64_t arg8;
-    // uint64_t arg7;
-    // uint64_t arg6;
-
-    // uint64_t r15;
-    // uint64_t r14;
-    // uint64_t r13;
-    // uint64_t r12;
-    // uint64_t rbp;
-    // uint64_t rsp;
-    // uint64_t rbx;
-    // uint64_t r11;
-    // uint64_t r10;
-    // uint64_t r9;
-    // uint64_t r8;
-    // uint64_t rax;  // Syscall number
-    // uint64_t rcx;
-    // uint64_t rdx;  // Third argument
-    // uint64_t rsi;  // Second argument
-    // uint64_t rdi;  // First argument
 
     // uint64_t rip;
     // uint64_t cs;
@@ -64,7 +42,8 @@ typedef struct pt_regs {
 } pt_regs;
 
 enum SYSCALL_NR {
-    sys_printf
+    sys_printf,
+    sys_getchar
 };
 
 #if defined(__is_libk)
@@ -73,9 +52,10 @@ enum SYSCALL_NR {
 #pragma GCC diagnostic ignored "-Wincompatible-pointer-types"
 
 // #define __NR_syscalls 256
-typedef void (*syscall_t)();
-static const syscall_t __attribute__((unused)) SYSCALL_TABLE[] = {
-    [sys_printf] = printf
+typedef int64_t (*syscall_t)();
+static const syscall_t SYSCALL_TABLE[] = {
+    [sys_printf] = printf,
+    [sys_getchar] = getchar
 };
 
 #pragma GCC diagnostic pop
@@ -95,7 +75,7 @@ void enable_syscall();
 extern void syscall_entry();
 void configure_segments();
 
-void syscall_handler(pt_regs *regs);
+int64_t syscall_handler(pt_regs *regs);
 #endif
 void init_syscall();
 
@@ -103,47 +83,47 @@ void init_syscall();
 #define SYSCALL_ARGS_MAX 12
 
 /**
- * @brief A variadic function of `syscall()`
+ * @brief A format function of `vsyscall()`. See x86_64 calling conventions. (Same as `vsyscall()`,
+ * but with the first argument outside of va_list)
  * 
  * @param number 
+ * @param rdi 
  * @param args 
  * @return uint64_t 
  */
-static uint64_t syscall_variadic(long number, va_list args) {
+static uint64_t fvsyscall(long number, volatile uint64_t rdi, va_list args) {
     volatile uint64_t ret;
-    
-    // push args
-    // volatile uint64_t arg;
 
-    volatile uint64_t rdi = va_arg(args, uint64_t);
+    // Extract the arguments and load them into the correct registers
     volatile uint64_t rsi = va_arg(args, uint64_t);
     volatile uint64_t rdx = va_arg(args, uint64_t);
     volatile uint64_t r10 = va_arg(args, uint64_t);
     volatile uint64_t r8 = va_arg(args, uint64_t);
     volatile uint64_t r9 = va_arg(args, uint64_t);
-    
-    // Push additional arguments (arg6, ...)
-    // for (int i = 0; i < SYSCALL_ARGS_MAX - SYSCALL_REGS_MAX; ++i) {
-    //     arg = va_arg(args, uint64_t);
-    //     __asm__ volatile("push %0;" : : "r"(arg));
-    // }
 
-    // Push r10, r8, r9
-    __asm__ volatile("push %0;" : : "r"(r10));
-    __asm__ volatile("push %0;" : : "r"(r8));
-    __asm__ volatile("push %0;" : : "r"(r9));
-
-    // rax, rdi, rsi, rdx, syscall
-    __asm__ volatile("syscall" : "=a"(ret) : "a"(number), "D"(rdi), "S"(rsi), "d"(rdx) : "memory","cc");
-
-    // Pop additional arguments (arg6, ...)
-    // for (int i = 0; i < SYSCALL_ARGS_MAX - SYSCALL_REGS_MAX; ++i) {
-    //     __asm__ volatile("pop %0;" : "=r"(arg));
-    // }
+    // Perform the syscall
+    __asm__ volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(number), "D"(rdi), "S"(rsi), "d"(rdx), "r"(r8), "r"(r9), "r"(r10) // rdi, rsi, rdx, r8, r9, r10
+        : "memory", "cc"
+    );
 
     return ret;
 }
 
+/**
+ * @brief A variadic function of `syscall()`. See x86_64 calling conventions.
+ * 
+ * @param number 
+ * @param args 
+ * @return uint64_t 
+ */
+static uint64_t vsyscall(long number, va_list args) {
+    volatile uint64_t rdi = va_arg(args, uint64_t);
+
+    return fvsyscall(number, rdi, args);
+}
 
 /**
  * @brief Executes a system call with the specified number and arguments.
@@ -163,24 +143,7 @@ static inline uint64_t syscall(long number, ...) {
     va_list args;
     va_start(args, number);
 
-    // volatile uint64_t ret = syscall_variadic(number, args);
-    volatile uint64_t ret;
-    
-    // push args
-    volatile uint64_t rdi = va_arg(args, uint64_t);
-    volatile uint64_t rsi = va_arg(args, uint64_t);
-    volatile uint64_t rdx = va_arg(args, uint64_t);
-    volatile uint64_t r10 = va_arg(args, uint64_t);
-    volatile uint64_t r8 = va_arg(args, uint64_t);
-    volatile uint64_t r9 = va_arg(args, uint64_t);
-
-    // Push r10, r8, r9
-    __asm__ volatile("push %0;" : : "r"(r10));
-    __asm__ volatile("push %0;" : : "r"(r8));
-    __asm__ volatile("push %0;" : : "r"(r9));
-
-    // rax, rdi, rsi, rdx, syscall
-    __asm__ volatile("syscall" : "=a"(ret) : "a"(number), "D"(rdi), "S"(rsi), "d"(rdx) : "memory","cc");
+    volatile uint64_t ret = vsyscall(number, args);
 
     va_end(args);
 

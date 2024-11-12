@@ -185,7 +185,7 @@ int printf(const char* format, ...) {
 
     #else
     // Syscall
-    res = syscall_variadic(sys_printf, parameters);
+    res = fvsyscall(sys_printf, (uint64_t) format, parameters);
 
     #endif
 	va_end(parameters);

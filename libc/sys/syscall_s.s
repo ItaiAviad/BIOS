@@ -6,10 +6,6 @@ section .text
 syscall_entry:
     cli
 
-    pop r9
-    pop r8
-    pop r10
-
     ; Additional arguments are pushed here (in syscall function)
     ; Save all general-purpose registers
     push r15                ; Save r15
@@ -57,7 +53,8 @@ syscall_entry:
     pop rsi                 ; Restore rsi
     pop rdx                 ; Restore rdx
     pop rcx                 ; Restore rcx
-    pop rax                 ; Restore rax
+    pop r15
+    ; pop rax                 ; Restore rax
     pop r8                  ; Restore r8
     pop r9                  ; Restore r9
     pop r10                 ; Restore r10

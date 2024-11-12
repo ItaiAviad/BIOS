@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sys/syscall.h>
 
 #if defined(__is_libk)
 #include <arch/x86_64/tty.h>
@@ -13,9 +14,11 @@
 int getchar() {
     int ic = 0;
 #if defined(__is_libk)
+    sti();
     ic = (int) wait_key();
+    cli();
 #else
-    // TODO: Implement stdio and the write system call.
+    ic = syscall(sys_getchar);
 #endif
     return ic;
 }

@@ -55,7 +55,7 @@ void special_key_press(uint16_t scan_code);
  * 
  * @return char - ascii char read
  */
-char wait_key();
+unsigned char wait_key();
 
 // Inline Assembly
 /**

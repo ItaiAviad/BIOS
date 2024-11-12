@@ -4,7 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#if defined(__is_libk)
 #include <arch/x86_64/io.h>
+#endif
 
 #define SCANF_BUF_SIZE 0x100
 

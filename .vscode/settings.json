@@ -86,6 +86,7 @@
     "format": "cpp",
     "syscall.h": "c",
     "interrupts.h": "c",
-    "limits.h": "c"
+    "limits.h": "c",
+    "io.h": "c"
 }
 }

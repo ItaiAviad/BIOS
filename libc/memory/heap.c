@@ -1,4 +1,7 @@
+#if defined(__is_libk)
 #include <arch/x86_64/mmu.h>
+#endif
+
 #include <memory.h>
 
 

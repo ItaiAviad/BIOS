@@ -26,23 +26,31 @@ void init_syscall() {
     configure_segments();
 }
 
-// x86_64 calling conventions: https://x64.syscall.sh/
-void syscall_handler(pt_regs *regs) {
+int64_t syscall_handler(pt_regs *regs) {
     long number = regs->rax;
-    printf("syscall number: %p\n", number);
-    printf("rdi: %p\n", regs->rdi);
-    printf("rsi: %p\n", regs->rsi);
-    printf("rdx: %p\n", regs->rdx);
-    printf("r10: %p\n", regs->r10);
-    printf("r8: %p\n", regs->r8);
-    printf("r9: %p\n", regs->r9);
+    // printf("syscall number: %p\n", number);
+    // printf("rdi: %p\n", regs->rdi);
+    // printf("rsi: %p\n", regs->rsi);
+    // printf("rdx: %p\n", regs->rdx);
+    // printf("r10: %p\n", regs->r10);
+    // printf("rcx: %p\n", regs->rcx);
+    // // printf("r11: %p\n", regs->r11);
+    // // printf("r12: %p\n", regs->r12);
+    // // printf("r13: %p\n", regs->r13);
+    // // printf("r14: %p\n", regs->r14);
+    // // printf("r15: %p\n", regs->r15);
+    // printf("rbx: %p\n", regs->rbx);
+    // // printf("rsp: %p\n", regs->rsp);
+    // // printf("rbp: %p\n", regs->rbp);
+    // printf("r8: %p\n", regs->r8);
+    // printf("r9: %p\n", regs->r9);
     
     int SYS_T_LEN = sizeof(SYSCALL_TABLE) / sizeof(SYSCALL_TABLE[0]);
     if (number >= SYS_T_LEN || SYSCALL_TABLE[number] == NULL) {
-        return;
+        return -1;
     }
 
-    SYSCALL_TABLE[number](regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9); 
+    return SYSCALL_TABLE[number](regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9); 
 }
 
 #endif
