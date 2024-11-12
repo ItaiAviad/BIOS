@@ -130,7 +130,6 @@ char wait_key() {
     irq_clear_mask(IRQ_KEYBOARD);
     
     while (buffer_is_empty()) {}
-    printf("AFTE WAIT KEY\n");
 
     irq_set_mask(IRQ_KEYBOARD);
 
