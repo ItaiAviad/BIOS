@@ -3,6 +3,7 @@
 #endif
 
 #include <memory.h>
+#include <sys/syscall.h>
 
 
 void* init_heap(__attribute__((unused)) Context ctx, uint64_t base_addr, uint64_t size) {
@@ -43,6 +44,7 @@ void *sbrk(size_t increment) {
 }
 
 void print_heap(void) {
+#if defined(__is_libk)
     malloc_state *heap = (malloc_state *)heap_malloc_state_base;
 
     printf("heap_base: %p, tsize: %p, end: %p\n", heap->heap_base, heap->heap_total_size, heap_end);
@@ -60,4 +62,8 @@ void print_heap(void) {
         printf("ptr: %p, size: %p, fd: %p, bk: %p, data: %p\n", cur, cur->mchunk_size, cur->fd, cur->bk, cur->data);
         cur = cur->fd;
     }
+
+#else
+    syscall(sys_print_heap);
+#endif
 }

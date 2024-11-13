@@ -1,6 +1,8 @@
 #include <memory.h>
+#include <sys/syscall.h>
 
 void free(void* ptr) {
+#if defined(__is_libk)
     // Get Heap
     malloc_state* heap = (malloc_state*) heap_malloc_state_base;
 
@@ -40,4 +42,7 @@ void free(void* ptr) {
         }
         cur = cur->fd;
     }
+#else
+    syscall(sys_free, ptr);
+#endif
 }

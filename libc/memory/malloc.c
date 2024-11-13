@@ -4,8 +4,10 @@
 
 #include <memory.h>
 #include <string.h>
+#include <sys/syscall.h>
 
 void* malloc(size_t size) {
+#if defined(__is_libk)
     // Get Heap
     malloc_state* heap = (malloc_state*) heap_malloc_state_base;
 
@@ -92,4 +94,8 @@ void* malloc(size_t size) {
 #endif
 
     return new_mchunk.data;
+
+#else
+    return (void *)syscall(sys_malloc, size);
+#endif
 }

@@ -1,4 +1,5 @@
 #include <time.h>
+#include <sys/syscall.h>
 
 const char* monts[] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 const char* weekdays[] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
@@ -159,17 +160,21 @@ const char* day_of_week(unsigned int day, unsigned int month, unsigned int year)
 uint64_t time() {
 #if defined(__is_libk)
     read_rtc();
-#else
-    // Ensure to implement the rest of the code as needed (syscall)
-#endif
     // Return in seconds (UNIX time)
     return unix_time();
+#else
+    return syscall(sys_time);
+#endif
 }
 
 void date() {
+#if defined(__is_libk)
     read_rtc();
     
     const char* weekday = day_of_week(day, month, year);
     const char* month_name = monts[month - 1];
     printf("%s %d %s %d %d:%d:%d %s\n", weekday, day, month_name, year, hour, minute, second, TIMEZONE);
+#else
+    syscall(sys_date);
+#endif
 }

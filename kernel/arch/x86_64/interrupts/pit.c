@@ -60,6 +60,7 @@ void pit_handler() {
 }
 
 void pit_sleep(uint64_t milliseconds) {
+    sti();
     volatile uint64_t end_ticks = pit_tick_count + milliseconds;
     #ifdef DEBUG
     printf("%s: Start ticks: %d, End ticks: %d\n", DEBUG, pit_tick_count, end_ticks);

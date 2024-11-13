@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
+#include <memory.h>
 
 #define MSR_EFER 0xC0000080
 #define MSR_STAR 0xC0000081
@@ -43,7 +45,14 @@ typedef struct pt_regs {
 
 enum SYSCALL_NR {
     sys_printf,
-    sys_getchar
+    sys_getchar,
+    sys_time,
+    sys_date,
+    sys_sleep,
+    sys_abort,
+    sys_malloc,
+    sys_free,
+    sys_print_heap
 };
 
 #if defined(__is_libk)
@@ -55,7 +64,14 @@ enum SYSCALL_NR {
 typedef int64_t (*syscall_t)();
 static const syscall_t SYSCALL_TABLE[] = {
     [sys_printf] = printf,
-    [sys_getchar] = getchar
+    [sys_getchar] = getchar,
+    [sys_time] = time,
+    [sys_date] = date,
+    [sys_sleep] = sleep,
+    [sys_abort] = abort,
+    [sys_malloc] = malloc,
+    [sys_free] = free,
+    [sys_print_heap] = print_heap
 };
 
 #pragma GCC diagnostic pop
