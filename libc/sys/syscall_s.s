@@ -69,4 +69,5 @@ syscall_entry:
 
     sti
     ; Return to user space
-    sysret
+    mov r11, 0x002
+    o64 sysret
