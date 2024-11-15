@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <memory.h>
 #include <stdlib.h>
+#include <kernel.h>
 
 #define MSR_EFER 0xC0000080
 #define MSR_STAR 0xC0000081
@@ -30,8 +31,8 @@ typedef struct pt_regs {
     uint64_t r10;
     uint64_t r11;
     uint64_t rbx;
-    uint64_t rsp;
-    uint64_t rbp;
+    // uint64_t rsp;
+    // uint64_t rbp;
     uint64_t r12;
     uint64_t r13;
     uint64_t r14;
@@ -55,7 +56,9 @@ enum SYSCALL_NR {
     sys_free,
     sys_print_heap,
     sys_stdin_clear,
-    sys_shutdown
+    sys_shutdown,
+    sys_tty_init,
+    sys_ursp
 };
 
 #if defined(__is_libk)
@@ -76,7 +79,9 @@ static const syscall_t SYSCALL_TABLE[] = {
     [sys_free] = free,
     [sys_print_heap] = print_heap,
     [sys_stdin_clear] = stdin_clear,
-    [sys_shutdown] = shutdown
+    [sys_shutdown] = shutdown,
+    [sys_tty_init] = tty_init,
+    [sys_ursp] = ursp
 };
 
 #pragma GCC diagnostic pop

@@ -4,8 +4,9 @@
 
 #include <stdbool.h>
 
-
 #include <string.h>
+#include <kernel.h>
+
 #include <arch/x86_64/pic.h>
 #include <arch/x86_64/scs1.h>
 #include <arch/x86_64/interrupts.h>
@@ -13,6 +14,11 @@
 #define STDIN 0
 #define STDOUT 1
 #define STDERR 2
+
+#define LOG_SYM_SUC "[+]"
+#define LOG_SYM_FAI "[-]"
+#define LOG_SYM_INF "[*]"
+#define LOG_SYM_ERR "[!]"
 
 
 // IO Buffer
@@ -25,13 +31,7 @@ typedef struct keyboard_t {
     size_t buffer_head;
     size_t buffer_tail;
 
-    bool caps;
-    bool lshift;
-    bool lctrl;
-    bool lalt;
-    bool altgr;
-    bool rctrl;
-    bool rshift;
+    keyboard_state ks;
 } keyboard_t;
 
 /**

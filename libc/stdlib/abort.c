@@ -14,12 +14,3 @@ void abort(void) {
 	while (1) {}
 	__builtin_unreachable();
 }
-
-void shutdown(void) {
-#if defined(__is_libk)
-    qemu_shutdown();
-#else
-    syscall(sys_shutdown);
-#endif
-}
-

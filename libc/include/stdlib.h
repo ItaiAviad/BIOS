@@ -13,7 +13,6 @@ extern "C" {
 
 __attribute__((__noreturn__))
 void abort(void);
-void shutdown(void);
 
 /**
  * @brief Convert an integer to a string
@@ -31,7 +30,7 @@ char* itoa(int64_t, char*, int);
  * @param nptr 
  * @return int 
  */
-uint64_t atoi(const char *nptr);
+int64_t atoi(const char *nptr);
 
 #ifdef __cplusplus
 }

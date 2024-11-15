@@ -90,6 +90,10 @@
     "io.h": "c",
     "unistd.h": "c",
     "string.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "shell.h": "c",
+    "random.h": "c",
+    "kernel.h": "c",
+    "tty.h": "c"
 }
 }

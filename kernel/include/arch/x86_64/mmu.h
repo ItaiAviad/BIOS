@@ -170,4 +170,8 @@ uint64_t kheap_current_size_left;
 void *kmalloc(size_t size);
 void kfree(void* ptr);
 
+static inline void set_rsp(uint64_t new_rsp) {
+    __asm__ volatile("mov %0, %%rsp" :: "r"(new_rsp) : "memory", "cc");
+}
+
 #endif

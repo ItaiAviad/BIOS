@@ -8,10 +8,14 @@
 #include <time.h>
 #include <random.h>
 
+#include <shell.h>
+#include <kernel.h>
+
 int umain(void) {
-    char buff[100];
-    scanf("%s", buff);
-    sleep(5000);
+    printf("%s Usermode\n", LOG_SYM_SUC);
+    // get rsp with inline assembly and printf its value
+
+    shell_init();
 
     while (1) {}
     return 0;

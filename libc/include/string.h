@@ -49,6 +49,35 @@ void* memset(void*, char, size_t);
  */
 size_t strlen(const char*);
 
+
+/**
+ * @brief Find the first occurrence of a character in a string
+ * 
+ * @param str 
+ * @param c 
+ * @return char* - pointer to first occurrence
+ */
+char *strchr(const char *str, int c);
+
+/**
+ * @brief Tokenize a string
+ * 
+ * @param str 
+ * @param delim 
+ * @return char* - pointer to next token
+ */
+char *strtok(char *str, const char *delim);
+
+/**
+ * @brief Compare two strings
+ * 
+ * @param s1 
+ * @param s2 
+ * @return int 
+ */
+int strcmp(const char *s1, const char *s2);
+
+
 #ifdef __cplusplus
 }
 #endif

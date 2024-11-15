@@ -9,6 +9,25 @@
 
 #define EOF (-1)
 
+typedef struct _iobuf
+{
+    char*   _ptr;
+    int _cnt;
+    char*   _base;
+    int _flag;
+    int _file;
+    int _charbuf;
+    int _bufsiz;
+    char*   _tmpfname;
+} FILE;
+
+static __attribute__((__unused__))FILE stdin_file = { 0, 0, 0, 0, 0, 0, 0, 0 };
+static __attribute__((__unused__)) FILE stdout_file = { 0, 0, 0, 0, 0, 0, 0, 0 };
+static __attribute__((__unused__)) FILE stderr_file = { 0, 0, 0, 0, 0, 0, 0, 0 };
+static __attribute__((__unused__)) FILE* stdin = &stdin_file;
+static __attribute__((__unused__)) FILE* stdout = &stdout_file;
+static __attribute__((__unused__)) FILE* stderr = &stderr_file;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -75,6 +94,14 @@ int scanf(const char*, ...);
  * @return int - number of input items read
  */
 int sscanf(const char *, const char*, ...);
+
+char *fgets(char *str, int n, FILE *stream);
+
+int isdigit(int c);
+int isnumber(char* s);
+int isspace(int c);
+char *trimwhitespace(char *s);
+char *rmwhitespace(char *s);
 
 #ifdef __cplusplus
 }

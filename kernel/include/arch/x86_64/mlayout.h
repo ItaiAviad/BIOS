@@ -53,6 +53,10 @@
 
 #define HARDWARE_MEM_START (KERNEL_HEAP_START + KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE)
 
+#ifndef USER_LOAD_ADDR
+#define USER_LOAD_ADDR 0x4000000
+#endif
+
 // Processes (1GB of virtual memory: 0-0.5B -> User, 0.5B-1GB -> Kernel)
 #define HIGHER_HALF_KERNEL_START_PAGES 0.5 * GB_PAGES // 0.5 GB = 0x200 (Pages)
 

@@ -21,6 +21,7 @@ int pow(int, int);
 int min(int, int);
 int max(int, int);
 int upper_divide(int numerator, int denominator);
+
 #ifdef __cplusplus
 }
 #endif

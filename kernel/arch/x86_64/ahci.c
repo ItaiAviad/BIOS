@@ -39,7 +39,7 @@ void initialize_ahci(HBA_MEM *abar, __attribute__((unused)) PCIDevice *device) {
     }
 
     // Check capabilities and configure ports
-    printf("AHCI\n");
+    printf("%s AHCI\n", LOG_SYM_SUC);
     #ifdef DEBUG
     printf("AHCI GHC: %d\n", abar->ghc);
     printf("AHCI Capabilities: %d\n", abar->cap);
@@ -115,7 +115,7 @@ void probe_port(HBA_MEM *abar) {
             port_reset((HBA_PORT *)abar->ports + i);
             int dt = check_type(&abar->ports[i]);
             if (dt == AHCI_DEV_SATA) {
-                printf("SATA drive found at port %d\n", i);
+                printf("%s SATA drive found at port %d\n", LOG_SYM_INF, i);
                 port_rebase(abar->ports + i);
 
                 ATA_IDENTIFY_DEVICE* ata_id = hardware_allocate_mem(sizeof(ATA_IDENTIFY_DEVICE), 0);

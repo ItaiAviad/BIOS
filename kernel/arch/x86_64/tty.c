@@ -76,10 +76,7 @@ void reverse_cursor(){
     update_cursor_absolute(pos);
 }
 
-void terminal_initialize(void) {
-    // Cursor Setup
-    enable_cursor(0, 0);
-
+void terminal_clear(void) {
     // Terminal Setup
 	terminal_row = 0;
 	terminal_column = 0;
@@ -91,6 +88,13 @@ void terminal_initialize(void) {
 			terminal_buffer[index] = vga_entry(' ', terminal_color);
 		}
 	}
+}
+
+void terminal_initialize(void) {
+    // Cursor Setup
+    enable_cursor(0, 0);
+
+    terminal_clear();
 }
 
 void terminal_setcolor(uint8_t color) {

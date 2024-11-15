@@ -7,13 +7,20 @@ keyboard_t keyboard = {
     .buffer_head = 0,
     .buffer_tail = 0,
     
-    .caps = false,
-    .lshift = false,
-    .lctrl = false,
-    .lalt = false,
-    .altgr = false,
-    .rctrl = false,
-    .rshift = false,
+    .ks = {
+        .caps = false,
+        .lshift = false,
+        .lctrl = false,
+        .lalt = false,
+        .altgr = false,
+        .rctrl = false,
+        .rshift = false,
+
+        .up = false,
+        .down = false,
+        .left = false,
+        .right = false
+    }
 };
 
 bool is_special_char(char c) {
@@ -42,10 +49,10 @@ void buffer_put(unsigned char s) {
     // Check for special keys
     special_key_press(s);
 
-    unsigned char uc = scs1_to_ascii(s, keyboard.lshift | keyboard.rshift, keyboard.caps);
+    unsigned char uc = scs1_to_ascii(s, keyboard.ks.lshift | keyboard.ks.rshift, keyboard.ks.caps);
 
     // Ctrl+Backspace || Ctrl+Del || Ctrl+w
-    if ((keyboard.lctrl || keyboard.rctrl) && !(keyboard.lshift || keyboard.rshift) && (uc == '\b' || uc == 0x0C || uc == 'w')) {
+    if ((keyboard.ks.lctrl || keyboard.ks.rctrl) && !(keyboard.ks.lshift || keyboard.ks.rshift) && (uc == '\b' || uc == 0x0C || uc == 'w')) {
         if (uc == '\b' || uc == 'w') { // Ctrl+Backspace || Ctrl+w
             // Clear trailing spaces
             int start = (int)keyboard.buffer_head;
@@ -70,7 +77,7 @@ void buffer_put(unsigned char s) {
     }
 
     // Invalid input
-    if (keyboard.lctrl || keyboard.rctrl || keyboard.lalt || keyboard.altgr)
+    if (keyboard.ks.lctrl || keyboard.ks.rctrl || keyboard.ks.lalt || keyboard.ks.altgr)
         return;
 
     // Add char to buffer
@@ -118,7 +125,7 @@ int buffer_is_empty(void) {
 void special_key_press(uint16_t scan_code) {
     switch (scan_code) {
         case 0x3A: // CapsLock Pressed
-            keyboard.caps = !keyboard.caps;
+            keyboard.ks.caps = !keyboard.ks.caps;
             // outb(PS2_KEYBOARD_PORT_CMD_REG, 0xED);
             // io_wait();
             // outb(PS2_KEYBOARD_PORT_DATA, 0x0);
@@ -129,48 +136,51 @@ void special_key_press(uint16_t scan_code) {
             break;
         
         case 0x2A: // Left Shift Pressed
-            keyboard.lshift = true;
+            keyboard.ks.lshift = true;
             break;
         case 0xAA: // Left Shift Released
-            keyboard.lshift = false;
+            keyboard.ks.lshift = false;
             break;
 
         case 0x1D: // Left Ctrl Pressed
-            keyboard.lctrl = true;
+            keyboard.ks.lctrl = true;
             break;
         case 0x9D: // Left Ctrl Released
-            keyboard.lctrl = false;
-            keyboard.rctrl = false;
+            keyboard.ks.lctrl = false;
+            keyboard.ks.rctrl = false;
             break;
 
         case 0x38: // Left Alt Pressed
-            keyboard.lalt = true;
+            keyboard.ks.lalt = true;
             break;
         case 0xB8: // Left Alt Released
-            keyboard.lalt = false;
-            keyboard.altgr = false;
+            keyboard.ks.lalt = false;
+            keyboard.ks.altgr = false;
             break;
 
         case 0xE0: // Right Alt (Alt Gr) Pressed
-            keyboard.lalt = true;
-            keyboard.altgr = true;
+            keyboard.ks.lalt = true;
+            keyboard.ks.altgr = true;
 
-            keyboard.rctrl = true;
+            keyboard.ks.rctrl = true;
             break;
 
         case 0x3B: // Right Ctrl Pressed
-            keyboard.rctrl = true;
+            keyboard.ks.rctrl = true;
             break;
         case 0xBB: // Right Ctrl Released
-            keyboard.rctrl = false;
+            keyboard.ks.rctrl = false;
             break;
         
         case 0x36: // Right Shift Pressed
-            keyboard.rshift = true;
+            keyboard.ks.rshift = true;
             break;
         case 0xB6: // Right Shift Released
-            keyboard.rshift = false;
+            keyboard.ks.rshift = false;
             break;
+
+        
+        
         default:
             break;
     }

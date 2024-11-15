@@ -55,6 +55,10 @@ char* gets_s(char* str, size_t size) {
     return str;
 }
 
+char *fgets(char *str, int n, __attribute__((unused)) FILE *stream) {
+    return gets_s(str, n);
+}
+
 char* gets(char* str) {
     return gets_s(str, INT32_MAX);
 }
