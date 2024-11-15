@@ -44,6 +44,8 @@
 // Paging (Kernel)
 #define PML4_KERNEL 0x82000                  // PML4 kernel base address
 
+#define KERNEL_STACK_START PML4_BOOT
+
 // Heap
 // #define KERNEL_HEAP_START 0x200000
 #define KERNEL_HEAP_START (0x20 * MB) // 16 MB

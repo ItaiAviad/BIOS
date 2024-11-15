@@ -28,6 +28,15 @@ void user_init();
 #define USER_LOAD_ADDR 0x4000000
 #endif
 
+void set_rsp(uint64_t new_rsp) {
+    __asm__ volatile (
+        "mov %0, %%rsp"
+        :
+        : "r"(new_rsp)
+        :
+    );
+}
+
 int kmain(void) {
     // TTY - Terminal
     terminal_initialize();

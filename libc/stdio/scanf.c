@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/syscall.h>
 
 #if defined(__is_libk)
 #include <arch/x86_64/io.h>
@@ -11,7 +12,18 @@
 
 #define SCANF_BUF_SIZE 0x100
 
+void stdin_clear() {
+#if defined(__is_libk)
+    buffer_clear();
+#else
+    syscall(sys_stdin_clear);
+#endif
+}
+
 char* gets_s(char* str, size_t size) {
+    // Clear buffer before new input
+    stdin_clear();
+
     char c = 0;
     uint32_t i = 0;
     do {

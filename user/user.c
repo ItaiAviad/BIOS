@@ -9,6 +9,9 @@
 #include <random.h>
 
 int umain(void) {
+    char buff[100];
+    scanf("%s", buff);
+    sleep(5000);
 
     while (1) {}
     return 0;

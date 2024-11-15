@@ -13,6 +13,7 @@ extern "C" {
 
 __attribute__((__noreturn__))
 void abort(void);
+void shutdown(void);
 
 /**
  * @brief Convert an integer to a string

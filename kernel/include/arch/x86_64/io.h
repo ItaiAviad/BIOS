@@ -16,10 +16,12 @@
 
 
 // IO Buffer
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 0x100
 
 typedef struct keyboard_t {
     char buffer[BUFFER_SIZE];
+    char tmp[BUFFER_SIZE];
+
     size_t buffer_head;
     size_t buffer_tail;
 
@@ -41,6 +43,11 @@ void buffer_put(unsigned char);
 void buffer_put_c(unsigned char);
 unsigned char buffer_get(void);
 int buffer_is_empty(void);
+/**
+ * @brief Clear the buffer
+ * 
+ */
+void buffer_clear(void);
 
 // Keyboard
 
@@ -91,7 +98,7 @@ static inline uint8_t inb(uint16_t port)
  * @param val 
  */
 static inline void outw(uint16_t port, uint16_t val) {
-    __asm__ volatile ( "outb %w1, %w0" : : "a"(val), "Nd"(port) : "memory");
+    __asm__ volatile ( "out %1, %0" : : "a"(val), "Nd"(port) : "memory");
 }
 
 /**

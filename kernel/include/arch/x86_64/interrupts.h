@@ -15,4 +15,6 @@ void cli();
 */
 void sti();
 
+void qemu_shutdown(void);
+
 #endif

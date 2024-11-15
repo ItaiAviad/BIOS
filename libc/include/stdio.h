@@ -14,6 +14,12 @@ extern "C" {
 #endif
 
 /**
+ * @brief Syscall wrapper to clear stdin buffer
+ * 
+ */
+void stdin_clear();
+
+/**
  * @brief Write a formatted output to stdout
  * 
  * @param 

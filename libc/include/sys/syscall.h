@@ -11,6 +11,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <memory.h>
+#include <stdlib.h>
 
 #define MSR_EFER 0xC0000080
 #define MSR_STAR 0xC0000081
@@ -52,7 +53,9 @@ enum SYSCALL_NR {
     sys_abort,
     sys_malloc,
     sys_free,
-    sys_print_heap
+    sys_print_heap,
+    sys_stdin_clear,
+    sys_shutdown
 };
 
 #if defined(__is_libk)
@@ -71,7 +74,9 @@ static const syscall_t SYSCALL_TABLE[] = {
     [sys_abort] = abort,
     [sys_malloc] = malloc,
     [sys_free] = free,
-    [sys_print_heap] = print_heap
+    [sys_print_heap] = print_heap,
+    [sys_stdin_clear] = stdin_clear,
+    [sys_shutdown] = shutdown
 };
 
 #pragma GCC diagnostic pop

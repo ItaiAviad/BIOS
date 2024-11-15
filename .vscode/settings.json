@@ -88,6 +88,8 @@
     "interrupts.h": "c",
     "limits.h": "c",
     "io.h": "c",
-    "unistd.h": "c"
+    "unistd.h": "c",
+    "string.h": "c",
+    "stdlib.h": "c"
 }
 }
