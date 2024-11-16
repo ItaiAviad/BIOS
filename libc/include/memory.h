@@ -8,9 +8,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <arch/x86_64/mmu.h>
+#include <limits.h>
 
-#define HEAP_CHUNK_MIN_SIZE_BYTES 64
+#include <arch/x86_64/mmu.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,6 +38,8 @@ PageFrameAllocator kernel_allocator;
 // ----------------------------------------------
 
 // Heap
+#define HEAP_CHUNK_MIN_SIZE_BYTES 64
+
 // Chunk
 typedef struct __attribute__((__packed__)) malloc_chunk {
     uint32_t mchunk_prev_size;  // Size of previous chunk, if it is free

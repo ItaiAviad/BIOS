@@ -10,8 +10,6 @@
 #include <arch/x86_64/io.h>
 #endif
 
-#define SCANF_BUF_SIZE 0x100
-
 void stdin_clear() {
 #if defined(__is_libk)
     buffer_clear();
@@ -185,7 +183,7 @@ int sscanf_args(const char* str, const char* restrict format, va_list args) {
         } else if (*format == 'd') { // Read string and convert to int
             format++;
 			int* dst = va_arg(args, int*);
-            char dst_str[SCANF_BUF_SIZE];
+            char dst_str[BUFFER_SIZE];
             itoa(*dst, dst_str, 10);
             int next_idx = get_next_valid_string(str, strlen(str), dst_str);
             *dst = atoi(dst_str);
@@ -210,8 +208,8 @@ int sscanf(const char* str, const char* restrict format, ...) {
 }
 
 int scanf(const char* restrict format, ...) {
-    char buf[SCANF_BUF_SIZE];
-    gets_s(buf, SCANF_BUF_SIZE);
+    char buf[BUFFER_SIZE];
+    gets_s(buf, BUFFER_SIZE);
 
     va_list args;
     va_start(args, format);

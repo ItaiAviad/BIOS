@@ -100,8 +100,21 @@ char *fgets(char *str, int n, FILE *stream);
 int isdigit(int c);
 int isnumber(char* s);
 int isspace(int c);
+/**
+ * @brief Trim whitespaces (only leading and trailing)
+ * 
+ * @param s 
+ * @return char* 
+ */
 char *trimwhitespace(char *s);
 char *rmwhitespace(char *s);
+/**
+ * @brief Trim whitespaces (all whitespaces (more than 1 consecutive))
+ * 
+ * @param s 
+ * @return char* 
+ */
+char *ftrimwhitespace(char *s);
 
 #ifdef __cplusplus
 }

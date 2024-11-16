@@ -48,3 +48,46 @@ int strcmp(const char *s1, const char *s2) {
     return *(unsigned char *)s1 - *(unsigned char *)s2;
 }
 
+char *strcat(char *dst, char *src) {
+    char *dst_save = dst;
+
+    // Move to end of dst
+    while (*dst != '\0')
+        dst++;
+    // concat src to dst
+    while (*src != '\0')
+        *(dst++) = *(src++);
+    // null-terminate dst
+    *dst = '\0';
+
+    return dst_save;
+}
+
+char *strjoin(char *dst, int argc, char *argv[], const char *delim) {
+    char *dst_save = dst;
+    char *src = NULL;
+
+    while (*dst != '\0')
+        dst++;
+
+    // concat with argv and delim
+    for (int i = 0; i < argc - 1; i++) {
+        // concat argv[i]
+        src = argv[i];
+        while (*src != '\0')
+            *(dst++) = *(src++);
+
+        // concat delim
+        src = (char*) delim;
+        while (*src != '\0')
+            *(dst++) = *(src++);
+    }
+    src = argv[argc - 1];
+    while (*src != '\0')
+        *(dst++) = *(src++);
+
+    // null-terminate dst
+    *dst = '\0';
+
+    return dst_save;
+}

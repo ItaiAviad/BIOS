@@ -77,6 +77,26 @@ char *strtok(char *str, const char *delim);
  */
 int strcmp(const char *s1, const char *s2);
 
+/**
+ * @brief Concatenate two strings
+ * 
+ * @param dst 
+ * @param src 
+ * @return char* 
+ */
+char *strcat(char *dst, char *src);
+
+/**
+ * @brief Concatenate multiple strings with a delimiter into dst
+ * 
+ * @param dst 
+ * @param argc 
+ * @param argv 
+ * @param delim 
+ * @return char* 
+ */
+char *strjoin(char *dst, int argc, char *argv[], const char *delim);
+
 
 #ifdef __cplusplus
 }

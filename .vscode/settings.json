@@ -94,6 +94,8 @@
     "shell.h": "c",
     "random.h": "c",
     "kernel.h": "c",
-    "tty.h": "c"
+    "tty.h": "c",
+    "scs1.h": "c",
+    "stdbool.h": "c"
 }
 }

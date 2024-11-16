@@ -6,6 +6,7 @@
 
 #include <string.h>
 #include <kernel.h>
+#include <limits.h>
 
 #include <arch/x86_64/pic.h>
 #include <arch/x86_64/scs1.h>
@@ -19,10 +20,6 @@
 #define LOG_SYM_FAI "[-]"
 #define LOG_SYM_INF "[*]"
 #define LOG_SYM_ERR "[!]"
-
-
-// IO Buffer
-#define BUFFER_SIZE 0x100
 
 typedef struct keyboard_t {
     char buffer[BUFFER_SIZE];

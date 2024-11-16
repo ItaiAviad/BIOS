@@ -17,6 +17,8 @@ int umain(void) {
 
     shell_init();
 
+    printf("Now you are stuck here with me forever... :D\n");
+
     while (1) {}
     return 0;
 }

@@ -46,3 +46,22 @@ char *rmwhitespace(char *s) {
     return s;
 }
 
+char *ftrimwhitespace(char *s) {
+    int i = 0, j = 0;
+    int sf = 0; // space flag
+
+    while (s[i] != '\0') {
+        if (s[i] != ' ') {
+            s[j++] = s[i];
+            sf = 0;  // Reset the space flag
+        } else if (!sf) {  // Allow one space
+            s[j++] = ' ';
+            sf = 1;
+        }
+        i++;
+    }
+    s[j] = '\0';  // Null-terminate the modified string
+
+    return s;
+}
+
