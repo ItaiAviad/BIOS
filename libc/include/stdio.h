@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <types.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #define EOF (-1)
 
@@ -97,9 +98,6 @@ int sscanf(const char *, const char*, ...);
 
 char *fgets(char *str, int n, FILE *stream);
 
-int isdigit(int c);
-int isnumber(char* s);
-int isspace(int c);
 /**
  * @brief Trim whitespaces (only leading and trailing)
  * 
@@ -115,6 +113,7 @@ char *rmwhitespace(char *s);
  * @return char* 
  */
 char *ftrimwhitespace(char *s);
+
 
 #ifdef __cplusplus
 }

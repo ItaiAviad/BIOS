@@ -31,6 +31,9 @@ struct tty {
     bool alive;
 };
 
+// main shell tty
+struct tty tty1;
+
 void shell_init(void);
 // shell destructor
 void shell_fini(void);
@@ -64,6 +67,9 @@ void shcmd_shutdown(int argc, char *argv[]);
 // Exit
 void shcmd_exit(int argc, char *argv[]);
 
+// Calculator
+void shcmd_bc(int argc, char *argv[]);
+
 typedef void (*shcmd)(int argc, char *argv[]);
 
 // Notice! Indices of shcmd_str eand shcmd_table must match!
@@ -73,6 +79,7 @@ static const char shcmd_str[MAX_CMDS][MAX_CMD_STR] = {
     "pwd",
     "shutdown",
     "exit",
+    "bc",
 };
 
 static const shcmd shcmd_table[MAX_CMDS] = {
@@ -81,6 +88,7 @@ static const shcmd shcmd_table[MAX_CMDS] = {
     pwd,
     shcmd_shutdown,
     shcmd_exit,
+    shcmd_bc,
 };
 
 #endif

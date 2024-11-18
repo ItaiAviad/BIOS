@@ -113,7 +113,7 @@ void terminal_putchar(char c) {
     if (uc == '\n') {
         uint8_t current_row = (uint8_t) (position / VGA_WIDTH);
 
-        if (++current_row >= VGA_HEIGHT) {
+        if (++current_row >= VGA_HEIGHT - 1) {
             terminal_scroll_line_down();
             terminal_column = -1;
         }
@@ -139,7 +139,7 @@ void terminal_putchar(char c) {
     }
 	if (++terminal_column == VGA_WIDTH) {
 		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT) {
+		if (++terminal_row == VGA_HEIGHT - 1) {
             terminal_scroll_line_down();
         }
 	}
@@ -174,5 +174,5 @@ void terminal_scroll_line_down() {
         terminal_buffer[pos] = vga_entry(' ', terminal_color);
     }
 
-    update_cursor(0, VGA_HEIGHT - 1);
+    update_cursor(0, VGA_HEIGHT - 2);
 }

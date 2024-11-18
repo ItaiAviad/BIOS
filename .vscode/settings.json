@@ -96,6 +96,9 @@
     "kernel.h": "c",
     "tty.h": "c",
     "scs1.h": "c",
-    "stdbool.h": "c"
+    "stdbool.h": "c",
+    "cstdlib": "c",
+    "ctype.h": "c",
+    "cstring": "c"
 }
 }
