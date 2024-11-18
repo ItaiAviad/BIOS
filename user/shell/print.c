@@ -1,7 +1,7 @@
 // Shell print related functions
 #include <shell.h>
 
-void echo(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[]) {
+void shcmd_echo(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[]) {
     if (!argc || !argv)
         return;
     if (argc == 1 || !argv[1] || !strlen(argv[1]))

@@ -10,6 +10,8 @@ enum Error {
     ERR_NONE, ERR_SYNTAX, ERR_DIVISION_BY_ZERO
 };
 
+int eval(expr_t *expr);
+
 // Parse a number (decimal or hexadecimal)
 int number(expr_t *expr) {
     int neg = 0;

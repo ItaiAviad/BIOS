@@ -14,3 +14,10 @@ void shcmd_shutdown(__attribute__((unused)) int argc, __attribute__((unused)) ch
 void shcmd_exit(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[]) {
     tty1.alive = false;
 }
+
+void shcmd_clear(int argc, char *argv[]) {
+    if (!argc || !argv)
+        return;
+
+    tty_init();
+}

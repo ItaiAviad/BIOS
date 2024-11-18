@@ -34,7 +34,7 @@ void shell_fini(void) {
 }
 
 void print_prompt(void) {
-    pwd(0, NULL);
+    shcmd_pwd(0, NULL);
     printf(PROMPT);
 }
 

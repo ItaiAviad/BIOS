@@ -1,7 +1,7 @@
 // Shell File System related functions
 #include <shell.h>
 
-void pwd(int argc, char *argv[]) {
+void shcmd_pwd(int argc, char *argv[]) {
     char cwd[MAX_DIRS * MAX_DIR_NAME];
     memset(cwd, 0x0, sizeof(cwd));
 

@@ -53,13 +53,13 @@ void parse_cmd(int argc, char *argv[]);
 void shcmd_notfound(int argc, char *argv[]);
 
 // Echo string
-void echo(int argc, char *argv[]);
+void shcmd_echo(int argc, char *argv[]);
 
 // Print formatted string (linux like)
 void shcmd_printf(int argc, char *argv[]);
 
 // Print working directory
-void pwd(int argc, char *argv[]);
+void shcmd_pwd(int argc, char *argv[]);
 
 // Shutdown
 void shcmd_shutdown(int argc, char *argv[]);
@@ -67,8 +67,11 @@ void shcmd_shutdown(int argc, char *argv[]);
 // Exit
 void shcmd_exit(int argc, char *argv[]);
 
-// Calculator
+// Basic Calculator
 void shcmd_bc(int argc, char *argv[]);
+
+// Clear tty
+void shcmd_clear(int argc, char *argv[]);
 
 typedef void (*shcmd)(int argc, char *argv[]);
 
@@ -80,15 +83,17 @@ static const char shcmd_str[MAX_CMDS][MAX_CMD_STR] = {
     "shutdown",
     "exit",
     "bc",
+    "clear",
 };
 
 static const shcmd shcmd_table[MAX_CMDS] = {
-    echo,
+    shcmd_echo,
     shcmd_printf,
-    pwd,
+    shcmd_pwd,
     shcmd_shutdown,
     shcmd_exit,
     shcmd_bc,
+    shcmd_clear,
 };
 
 #endif
