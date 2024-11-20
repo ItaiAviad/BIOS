@@ -38,13 +38,24 @@ typedef struct keyboard_t {
  */
 void buffer_put(unsigned char);
 void buffer_put_c(unsigned char);
-unsigned char buffer_get(void);
+/**
+ * @brief Get next char from buffer (or special character press, i.e. cursor keys)
+ * 
+ * @return int 
+ */
+int buffer_get(void);
+/**
+ * @brief true if buffer is empty and no special key was pressed
+ * 
+ * @return int 
+ */
 int buffer_is_empty(void);
 /**
  * @brief Clear the buffer
  * 
  */
 void buffer_clear(void);
+int buffer_len(void);
 
 // Keyboard
 
@@ -57,9 +68,9 @@ void special_key_press(uint16_t scan_code);
 /**
  * @brief Wait for key
  * 
- * @return char - ascii char read
+ * @return char - ascii char read (or special key)
  */
-unsigned char wait_key();
+int wait_key();
 
 // Inline Assembly
 /**

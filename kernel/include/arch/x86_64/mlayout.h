@@ -27,7 +27,7 @@
 #endif
 #define KERNEL_STACK 0xF000
 
-#define KERNEL_END (3 * MB) // 2MB
+#define KERNEL_END (4 * MB) // 2MB
 
 // Kernel Page Frame Allocator
 #define PAGE_FRAME_ALLOCATOR_START KERNEL_END

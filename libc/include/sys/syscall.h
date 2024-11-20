@@ -56,9 +56,10 @@ enum SYSCALL_NR {
     sys_free,
     sys_print_heap,
     sys_stdin_clear,
+    sys_stdin_insert,
     sys_shutdown,
     sys_tty_init,
-    sys_ursp
+    sys_ursp,
 };
 
 #if defined(__is_libk)
@@ -79,6 +80,7 @@ static const syscall_t SYSCALL_TABLE[] = {
     [sys_free] = free,
     [sys_print_heap] = print_heap,
     [sys_stdin_clear] = stdin_clear,
+    [sys_stdin_insert] = stdin_insert,
     [sys_shutdown] = shutdown,
     [sys_tty_init] = tty_init,
     [sys_ursp] = ursp

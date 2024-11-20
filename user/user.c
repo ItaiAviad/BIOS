@@ -13,7 +13,6 @@
 
 int umain(void) {
     printf("%s Usermode\n", LOG_SYM_SUC);
-    // get rsp with inline assembly and printf its value
 
     shell_init();
 

@@ -10,35 +10,34 @@
 #include <arch/x86_64/io.h>
 #endif
 
-void stdin_clear() {
-#if defined(__is_libk)
-    buffer_clear();
-#else
-    syscall(sys_stdin_clear);
-#endif
-}
-
 char* gets_s(char* str, size_t size) {
     // Clear buffer before new input
     stdin_clear();
 
-    char c = 0;
+    int c = 0;
     uint32_t i = 0;
     do {
         c = getchar();
+        if (c == -2) // Ignore extended keycodes: see `getchar()`
+            continue;
         if (c == 0x1B) // Ignore ESC
             continue;
         if (c == '\b') // Limit Backspaces
         {
-            if (i > 0)
+            if (i > 0) {
                 i--;
+                str[i] = '\0';
+            }
+            else if (i == 0 && str[i] != '\0') {
+                str[i] = '\0';
+            }
             else
                 continue;
         }
         if (i >= size - 1) // Only Backspace allowed after limit reached
             continue;
         
-        printf("%c", c);
+        printf("%c", (char)c);
 
         if (c != '\n' && c != EOF && c != '\0' && c != '\b') // Only store valid chars
             str[i++] = c;

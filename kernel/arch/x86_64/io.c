@@ -16,6 +16,8 @@ keyboard_t keyboard = {
         .rctrl = false,
         .rshift = false,
 
+        .ext = false,
+
         .up = false,
         .down = false,
         .left = false,
@@ -31,6 +33,10 @@ void buffer_clear(void) {
     keyboard.buffer_head = 0;
     keyboard.buffer_tail = 0;
     memset(keyboard.buffer, 0, BUFFER_SIZE);
+}
+
+int buffer_len(void) {
+    return keyboard.buffer_tail;
 }
 
 int clear_trailing_space(int start) {
@@ -49,6 +55,10 @@ void buffer_put(unsigned char s) {
     // Check for special keys
     special_key_press(s);
 
+    // Ignore extended byte press
+    if (keyboard.ks.ext || keyboard.ks.up || keyboard.ks.left || keyboard.ks.down || keyboard.ks.right)
+        return;
+    
     unsigned char uc = scs1_to_ascii(s, keyboard.ks.lshift | keyboard.ks.rshift, keyboard.ks.caps);
 
     // Ctrl+Backspace || Ctrl+Del || Ctrl+w
@@ -93,20 +103,19 @@ void buffer_put_c(unsigned char c) {
     }
 }
 
-unsigned char buffer_get(void) {
+int buffer_get(void) {
     if (keyboard.buffer_head == keyboard.buffer_tail) {
-        return -1; // Buffer empty
+        return EOF; // Buffer empty
     }
-    unsigned char c = keyboard.buffer[keyboard.buffer_tail];
+    int c = keyboard.buffer[keyboard.buffer_tail];
     keyboard.buffer_tail = (keyboard.buffer_tail + 1) % BUFFER_SIZE;
 
-    if (c != '\b' || keyboard.buffer_tail <= 1)
+    if (c != '\b')
         return c;
 
     // Shift next chars left
     // Example:
     // q w e r t y \b \b -> q w e r t \b
-    // char tmp[BUFFER_SIZE];
     cli();
     memset(keyboard.tmp, 0x0, BUFFER_SIZE);
     memcpy(keyboard.tmp, keyboard.buffer + keyboard.buffer_tail, BUFFER_SIZE - (keyboard.buffer_tail + 1));
@@ -119,7 +128,8 @@ unsigned char buffer_get(void) {
 }
 
 int buffer_is_empty(void) {
-    return keyboard.buffer_head == keyboard.buffer_tail;
+    return keyboard.buffer_head == keyboard.buffer_tail && 
+        !(keyboard.ks.up || keyboard.ks.down || keyboard.ks.left || keyboard.ks.right);
 }
 
 void special_key_press(uint16_t scan_code) {
@@ -158,18 +168,18 @@ void special_key_press(uint16_t scan_code) {
             keyboard.ks.altgr = false;
             break;
 
-        case 0xE0: // Right Alt (Alt Gr) Pressed
-            keyboard.ks.lalt = true;
-            keyboard.ks.altgr = true;
-
-            keyboard.ks.rctrl = true;
+        case 0xE0: // Extended byte
+            keyboard.ks.ext = true;
             break;
 
+        // Right keys
         case 0x3B: // Right Ctrl Pressed
-            keyboard.ks.rctrl = true;
+            if (keyboard.ks.ext) keyboard.ks.rctrl = true;
+            keyboard.ks.ext = false;
             break;
         case 0xBB: // Right Ctrl Released
-            keyboard.ks.rctrl = false;
+            if (keyboard.ks.ext) keyboard.ks.rctrl = false;
+            keyboard.ks.ext = false;
             break;
         
         case 0x36: // Right Shift Pressed
@@ -179,20 +189,75 @@ void special_key_press(uint16_t scan_code) {
             keyboard.ks.rshift = false;
             break;
 
-        
+        // Cursor keys
+        case 0x48: // Cursor Up Pressed
+            if (keyboard.ks.ext) keyboard.ks.up = true;
+            keyboard.ks.ext = false;
+            break;
+        case 0xC8: // Cursor Up Released
+            if (keyboard.ks.ext) keyboard.ks.up = false;
+            keyboard.ks.ext = false;
+            break;
+ 
+        case 0x4B: // Cursor Left Pressed
+            if (keyboard.ks.ext) keyboard.ks.left = true;
+            keyboard.ks.ext = false;
+            break;
+        case 0xCB: // Cursor Left Released
+            if (keyboard.ks.ext) keyboard.ks.left = false;
+            keyboard.ks.ext = false;
+            break;
+
+        case 0x4D: // Cursor Right Pressed
+            if (keyboard.ks.ext) keyboard.ks.right = true;
+            keyboard.ks.ext = false;
+            break;
+        case 0xCD: // Cursor Right Released
+            if (keyboard.ks.ext) keyboard.ks.right = false;
+            keyboard.ks.ext = false;
+            break;
+
+        case 0x50: // Cursor Down Pressed
+            if (keyboard.ks.ext) keyboard.ks.down = true;
+            keyboard.ks.ext = false;
+            break;
+        case 0xD0: // Cursor Down Released
+            if (keyboard.ks.ext) keyboard.ks.down = false;
+            keyboard.ks.ext = false;
+            break;        
         
         default:
             break;
     }
 }
 
-unsigned char wait_key() {
+int wait_key() {
     irq_clear_mask(IRQ_KEYBOARD);
     
     while (buffer_is_empty()) {}
-    unsigned char c = buffer_get();
+    int c = buffer_get();
 
     irq_set_mask(IRQ_KEYBOARD);
 
-    return c;
+    if (c != EOF)
+        return c;
+
+    if (keyboard.ks.up) {
+        keyboard.ks.up = false;
+        return CURSOR_UP;
+    }
+    if (keyboard.ks.down) {
+        keyboard.ks.down = false;
+        return CURSOR_DOWN;
+    }
+    if (keyboard.ks.left) {
+        keyboard.ks.left = false;
+        return CURSOR_LEFT;
+    }
+    if (keyboard.ks.right) {
+        keyboard.ks.right = false;
+        return CURSOR_RIGHT;
+    }
+
+    return EOF;
 }

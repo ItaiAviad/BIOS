@@ -93,7 +93,8 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
         if (isr_num == IRQ_PIT + PIC1_OFFSET) // PIT IRQ
             pit_handler();
         else if (isr_num == IRQ_KEYBOARD + PIC1_OFFSET) { // Keyboard IRQ
-            buffer_put(inb(PS2_KEYBOARD_PORT_DATA));
+            unsigned char in = inb(PS2_KEYBOARD_PORT_DATA);
+            buffer_put(in);
         }
 
         pic_send_eoi(isr_num - PIC1_OFFSET); // Send ACK to PIC

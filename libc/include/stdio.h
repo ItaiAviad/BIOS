@@ -7,6 +7,7 @@
 #include <types.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <kernel.h>
 
 #define EOF (-1)
 
@@ -34,12 +35,6 @@ extern "C" {
 #endif
 
 /**
- * @brief Syscall wrapper to clear stdin buffer
- * 
- */
-void stdin_clear();
-
-/**
  * @brief Write a formatted output to stdout
  * 
  * @param 
@@ -64,7 +59,7 @@ int puts(const char*);
  * 
  * @return int 
  */
-int getchar();
+int getchar(void);
 /**
  * @brief Reads a string from stdin
  * 

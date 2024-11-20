@@ -8,6 +8,7 @@
 #include <sys/syscall.h>
 #include <stdio.h>
 #include <string.h>
+#include <kernel.h>
 
 #define SHELL_NAME "bioshell"
 
@@ -21,20 +22,26 @@
 
 #define ARGV_DELIM " "
 
+
 struct tty {
     char **cache[MAX_CMDS_CACHE]; // argv cache (previous commands' argv)
     uint64_t cargc [MAX_CMDS_CACHE]; // argc cache (previous commands' argc)
-    int ci; // cache current index
+    int64_t ci; // current index
+
+    int64_t tci; // temp/traverse current index (for traversing cache)
 
     char cwd[MAX_DIRS][MAX_DIR_NAME];
 
     bool alive;
+    bool active;
 };
+// main shell tty - shell mode
+struct tty tty0;
 
-// main shell tty
-struct tty tty1;
 
+// shell constructor
 void shell_init(void);
+
 // shell destructor
 void shell_fini(void);
 
@@ -46,6 +53,7 @@ void print_prompt(void);
  */
 int get_cmd(struct tty*);
 void parse_cmd(int argc, char *argv[]);
+
 
 // shell functions
 
@@ -95,5 +103,22 @@ static const shcmd shcmd_table[MAX_CMDS] = {
     shcmd_bc,
     shcmd_clear,
 };
+
+
+void traverse_cache(int offset);
+
+// Extended Keycodes Handlers
+
+// Cursor Up Handler
+void cuph();
+
+// Cursor Left Handler
+void clefth();
+
+// Cursor Right Handler
+void crighth();
+
+// Cursor Down Handler
+void cdownh();
 
 #endif

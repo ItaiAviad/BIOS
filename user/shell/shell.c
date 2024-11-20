@@ -5,15 +5,17 @@ void shell_init(void) {
     // Clear tty
     tty_init();
 
-    tty1.ci = 0;
-    tty1.alive = true;
+    tty0.ci = 0;
+    tty0.tci = 0;
+    tty0.alive = true;
+    tty0.active = true;
 
-    memcpy(tty1.cwd[0], "dev", 3);
+    memcpy(tty0.cwd[0], "dev", 3);
 
-    while (tty1.alive) {
+    while (tty0.alive) {
         print_prompt();
-        int ci = get_cmd(&tty1);
-        parse_cmd(tty1.cargc[ci], tty1.cache[ci]);
+        int ci = get_cmd(&tty0); // get command and build argv + argc
+        parse_cmd(tty0.cargc[ci], tty0.cache[ci]);
     }
 
     shell_fini();
@@ -22,14 +24,14 @@ void shell_init(void) {
 void shell_fini(void) {
     // free all allocated commands cache memory
     for (int i = 0; i < MAX_CMDS_CACHE; i++) {
-        if (!tty1.cache[i])
+        if (!tty0.cache[i])
             continue;
-        for (int j = 0; j < MAX_CMDS; j++) {
-            if (!tty1.cache[i][j])
+        for (int j = 0; j < ARG_MAX; j++) {
+            if (!tty0.cache[i][j])
                 break;
-            free(tty1.cache[i][j]);
+            free(tty0.cache[i][j]);
         }
-        free(tty1.cache[i]);
+        free(tty0.cache[i]);
     }
 }
 
@@ -54,6 +56,10 @@ int get_cmd(struct tty* tty) {
     if (!(tty->cache[tty->ci]))
         tty->cache[tty->ci] = malloc(sizeof(char*) * ARG_MAX);
 
+    int ci_before = tty->ci;
+    if (!token)
+        return ci_before;
+
     while (token && argc < ARG_MAX) {
         char* ptr = tty->cache[tty->ci][argc];
         // Allocate argv[argc] (if needed)
@@ -63,6 +69,7 @@ int get_cmd(struct tty* tty) {
 
         // copy token to argv[argc]
         int len = min(strlen(token), ARG_MAX - 1);
+        memset(ptr, 0x0, strlen(ptr));
         memcpy(ptr, token, len);
         ptr[len + 1] = '\0';
 
@@ -71,10 +78,11 @@ int get_cmd(struct tty* tty) {
         token = strtok(NULL, ARGV_DELIM);
     }
     tty->cargc[tty->ci] = argc;
+    
 
-    int ci_before = tty->ci;
     tty->ci++;
     tty->ci %= MAX_CMDS_CACHE;
+    tty->tci = tty->ci;
 
     return ci_before;
 }
@@ -86,9 +94,39 @@ void parse_cmd(int argc, char *argv[]) {
     char* cmd = argv[0];
 
     // search cmd in commands str array
-    for (int i = 0; i < MAX_CMDS; i++)
-        if (shcmd_table[i] && !strcmp(cmd, shcmd_str[i]))
-            return (void) shcmd_table[i](argc, argv);
+    tty0.active = false;
+    shcmd dst = NULL;
+    for (int i = 0; i < MAX_CMDS; i++) {
+        if (shcmd_table[i] && !strcmp(cmd, shcmd_str[i])) {
+            dst = shcmd_table[i];
+            break;
+        }
+    }
+    if (!dst) dst = shcmd_notfound;
 
-    shcmd_notfound(argc, argv);
+    dst(argc, argv);
+
+    tty0.active = true;
+}
+
+void traverse_cache(int offset) {
+    int tmptci = tty0.tci; // save tci
+
+    tty0.tci += offset;
+    // If negative
+    if (tty0.tci < 0) tty0.tci = MAX_CMDS_CACHE + tty0.tci;
+    tty0.tci %= MAX_CMDS_CACHE;
+
+    if (tty0.tci == tty0.ci || // back to current command - not allowed
+        (!tty0.cache[tty0.tci] || !tty0.cache[tty0.tci][0])) // invalid cache entry
+        return (void) (tty0.tci = tmptci);
+    
+    // show cache
+    // clear current buffer
+    stdin_clear();
+
+    // insert current cache
+    char *dst = malloc(BUFFER_SIZE);
+    stdin_insert(strjoin(dst, tty0.cargc[tty0.tci], tty0.cache[tty0.tci], ARGV_DELIM));
+    free(dst);
 }

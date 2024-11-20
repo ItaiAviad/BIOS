@@ -11,7 +11,7 @@
  * 
  * @return int - char
  */
-int getchar() {
+int getchar(void) {
     int ic = 0;
 #if defined(__is_libk)
     sti();
@@ -19,6 +19,9 @@ int getchar() {
     cli();
 #else
     ic = syscall(sys_getchar);
+    keycode_ext_handler(ic);
+    if (ic >= KEYCODES_EXT_START)
+        ic = -2; // extended keycode return
 #endif
     return ic;
 }
