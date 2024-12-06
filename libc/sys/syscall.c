@@ -44,7 +44,7 @@ int64_t syscall_handler(pt_regs *regs) {
     // // printf("rbp: %p\n", regs->rbp);
     // printf("r8: %p\n", regs->r8);
     // printf("r9: %p\n", regs->r9);
-    
+    int x = 1/0;
     int SYS_T_LEN = sizeof(SYSCALL_TABLE) / sizeof(SYSCALL_TABLE[0]);
     if (number >= SYS_T_LEN || SYSCALL_TABLE[number] == NULL) {
         return -1;

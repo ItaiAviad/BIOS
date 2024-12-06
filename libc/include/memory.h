@@ -26,17 +26,6 @@ extern "C" {
 uint64_t aalign(uint64_t, uint64_t);
 uint64_t aalign_down(uint64_t addr, uint64_t alignment);
 
-
-// ----------------------------------------------
-
-__attribute__((unused))
-void* heap_malloc_state_base;
-__attribute__((unused))
-void* heap_end;
-__attribute__((unused))
-PageFrameAllocator kernel_allocator;
-// ----------------------------------------------
-
 // Heap
 #define HEAP_CHUNK_MIN_SIZE_BYTES 64
 
@@ -50,9 +39,10 @@ typedef struct __attribute__((__packed__)) malloc_chunk {
 } malloc_chunk;
 
 // Heap State
-#define MALLOC_STATE_PADDING_SIZE HEAP_CHUNK_MIN_SIZE_BYTES - (sizeof(uint64_t) + sizeof(size_t) + sizeof(malloc_chunk*) * 2)
+#define MALLOC_STATE_PADDING_SIZE HEAP_CHUNK_MIN_SIZE_BYTES - (2 * sizeof(void*) + sizeof(size_t) + sizeof(malloc_chunk*) * 2)
 typedef struct __attribute__((__packed__)) malloc_state {
     void* heap_base;
+    void* heap_end;
     size_t heap_total_size;
     malloc_chunk* mchunk;
     malloc_chunk* unsorted_bin_head;

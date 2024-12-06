@@ -99,6 +99,8 @@
     "stdbool.h": "c",
     "cstdlib": "c",
     "ctype.h": "c",
-    "cstring": "c"
+    "cstring": "c",
+    "idt.h": "c",
+    "process.h": "c"
 }
 }

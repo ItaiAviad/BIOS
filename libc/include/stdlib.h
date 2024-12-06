@@ -32,6 +32,14 @@ char* itoa(int64_t, char*, int);
  */
 int64_t atoi(const char *nptr);
 
+/**
+ * @brief Absolute value
+ * 
+ * @param x 
+ * @return int 
+ */
+int abs(int x);
+
 #ifdef __cplusplus
 }
 #endif

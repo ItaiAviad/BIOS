@@ -33,13 +33,15 @@ void* init_heap(__attribute__((unused)) Context ctx, uint64_t base_addr, uint64_
 }
 
 int brk(void *end_data_segment) {
-    heap_end = end_data_segment;
+    malloc_state* heap = (malloc_state*) heap_malloc_state_base;
+    heap->heap_end = end_data_segment;
     return 0;
 }
 
 void *sbrk(size_t increment) {
-    void *old_break = heap_end;
-    heap_end += aalign(increment, HEAP_CHUNK_MIN_SIZE_BYTES);
+    malloc_state* heap = (malloc_state*) heap_malloc_state_base;
+    void *old_break = heap->heap_end;
+    heap->heap_end += aalign(increment, HEAP_CHUNK_MIN_SIZE_BYTES);
     return (void *)old_break;
 }
 
@@ -47,7 +49,7 @@ void print_heap(void) {
 #if defined(__is_libk)
     malloc_state *heap = (malloc_state *)heap_malloc_state_base;
 
-    printf("heap_base: %p, tsize: %p, end: %p\n", heap->heap_base, heap->heap_total_size, heap_end);
+    printf("heap_base: %p, tsize: %p, end: %p\n", heap->heap_base, heap->heap_total_size, heap->heap_end);
 
     printf("Allocated Chunks:\n");
     malloc_chunk *cur = heap->mchunk;

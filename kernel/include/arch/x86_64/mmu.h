@@ -34,7 +34,7 @@ typedef struct {
 
 typedef struct Context {
     uint64_t start_addr; // Virtual - Relative to last context
-    uint64_t kernel_start_offset; // Different for a process
+    uint64_t kernel_addr; // Different for a process
     uint64_t memory_size_pages; // Total memory size (in pages) for context
     PageFrameAllocator* allocator;
     uint64_t* old_pml4;
@@ -43,6 +43,10 @@ typedef struct Context {
 
 __attribute__((unused))
 Context k_ctx;
+__attribute__((unused))
+PageFrameAllocator kernel_allocator;
+__attribute__((unused))
+void* heap_malloc_state_base;
 // ----------------------------------------------
 
 // Page Frame Allocator

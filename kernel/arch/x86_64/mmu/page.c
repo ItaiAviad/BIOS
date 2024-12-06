@@ -9,7 +9,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
     cli();
     Context boot_ctx = {
         .start_addr = 0x0,
-        .kernel_start_offset = 0x0,
+        .kernel_addr = 0x0,
         .memory_size_pages = memory_size_pages,
         .allocator = allocator,
         .old_pml4 = (uint64_t*) PML4_BOOT,
@@ -17,7 +17,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
     };
 
     k_ctx.start_addr = 0x0;
-    k_ctx.kernel_start_offset = 0x0;
+    k_ctx.kernel_addr = 0x0;
     k_ctx.memory_size_pages = memory_size_pages;
     k_ctx.allocator = allocator;
     k_ctx.old_pml4 = (uint64_t*) PML4_BOOT;
