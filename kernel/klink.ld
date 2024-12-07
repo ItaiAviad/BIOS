@@ -1,5 +1,5 @@
 ENTRY(_kentry)
-phys = $(KERNEL_LOAD_ADDR);
+phys = $(KERNEL_VBASE);
 SECTIONS
 {
     . = phys;

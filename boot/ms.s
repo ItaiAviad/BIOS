@@ -77,6 +77,10 @@ elevate_lm:
         mov fs, ax
         mov gs, ax
         mov ss, ax
+
+        ; Set up stack
+        mov rbp, KERNEL_VBASE
+        mov rsp, rbp
         
         sti
         jmp lm

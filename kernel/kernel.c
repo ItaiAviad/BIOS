@@ -45,6 +45,8 @@ int kmain(void) {
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
     printf("%s PIC\n", LOG_SYM_SUC);
 
+    // while (1) {}
+
     // Initialize Kernel Paging:
     // Page Frame Allocator - Manage Physical Memory
     // Paging sturctures (PML4T, PDPT, PDT, PT)
@@ -122,9 +124,9 @@ void user_init() {
     memset(pcb.ctx.allocator->bitmap, 0x1, upper_divide(PROC_PML4T_ADDR, PAGE_SIZE));
 
     // Map process binary, pfa
-    map_memory_range(pcb.ctx, (void*) PROC_BIN_ADDR, (void*) PROC_PML4T_ADDR, (void*) pcb.entry);
+    map_memory_range(pcb.ctx, (void*) PROC_BIN_ADDR, (void*) PROC_PML4T_ADDR - 1, (void*) pcb.entry);
     // Map process PML4T
-    map_memory_range(pcb.ctx, (void*) PROC_PML4T_ADDR, (void*) (PROC_PML4T_ADDR + PAGE_SIZE), (void*)pcb.ctx.pml4);
+    map_memory_range(pcb.ctx, (void*) PROC_PML4T_ADDR, (void*) (PROC_PML4T_ADDR + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
 
     // Stack
     int stack_slot = rand() % PROC_SLOTS + PROC_SLOTS_OFFSET;
@@ -140,15 +142,16 @@ void user_init() {
     // TODO: Update heap_malloc_state_base so kernel mallocs in process's heap
 
     // Map Kernel (higher half)
-
-    // set_rsp(USER_LOAD_ADDR);
+    map_memory_range(pcb.ctx, (void*) (PROC_KERNEL_ADDR), (void*) (PAGE_FRAME_ALLOCATOR_END), (void*) (KERNEL_VBASE - KERNEL_LOAD_ADDR));
 
     printf("%p, %p, %p\n", pcb.entry, pcb.stack, pcb.heap);
 
-    // Switch PML4 to use the (new) s PML4
-    // set_pml4_address((uint64_t *) pcb.ctx.pml4);
-    printf("printf addr: %p\n", printf);
+    // int x = 1/0;
 
+    // Switch PML4 to use the (new) s PML4
+    printf("printf addr: %p\n", printf);
+    set_pml4_address((uint64_t *) pcb.ctx.pml4);
+    printf("printf addr: %p\n", printf);
     sti();
     jump_usermode((void*)pcb.entry, (void*)pcb.stack);
 }

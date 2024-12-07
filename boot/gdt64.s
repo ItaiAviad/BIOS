@@ -50,7 +50,7 @@ tss:
 ;     dw 0x0               ; IO Map B
 
 section .text
-rsp0_value: dd KERNEL_LOAD_ADDR
+rsp0_value: dd KERNEL_VBASE
 [global tss_init]
 tss_init_rsp0:
     mov eax, [rsp0_value]

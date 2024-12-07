@@ -99,8 +99,10 @@ void switch_context(Context ctx) {
     // Map Kernel + Page Frame Allocator + Pagign Tables in new Kernel Context
     memset(ctx.allocator->bitmap, 1, upper_divide(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
 
-    map_memory_range(ctx, (void*)MBR_LOAD_ADDR, (void*) PAGE_FRAME_ALLOCATOR_END - 1, (void*)MBR_LOAD_ADDR);
+    map_memory_range(ctx, (void*)MBR_LOAD_ADDR, (void*) (MBR_LOAD_ADDR + (1 * MB)), (void*)MBR_LOAD_ADDR);
+    map_memory_range(ctx, (void*)(KERNEL_VBASE - KERNEL_LOAD_ADDR), (void*) PAGE_FRAME_ALLOCATOR_END - 1, (void*)(KERNEL_VBASE - KERNEL_LOAD_ADDR));
     map_memory_range(ctx, (void*)ctx.pml4, ctx.pml4+PAGE_SIZE-1, (void*)ctx.pml4);
+    printf("bitmap size: %p\n", PAGE_FRAME_ALLOCATOR_END);
     // Switch PML4 to use the (new) s PML4
     cli();
     set_pml4_address((uint64_t *) ctx.pml4);
@@ -111,7 +113,7 @@ void set_pml4_address(uint64_t* pml4){
     __asm__ volatile (
         "mov %%rax, %0\n"     // Move the address of the PML4 table into the RAX register
         "mov %%cr3, %%rax\n"  // Move the address from RAX into the CR3 register
-        "mov %%rax, %%cr3"
+        "mov %%rax, %%cr3\n"
         : 
         : "r" (pml4) // Input operand: the address of the PML4 table
         : "rax" // Clobbered register

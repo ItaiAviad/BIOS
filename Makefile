@@ -10,6 +10,7 @@ SECTOR_SIZE := 512
 
 KERNEL_LOAD_ADDR := 0x10000
 KERNEL_STACK_START_ADDR := 0xF000
+KERNEL_VBASE := $(shell echo $$((0x400000 + $(KERNEL_LOAD_ADDR)))) # 4MB - Kernel binary VA
 
 ### Directories
 BOOT_DIR := boot
@@ -87,6 +88,7 @@ INCLUDES := -I$(LIBC_INCLUDE) -I$(KERNEL_INCLUDE) -I$(USER_INCLUDE)
 # MISC_FLAGS = -DCURRENT_YEAR=$(shell date --utc | awk '{print $$7}')
 # MISC_FLAGS += -DTIMEZONE=\"$(shell date --utc | awk '{print $$6}')\"
 MISC_FLAGS = -DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) -DKERNEL_STACK_START_ADDR=$(KERNEL_STACK_START_ADDR) \
+			-DKERNEL_VBASE=$(KERNEL_VBASE) \
 			-DUSER_LOAD_ADDR=$(USER_LOAD_ADDR) -DCURRENT_YEAR=$(shell $(SHELL) -c "date -u +%Y")
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
@@ -131,6 +133,7 @@ $(BOOT_BIN): always kernel
 		-DKERNEL_SIZE_IN_SECTORS=$$(($(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))'))) \
 		-DTOTAL_SIZE_IN_SECTORS=$(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))')\
 		-DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) \
+		-DKERNEL_VBASE=$(KERNEL_VBASE) \
 		-DKERNEL_STACK_START_ADDR=$(KERNEL_STACK_START_ADDR) \
 		-f bin -o $@
 
@@ -141,7 +144,7 @@ $(KERNEL_BIN): $(KERNEL_ELF)
 
 $(KERNEL_ELF): always $(KERNEL_OBJ)
 	echo "Linking Kernel..."
-	sed 's/$$(KERNEL_LOAD_ADDR)/$(KERNEL_LOAD_ADDR)/g' $(KERNEL_LD_ORG) > $(KERNEL_LD) && sync
+	sed 's/$$(KERNEL_VBASE)/$(KERNEL_VBASE)/g' $(KERNEL_LD_ORG) > $(KERNEL_LD) && sync
 	$(LD) $(LDFLAGS_KERNEL) $(KERNEL_OBJ) -o $@
 	rm $(KERNEL_LD)
 

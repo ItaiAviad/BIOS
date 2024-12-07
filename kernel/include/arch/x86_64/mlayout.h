@@ -13,7 +13,7 @@
 #define MB (1024 * 1024)           // = 0x100000
 #define MB_PAGES 0x100           // = 0x100000
 #define GB_PAGES 0x40000         // = 0x40000 (Pages) = 1024 * 1024 * 1024 / (4096)
-#define MEMORY_SIZE_PAGES (0x100 * MB) // = 1GB memory
+#define MEMORY_SIZE_PAGES (0x40 * MB) // = 1GB / 4 memory
 #define MEMORY_SIZE MEMORY_SIZE_PAGES / PAGE_SIZE
 // #define MEMORY_SIZE PAGE_SIZE * MEMORY_SIZE_PAGES // 8GB = 0x200000000
 
@@ -24,11 +24,14 @@
 
 // #define KERNEL_LOAD_ADDRESS ... ==> Defined in Makefile!
 #ifndef KERNEL_LOAD_ADDR
-#define KERNEL_LOAD_ADDR 0x90000
+#define KERNEL_LOAD_ADDR 0x10000
+#endif
+#ifndef KERNEL_VBASE
+#define KERNEL_VBASE 0x410000 // Kernel binary VA
 #endif
 #define KERNEL_STACK 0xF000
 
-#define KERNEL_END (2 * MB) // 2MB
+#define KERNEL_END (6 * MB) // 2MB
 
 // Kernel Page Frame Allocator
 #define PAGE_FRAME_ALLOCATOR_START KERNEL_END
@@ -77,8 +80,8 @@
 #define PROC_STACK_SIZE PROC_SLOT_SIZE
 #define PROC_HEAP_SIZE PROC_SLOT_SIZE
 
-#define PROC_KERNEL_SIZE PROC_MEM_SIZE / 2
 #define PROC_KERNEL_ADDR PROC_MEM_SIZE / 2
+#define PROC_KERNEL_SIZE PROC_MEM_SIZE / 2
 
 #define PROC_SLOTS_OFFSET 8 // save slots for binary, pfa, pml4t
 #define PROC_SLOTS PROC_MEM_SIZE / 2 / (PROC_STACK_SIZE) - PROC_SLOTS_OFFSET

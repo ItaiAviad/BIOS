@@ -174,14 +174,14 @@ pm_end:
 [bits 64]
 
 lm:
-    ; mov rdi, style_blue
-    ; mov rsi, msg_lm_success
-    ; call puts64
-    ; xchg bx, bx
-    ; IMPORTANT: Use `jmp` and not `call` as `call` misaligns RSP
-    mov rsp, KERNEL_STACK_START_ADDR
-    mov rbp, rsp
-    jmp KERNEL_LOAD_ADDR
+    ; Copy kernel from KERNEL_LOAD_ADDR to 4MB (0x400000)
+    mov rsi, KERNEL_LOAD_ADDR
+    mov rdi, KERNEL_VBASE
+    mov rcx, (TOTAL_SIZE_IN_SECTORS * sector_size) / 8  ; Total bytes / 8 bytes per move
+    rep movsq  ; Copy 64-bit words
+
+    ; Jump to kernel at 4MB
+    jmp KERNEL_VBASE
     jmp hlt
 
 ; Constants
