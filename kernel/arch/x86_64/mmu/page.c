@@ -1,6 +1,7 @@
 #include <arch/x86_64/mlayout.h>
 #include <math.h>
 #include <arch/x86_64/mmu.h>
+#include <process.h>
 #include <string.h>
 
 void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages) {
@@ -16,30 +17,30 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
         .pml4 = (uint64_t*) PML4_BOOT
     };
 
-    k_ctx.start_addr = 0x0;
-    k_ctx.kernel_addr = 0x0;
-    k_ctx.memory_size_pages = memory_size_pages;
-    k_ctx.allocator = allocator;
-    k_ctx.old_pml4 = (uint64_t*) PML4_BOOT;
-    k_ctx.pml4 = (uint64_t*) PML4_KERNEL;
+    kpcb.ctx.start_addr = 0x0;
+    kpcb.ctx.kernel_addr = 0x0;
+    kpcb.ctx.memory_size_pages = memory_size_pages;
+    kpcb.ctx.allocator = allocator;
+    kpcb.ctx.old_pml4 = (uint64_t*) PML4_BOOT;
+    kpcb.ctx.pml4 = (uint64_t*) PML4_KERNEL;
 
     allocator->bitmap[(uint64_t)boot_ctx.pml4 / PAGE_SIZE] = 1; // Mark pml4 boot as allocated
 
     allocator->bitmap[(uint64_t)(boot_ctx.pml4+PAGE_SIZE) / PAGE_SIZE] = 1; // Mark pdpt boot as allocated
 
-    // invlpg(k_ctx.pml4);
+    // invlpg(kpcb.ctx.pml4);
 
-    memset(k_ctx.pml4, 0, PAGE_SIZE);
+    memset(kpcb.ctx.pml4, 0, PAGE_SIZE);
 
     boot_ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)PML4_KERNEL | (uint64_t)PAGE_MAP_FLAGS;
 
-    init_recursive_paging(k_ctx);
+    init_recursive_paging(kpcb.ctx);
 
     // flush_tlb();
 
     // invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
 
-    switch_context(k_ctx);
+    switch_context(kpcb.ctx);
 
     cli();
 
@@ -99,10 +100,10 @@ void switch_context(Context ctx) {
     // Map Kernel + Page Frame Allocator + Pagign Tables in new Kernel Context
     memset(ctx.allocator->bitmap, 1, upper_divide(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
 
-    map_memory_range(ctx, (void*)MBR_LOAD_ADDR, (void*) (MBR_LOAD_ADDR + (1 * MB)), (void*)MBR_LOAD_ADDR);
+    // map_memory_range(ctx, (void*)MBR_LOAD_ADDR, (void*) (MBR_LOAD_ADDR + (1 * MB)), (void*)MBR_LOAD_ADDR);
+    map_memory_range(ctx, (void*)0x0, (void*) (0x0 + (3 * MB) - 1), (void*)0x0);
     map_memory_range(ctx, (void*)(KERNEL_VBASE - KERNEL_LOAD_ADDR), (void*) PAGE_FRAME_ALLOCATOR_END - 1, (void*)(KERNEL_VBASE - KERNEL_LOAD_ADDR));
     map_memory_range(ctx, (void*)ctx.pml4, ctx.pml4+PAGE_SIZE-1, (void*)ctx.pml4);
-    printf("bitmap size: %p\n", PAGE_FRAME_ALLOCATOR_END);
     // Switch PML4 to use the (new) s PML4
     cli();
     set_pml4_address((uint64_t *) ctx.pml4);

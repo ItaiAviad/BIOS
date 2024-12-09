@@ -78,6 +78,7 @@ tss_init_gdt64:
     mov [tss_base_upper], eax   ; Store base (bits 32-63)
     ret
 
+align 0x40
 gdt64_start:
     dd 0x0
     dd 0x0
@@ -188,7 +189,7 @@ gdt64_udata:
 tss_entry:
     dw 0x0067                   ; Limit (104 bytes - 1)
     dw tss             ; Base (bits 0-15)
-    db 0             ; Base (bits 16-23)
+    db 0xb0             ; Base (bits 16-23)
     db 0b10001001               ; Type: 64-bit TSS (available), DPL=3, Present
     db 0b00000000               ; Granularity, Limit (bits 16-19)
     db 0            ; Base (bits 24-31)

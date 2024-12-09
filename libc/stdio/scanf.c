@@ -207,12 +207,21 @@ int sscanf(const char* str, const char* restrict format, ...) {
 }
 
 int scanf(const char* restrict format, ...) {
-    char buf[BUFFER_SIZE];
-    gets_s(buf, BUFFER_SIZE);
+    int res;
 
     va_list args;
     va_start(args, format);
-    int res = sscanf_args(buf, format, args);
+
+    #if defined(__is_libk)
+
+    char buf[BUFFER_SIZE];
+    gets_s(buf, BUFFER_SIZE);
+    res = sscanf_args(buf, format, args);
+
+    #else 
+    // Syscall
+    res = fvsyscall(sys_scanf, (uint64_t) format, args);
+    #endif
 
     va_end(args);
 

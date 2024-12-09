@@ -10,10 +10,11 @@
 #include <types.h>
 
 #define PAGE_SIZE 4096
+#define KB 1024
 #define MB (1024 * 1024)           // = 0x100000
 #define MB_PAGES 0x100           // = 0x100000
 #define GB_PAGES 0x40000         // = 0x40000 (Pages) = 1024 * 1024 * 1024 / (4096)
-#define MEMORY_SIZE_PAGES (0x40 * MB) // = 1GB / 4 memory
+#define MEMORY_SIZE_PAGES (0x40000 * 4) // = 4 GB
 #define MEMORY_SIZE MEMORY_SIZE_PAGES / PAGE_SIZE
 // #define MEMORY_SIZE PAGE_SIZE * MEMORY_SIZE_PAGES // 8GB = 0x200000000
 
@@ -27,11 +28,12 @@
 #define KERNEL_LOAD_ADDR 0x10000
 #endif
 #ifndef KERNEL_VBASE
-#define KERNEL_VBASE 0x410000 // Kernel binary VA
+#define KERNEL_VBASE 0x810000 // Kernel binary VA
 #endif
-#define KERNEL_STACK 0xF000
+#define KERNEL_STACK_TOP KERNEL_VBASE - 0x10
+// #define KERNEL_STACK 0xF000
 
-#define KERNEL_END (6 * MB) // 2MB
+#define KERNEL_END (10 * MB) // 2MB
 
 // Kernel Page Frame Allocator
 #define PAGE_FRAME_ALLOCATOR_START KERNEL_END
@@ -46,9 +48,10 @@
 // Paging (Boot)
 #define PML4_BOOT 0x80000  // PML4 kernel base address
 // Paging (Kernel)
-#define PML4_KERNEL 0x82000                  // PML4 kernel base address
+// #define PML4_KERNEL 0x82000                  // PML4 kernel base address
+#define PML4_KERNEL 0xd00000                  // PML4 kernel base address
 
-#define KERNEL_STACK_START PML4_BOOT
+// #define KERNEL_STACK_START PML4_BOOT
 
 // Heap
 // #define KERNEL_HEAP_START 0x200000
@@ -66,8 +69,8 @@
 
 
 // Process memory layout (see ProcessMemoryLayout.md)
-#define PROC_MEM_SIZE PAGE_SIZE * 0x800 // 8MB
-#define PROC_BIN_ADDR 0x0
+#define PROC_MEM_SIZE PAGE_SIZE * 0x1000 // 8MB
+#define PROC_BIN_ADDR 0x400000
 #define PROC_BIN_SIZE PAGE_SIZE * 0x20 // 128KB
 
 #define PROC_SLOT_SIZE PAGE_SIZE * 0x20 // 128KB

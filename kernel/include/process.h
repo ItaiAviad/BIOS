@@ -6,6 +6,9 @@
 #include <arch/x86_64/mlayout.h>
 #include <arch/x86_64/interrupts.h>
 #include <arch/x86_64/mmu.h>
+#include <arch/x86_64/gdt.h>
+#include <arch/x86_64/tss.h>
+#include <memory.h>
 
 typedef struct ProcessControlBlock {
     uint32_t pid;                   // Process ID
@@ -21,6 +24,11 @@ typedef struct ProcessControlBlock {
     uint32_t priority;              // Priority (useful for scheduling later)
     uint64_t cpu_registers[16];     // Space for saving CPU registers during context switching
 } PCB;
+
+// Kernel ProcessControlBlock
+__attribute__((unused)) struct ProcessControlBlock kpcb;
+
+void init_kernel_process(void);
 
 
 #endif

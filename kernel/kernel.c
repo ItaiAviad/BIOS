@@ -37,34 +37,19 @@ int kmain(void) {
     init_isr_handlers();
     printf("%s ISRs\n", LOG_SYM_SUC);
 
-    // Flush TSS
-    flush_tss();
-
     // PIC - Programmable Interrupt Controller
     // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
     printf("%s PIC\n", LOG_SYM_SUC);
 
-    // while (1) {}
-
-    // Initialize Kernel Paging:
-    // Page Frame Allocator - Manage Physical Memory
-    // Paging sturctures (PML4T, PDPT, PDT, PT)
-    kernel_allocator.initialized = 0;
-    init_kernel_paging(&kernel_allocator, MEMORY_SIZE_PAGES);
-    printf("%s Kernel Paging\n", LOG_SYM_SUC);
-
-    // Kernel Heap - Manage Kernel Dynamic Memory
-    init_heap(k_ctx, KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
-    printf("%s Heap: %p\n", LOG_SYM_SUC, kheap_current);
+    // Initialize Kernel Process (Paging, Stack, Heap, etc.)
+    init_kernel_process();
 
     // Init PCI
     enumerate_pci();
 
     // Setup AHCI and enumerate Disks
     enumerate_disks();
-
-    cli();
 
     // Init Syscall
     init_syscall();
@@ -109,16 +94,16 @@ void user_init() {
     };
 
     // Map process memory in kernel's PML4T
-    map_memory_range(k_ctx, (void*) pcb.entry, (void*) pcb.entry + PROC_MEM_SIZE, (void*) pcb.entry);
+    map_memory_range(kpcb.ctx, (void*) pcb.entry, (void*) pcb.entry + PROC_MEM_SIZE, (void*) pcb.entry);
+    // Map process memory in kernel's PML4T (identity map for i.e. heap addresses)
+    map_memory_range(kpcb.ctx, (void*) PROC_BIN_ADDR, (void*) (PROC_MEM_SIZE / 2 - 1), (void*) pcb.entry + PROC_BIN_ADDR);
 
     // Read binary into process memory
     read(0, 0, PROC_BIN_SIZE, (void*) pcb.entry);
 
     // PML4T
-    k_ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)pcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
+    kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)pcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
     init_recursive_paging(pcb.ctx);
-    flush_tlb();
-    invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
     
     // Mark process binary, pfa as allocated
     memset(pcb.ctx.allocator->bitmap, 0x1, upper_divide(PROC_PML4T_ADDR, PAGE_SIZE));
@@ -128,30 +113,52 @@ void user_init() {
     // Map process PML4T
     map_memory_range(pcb.ctx, (void*) PROC_PML4T_ADDR, (void*) (PROC_PML4T_ADDR + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
 
-    // Stack
-    int stack_slot = rand() % PROC_SLOTS + PROC_SLOTS_OFFSET;
+    // Stack - Map Stack pages in process's VAS
+    // ASLR stack
+    // NOTICE! Stack address after this chunk of code is relative to the **process's VAS**
+    uint64_t stack_slot = rand() % PROC_SLOTS + PROC_SLOTS_OFFSET;
     while (stack_slot < PROC_SLOTS_OFFSET)
         stack_slot = rand() % PROC_SLOTS + PROC_SLOTS_OFFSET;
-    pcb.stack = (void*) pcb.entry + stack_slot * PROC_SLOT_SIZE;
+    pcb.stack = (void*) (stack_slot * PROC_SLOT_SIZE);
+    map_memory_range(pcb.ctx, (void*) (pcb.stack), (void*) (pcb.stack + PROC_STACK_SIZE - 1), (void*) ((uint64_t) pcb.entry + (uint64_t) pcb.stack));
+    pcb.stack += PROC_STACK_SIZE - 0x10;
 
     // Heap
-    int heap_slot = rand() % PROC_SLOTS + PROC_SLOTS_OFFSET;
+    // ASLR heap
+    // NOTICE! Heap address after this chunk of code is relative to the **kernel's VAS**
+    uint64_t heap_slot = rand() % PROC_SLOTS + PROC_SLOTS_OFFSET;
     while (heap_slot < PROC_SLOTS_OFFSET || abs(stack_slot - heap_slot) <= 1)
         heap_slot = rand() % PROC_SLOTS + PROC_SLOTS_OFFSET;
-    pcb.heap = (void*) pcb.entry + heap_slot * PROC_SLOT_SIZE;
+    pcb.heap = (void*) (heap_slot * PROC_SLOT_SIZE);
     // TODO: Update heap_malloc_state_base so kernel mallocs in process's heap
+    map_memory_range(pcb.ctx, (void*) (pcb.heap), (void*) (pcb.heap + PROC_STACK_SIZE - 1), (void*) ((uint64_t) pcb.entry + (uint64_t) pcb.heap));
+    pcb.heap += (uint64_t) pcb.entry;
+    // Init heap
+    init_heap(pcb.ctx, (uint64_t) pcb.heap, PROC_HEAP_SIZE);
 
     // Map Kernel (higher half)
+    /* NOTE: Kernel is mapped to the same virtual address in both kernel PML4 and process PML4
+             This ensures that the kernel in can see its own functions in the same address.
+       NOTE: Kernel includes IDT (but not GDT!)
+    */
     map_memory_range(pcb.ctx, (void*) (PROC_KERNEL_ADDR), (void*) (PAGE_FRAME_ALLOCATOR_END), (void*) (KERNEL_VBASE - KERNEL_LOAD_ADDR));
 
-    printf("%p, %p, %p\n", pcb.entry, pcb.stack, pcb.heap);
+    // Map kernel boot (Kernel GDT and TSS)
+    /* NOTE: For simplicity reasons, the GDT (initialized in Bootloader)
+             stays in the same physical space, and thereby needs to be mapped
+             to a different virtual address in the process's PML4 (GDT's address is ~0x8000,
+             which is reserved for the process's code).
+             GDT location is the same in both kernel and process PML4 (see ProcessMemoryLayout.md)
+    */
+    map_memory_range(pcb.ctx, (void*)(PAGE_FRAME_ALLOCATOR_END + 1), (void*) (PAGE_FRAME_ALLOCATOR_END + PROC_SLOT_SIZE), (void*)(0x0));
 
-    // int x = 1/0;
+    // Allow later kernel maps
+    init_recursive_paging(kpcb.ctx);
 
-    // Switch PML4 to use the (new) s PML4
-    printf("printf addr: %p\n", printf);
+    // Switch PML4 to use the (new) PML4
+    flush_tlb();
+    invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
     set_pml4_address((uint64_t *) pcb.ctx.pml4);
-    printf("printf addr: %p\n", printf);
-    sti();
-    jump_usermode((void*)pcb.entry, (void*)pcb.stack);
+
+    jump_usermode((void*)PROC_BIN_ADDR, (void*)(pcb.stack));
 }

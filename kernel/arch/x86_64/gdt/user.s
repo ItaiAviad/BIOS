@@ -21,6 +21,7 @@ jump_usermode:
     ; Push RFLAGS with the interrupt flag enabled
     pushfq                   ; Push current flags
     or qword [rsp], 1 << 9   ; Enable interrupts in the pushed RFLAGS
+    or qword [rsp], 0x286
     ; Push CS selector + RPL = 3 (Ring 3)
     push 0x18 | 3
     ; Push RIP (user mode code entry point, provided in rdi)

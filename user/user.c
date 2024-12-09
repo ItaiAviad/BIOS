@@ -14,7 +14,11 @@
 int umain(void) {
     printf("%s Usermode\n", LOG_SYM_SUC);
 
-    shell_init();
+    char str[100];
+    scanf("%s", str);
+    printf("%s\n", str);
+
+    // shell_init();
 
     printf("Now you are stuck here with me forever... :D\n");
 

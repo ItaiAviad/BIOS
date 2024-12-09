@@ -16,12 +16,20 @@ void configure_segments() {
     write_msr(MSR_STAR, star_value & 0xffffffff, (star_value >> 32));
 }
 
+struct kernel_gs_base kgb = {
+    .kstack = KERNEL_STACK_TOP,
+    .ustack = 0x0
+};
+
 void init_syscall() {
     // Enable syscall/sysret using EFER.SCE
     enable_syscall();
 
     // Set up the syscall entry point
     write_msr(MSR_LSTAR, ((uint64_t)syscall_entry & 0xffffffff), ((uint64_t)syscall_entry >> 32));
+
+    // Set up KernelGSBase
+    write_msr(MSR_KERNEL_GS_BASE, ((uint64_t)&kgb & 0xffffffff), ((uint64_t)&kgb >> 32));
 
     configure_segments();
 }
@@ -44,13 +52,37 @@ int64_t syscall_handler(pt_regs *regs) {
     // // printf("rbp: %p\n", regs->rbp);
     // printf("r8: %p\n", regs->r8);
     // printf("r9: %p\n", regs->r9);
-    int x = 1/0;
+    // int x = 1/0;
+
+    // Virtual Address Space (see `syscall_entry` in `syscall_s.s` for stack switch)
+    // Save current VAS
+    uint64_t prev_cr3;
+    __asm__ volatile (
+        "mov %0, cr3\n"
+        : "=r"(prev_cr3) // Output
+    );
+    // Switch to Kernel Virtual Address Space
+    if (prev_cr3 != (uint64_t) (PML4_KERNEL)) {
+        flush_tlb();
+        invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
+        set_pml4_address((uint64_t*) (PML4_KERNEL));
+    }
+
     int SYS_T_LEN = sizeof(SYSCALL_TABLE) / sizeof(SYSCALL_TABLE[0]);
     if (number >= SYS_T_LEN || SYSCALL_TABLE[number] == NULL) {
         return -1;
     }
 
-    return SYSCALL_TABLE[number](regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9); 
+    int64_t ret = SYSCALL_TABLE[number](regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9);
+
+    if (prev_cr3 != (uint64_t) (PML4_KERNEL)) {
+        
+    }
+    flush_tlb();
+    invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
+    set_pml4_address((uint64_t*) (prev_cr3));
+
+    return ret;
 }
 
 #endif

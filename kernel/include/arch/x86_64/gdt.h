@@ -43,4 +43,11 @@ typedef struct __attribute__((packed)) {
 	unsigned int reserved				: 32;
 } gdt_entry_bits;
 
+struct gdtr {
+    uint16_t limit;    // Limit (size of the GDT)
+    uint64_t base;     // Base address of the GDT
+} __attribute__((packed));
+
+__attribute__((unused)) struct gdtr org_gdtr;
+
 #endif

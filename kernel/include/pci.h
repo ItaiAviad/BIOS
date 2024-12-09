@@ -3,6 +3,7 @@
 #define PCI_H
 
 #include <arch/x86_64/io.h>
+#include <process.h>
 #include <arch/x86_64/hardwareMem.h>
 
 #include <types.h>

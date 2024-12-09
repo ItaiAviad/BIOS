@@ -10,7 +10,7 @@ SECTOR_SIZE := 512
 
 KERNEL_LOAD_ADDR := 0x10000
 KERNEL_STACK_START_ADDR := 0xF000
-KERNEL_VBASE := $(shell echo $$((0x400000 + $(KERNEL_LOAD_ADDR)))) # 4MB - Kernel binary VA
+KERNEL_VBASE := $(shell echo $$((0x800000 + $(KERNEL_LOAD_ADDR)))) # 4MB - Kernel binary VA
 
 ### Directories
 BOOT_DIR := boot
@@ -93,7 +93,7 @@ MISC_FLAGS = -DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) -DKERNEL_STACK_START_ADDR=$(
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
 endif
-CFLAGS := -ffreestanding -m64 -masm=intel -Wall -g -Wextra -O0 $(INCLUDES) $(MISC_FLAGS)
+CFLAGS := -ffreestanding -m64 -march=x86-64 -masm=intel -nostdlib -Wall -g -Wextra -O0 $(INCLUDES) $(MISC_FLAGS)
 NASMFLAGS := -f elf64 -g -DUSER_LOAD_ADDR=$(USER_LOAD_ADDR)
 LDFLAGS_KERNEL := -T $(KERNEL_LD) $(INCLUDES)
 LDFLAGS_USER := -T $(USER_LD) $(INCLUDES)

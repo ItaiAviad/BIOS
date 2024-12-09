@@ -4,6 +4,7 @@
 
 #include <arch/x86_64/mlayout.h>
 #include <memory.h>
+#include <process.h>
 #include <stdio.h>
 
 // Contains code to manage hardware devices memory

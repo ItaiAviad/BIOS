@@ -17,6 +17,7 @@
 #define MSR_EFER 0xC0000080
 #define MSR_STAR 0xC0000081
 #define MSR_LSTAR 0xC0000082
+#define MSR_KERNEL_GS_BASE 0xC0000102
 
 #define EFER_SCE (1 << 0)  // SCE bit is the lowest bit in MSR_EFER
 
@@ -60,6 +61,7 @@ enum SYSCALL_NR {
     sys_shutdown,
     sys_tty_init,
     sys_ursp,
+    sys_scanf,
 };
 
 #if defined(__is_libk)
@@ -83,7 +85,8 @@ static const syscall_t SYSCALL_TABLE[] = {
     [sys_stdin_insert] = stdin_insert,
     [sys_shutdown] = shutdown,
     [sys_tty_init] = tty_init,
-    [sys_ursp] = ursp
+    [sys_ursp] = ursp,
+    [sys_scanf] = scanf,
 };
 
 #pragma GCC diagnostic pop
@@ -104,6 +107,11 @@ extern void syscall_entry();
 void configure_segments();
 
 int64_t syscall_handler(pt_regs *regs);
+
+struct kernel_gs_base {
+    uint64_t kstack;
+    uint64_t ustack;
+};
 #endif
 void init_syscall();
 
