@@ -58,9 +58,10 @@ typedef struct __attribute__((__packed__)) malloc_state {
  * @param ctx context
  * @param uint64_t Heap base address
  * @param uint64_t Heap size
+ * @param bool map if to map the heap pages
  * @return void* 
  */
-void* init_heap(Context ctx, uint64_t, uint64_t);
+void* init_heap(Context ctx, uint64_t, uint64_t, bool map);
 /**
  * @brief Set the heap address
  * 

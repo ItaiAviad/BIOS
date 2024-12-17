@@ -11,6 +11,7 @@ SECTOR_SIZE := 512
 KERNEL_LOAD_ADDR := 0x10000
 KERNEL_STACK_START_ADDR := 0xF000
 KERNEL_VBASE := $(shell echo $$((0x800000 + $(KERNEL_LOAD_ADDR)))) # 4MB - Kernel binary VA
+PROC_BIN_ADDR := 0x400000
 
 ### Directories
 BOOT_DIR := boot
@@ -89,6 +90,7 @@ INCLUDES := -I$(LIBC_INCLUDE) -I$(KERNEL_INCLUDE) -I$(USER_INCLUDE)
 # MISC_FLAGS += -DTIMEZONE=\"$(shell date --utc | awk '{print $$6}')\"
 MISC_FLAGS = -DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) -DKERNEL_STACK_START_ADDR=$(KERNEL_STACK_START_ADDR) \
 			-DKERNEL_VBASE=$(KERNEL_VBASE) \
+			-DPROC_BIN_ADDR=$(PROC_BIN_ADDR) \
 			-DUSER_LOAD_ADDR=$(USER_LOAD_ADDR) -DCURRENT_YEAR=$(shell $(SHELL) -c "date -u +%Y")
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
@@ -155,7 +157,7 @@ $(USER_BIN): $(USER_ELF)
 
 $(USER_ELF): always $(USER_OBJ)
 	echo "Linking User..."
-	sed 's/$$(USER_LOAD_ADDR)/$(USER_LOAD_ADDR)/g' $(USER_LD_ORG) > $(USER_LD) && sync
+	sed 's/$$(PROC_BIN_ADDR)/$(PROC_BIN_ADDR)/g' $(USER_LD_ORG) > $(USER_LD) && sync
 	$(LD) $(LDFLAGS_USER) $(USER_OBJ) -o $@
 	rm $(USER_LD)
 

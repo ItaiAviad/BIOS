@@ -47,6 +47,7 @@ int kmain(void) {
 
     // Init PCI
     enumerate_pci();
+    printf("%s PCI\n", LOG_SYM_SUC);
 
     // Setup AHCI and enumerate Disks
     enumerate_disks();
@@ -94,12 +95,13 @@ void user_init() {
     };
 
     // Map process memory in kernel's PML4T
-    map_memory_range(kpcb.ctx, (void*) pcb.entry, (void*) pcb.entry + PROC_MEM_SIZE, (void*) pcb.entry);
+    map_memory_range(kpcb.ctx, (void*) (pcb.entry + PROC_BIN_ADDR), (void*) (pcb.entry + PROC_MEM_SIZE - PROC_BIN_ADDR), (void*) (pcb.entry + PROC_BIN_ADDR));
     // Map process memory in kernel's PML4T (identity map for i.e. heap addresses)
-    map_memory_range(kpcb.ctx, (void*) PROC_BIN_ADDR, (void*) (PROC_MEM_SIZE / 2 - 1), (void*) pcb.entry + PROC_BIN_ADDR);
+    map_memory_range(kpcb.ctx, (void*) (PROC_BIN_ADDR), (void*) (PROC_MEM_SIZE / 2 - 1), (void*) (pcb.entry + PROC_BIN_ADDR));
 
     // Read binary into process memory
-    read(0, 0, PROC_BIN_SIZE, (void*) pcb.entry);
+    read(0, 0, PROC_BIN_SIZE, (void*) (PROC_BIN_ADDR));
+    // memcpy((void*) PROC_BIN_ADDR, (void*) pcb.entry + PROC_BIN_ADDR, PROC_BIN_SIZE);
 
     // PML4T
     kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)pcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
@@ -109,32 +111,36 @@ void user_init() {
     memset(pcb.ctx.allocator->bitmap, 0x1, upper_divide(PROC_PML4T_ADDR, PAGE_SIZE));
 
     // Map process binary, pfa
-    map_memory_range(pcb.ctx, (void*) PROC_BIN_ADDR, (void*) PROC_PML4T_ADDR - 1, (void*) pcb.entry);
+    // map_memory_range(pcb.ctx, (void*) (PROC_BIN_ADDR), (void*) (PROC_PML4T_ADDR - 1), (void*) (pcb.entry + PROC_BIN_ADDR));
+    map_memory_range(pcb.ctx, (void*) (PROC_BIN_ADDR), (void*) ((PROC_MEM_SIZE / 2 - 1)), (void*) (pcb.entry + PROC_BIN_ADDR));
     // Map process PML4T
-    map_memory_range(pcb.ctx, (void*) PROC_PML4T_ADDR, (void*) (PROC_PML4T_ADDR + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
+    // map_memory_range(pcb.ctx, (void*) (PROC_PML4T_ADDR), (void*) (PROC_PML4T_ADDR + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
 
     // Stack - Map Stack pages in process's VAS
     // ASLR stack
     // NOTICE! Stack address after this chunk of code is relative to the **process's VAS**
-    uint64_t stack_slot = rand() % PROC_SLOTS + PROC_SLOTS_OFFSET;
+    uint64_t stack_slot = rand() % (PROC_SLOTS) + (PROC_SLOTS_OFFSET);
     while (stack_slot < PROC_SLOTS_OFFSET)
-        stack_slot = rand() % PROC_SLOTS + PROC_SLOTS_OFFSET;
+        stack_slot = rand() % (PROC_SLOTS) + (PROC_SLOTS_OFFSET);
     pcb.stack = (void*) (stack_slot * PROC_SLOT_SIZE);
-    map_memory_range(pcb.ctx, (void*) (pcb.stack), (void*) (pcb.stack + PROC_STACK_SIZE - 1), (void*) ((uint64_t) pcb.entry + (uint64_t) pcb.stack));
-    pcb.stack += PROC_STACK_SIZE - 0x10;
+    // map_memory_range(pcb.ctx, (void*) (pcb.stack), (void*) (pcb.stack + PROC_STACK_SIZE - 1), (void*) ((uint64_t) pcb.entry + (uint64_t) pcb.stack));
+    pcb.stack += PROC_STACK_SIZE - 0x100;
 
     // Heap
     // ASLR heap
-    // NOTICE! Heap address after this chunk of code is relative to the **kernel's VAS**
-    uint64_t heap_slot = rand() % PROC_SLOTS + PROC_SLOTS_OFFSET;
+    // NOTICE! Heap address after this chunk of code is relative to the **process's VAS**
+    uint64_t heap_slot = rand() % (PROC_SLOTS) + (PROC_SLOTS_OFFSET);
     while (heap_slot < PROC_SLOTS_OFFSET || abs(stack_slot - heap_slot) <= 1)
-        heap_slot = rand() % PROC_SLOTS + PROC_SLOTS_OFFSET;
+        heap_slot = rand() % (PROC_SLOTS) + (PROC_SLOTS_OFFSET);
     pcb.heap = (void*) (heap_slot * PROC_SLOT_SIZE);
     // TODO: Update heap_malloc_state_base so kernel mallocs in process's heap
-    map_memory_range(pcb.ctx, (void*) (pcb.heap), (void*) (pcb.heap + PROC_STACK_SIZE - 1), (void*) ((uint64_t) pcb.entry + (uint64_t) pcb.heap));
-    pcb.heap += (uint64_t) pcb.entry;
+    // map_memory_range(pcb.ctx, (void*) (pcb.heap), (void*) (pcb.heap + PROC_STACK_SIZE - 1), (void*) ((uint64_t) pcb.entry + (uint64_t) pcb.heap));
+    // pcb.heap += (uint64_t) pcb.entry; // if heap relative to kernel's VAS
     // Init heap
-    init_heap(pcb.ctx, (uint64_t) pcb.heap, PROC_HEAP_SIZE);
+    init_heap(pcb.ctx, (uint64_t) pcb.heap, PROC_HEAP_SIZE, false);
+
+    // printf("stack: %d, heap: %d\n", stack_slot, heap_slot);
+    // printf("stack: %p, heap: %p\n", pcb.stack, pcb.heap);
 
     // Map Kernel (higher half)
     /* NOTE: Kernel is mapped to the same virtual address in both kernel PML4 and process PML4

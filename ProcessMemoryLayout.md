@@ -1,6 +1,6 @@
 # Process Memory Layout
 
-### size: 8MB
+### size: 16MB
 
 |Name|Size (bytes)|Virtual Address|
 |--|--|--|

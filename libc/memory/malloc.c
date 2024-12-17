@@ -54,8 +54,9 @@ void* malloc(size_t size) {
         new_mchunk.data = new_addr + sizeof(malloc_chunk);
 
         // TODO! Use kmalloc syscall instead of map_memory_range
+        // IMPORTANT: NO NEED! Heap is allocated in advance
         #if defined(__is_libk)
-        map_memory_range(kpcb.ctx, new_addr, new_mchunk.data + data_size - 1, new_addr);
+        // map_memory_range(kpcb.ctx, new_addr, new_mchunk.data + data_size - 1, new_addr);
         #endif
     }
 

@@ -1,5 +1,5 @@
 ENTRY(_uentry)
-phys = $(USER_LOAD_ADDR);
+phys = $(PROC_BIN_ADDR);
 SECTIONS
 {
     . = phys;

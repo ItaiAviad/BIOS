@@ -250,5 +250,5 @@ int64_t* is_page_mapped(uint64_t* pml4, uint64_t virtual_address){
     printf("%s pml4: %d pdpt: %d pd: %d pt: %d pd_index: %d pd[pd_index]: %d pt_index: %d pt[pt_index]: %d\n", DEBUG, pml4, pdpt, pd, pt, pd_index, pd[pd_index], pt_index, pt[pt_index]);
     #endif
 
-    return (int64_t*) pt;
+    return (int64_t*) pt[pt_index];
 }

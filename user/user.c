@@ -18,7 +18,7 @@ int umain(void) {
     scanf("%s", str);
     printf("%s\n", str);
 
-    // shell_init();
+    shell_init();
 
     printf("Now you are stuck here with me forever... :D\n");
 

@@ -53,8 +53,9 @@ int get_cmd(struct tty* tty) {
     int argc = tty->cargc[tty->ci] = 0x0;
 
     // Allocate argv (if needed)
-    if (!(tty->cache[tty->ci]))
+    if (!(tty->cache[tty->ci])) {
         tty->cache[tty->ci] = malloc(sizeof(char*) * ARG_MAX);
+    }
 
     int ci_before = tty->ci;
     if (!token)
@@ -63,8 +64,9 @@ int get_cmd(struct tty* tty) {
     while (token && argc < ARG_MAX) {
         char* ptr = tty->cache[tty->ci][argc];
         // Allocate argv[argc] (if needed)
-        if (!ptr)
+        if (!ptr) {
             ptr = malloc(ARG_MAX);
+        }
         tty->cache[tty->ci][argc] = ptr;
 
         // copy token to argv[argc]

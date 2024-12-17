@@ -53,7 +53,13 @@ char* gets_s(char* str, size_t size) {
 }
 
 char *fgets(char *str, int n, __attribute__((unused)) FILE *stream) {
-    return gets_s(str, n);
+    char* ret = NULL;
+#if defined(__is_libk)
+    ret = gets_s(str, n);
+#else
+    ret = (char*) syscall(sys_fgets, str, n, stream);
+#endif
+    return ret;
 }
 
 char* gets(char* str) {

@@ -148,7 +148,7 @@ int bc_main() {
 void shcmd_bc(int argc, char *argv[]) {
     if (!argc || !argv)
         return;
-    
+
     bc_main();
 }
 

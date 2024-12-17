@@ -22,9 +22,9 @@ void init_kernel_process(void) {
     printf("%s Kernel Paging\n", LOG_SYM_SUC);
 
     // Kernel Heap - Manage Kernel Dynamic Memory
-    init_heap(kpcb.ctx, KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE);
+    init_heap(kpcb.ctx, KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE, true);
     kpcb.heap = heap_malloc_state_base;
-    printf("%s Heap: %p\n", LOG_SYM_SUC, kpcb.heap); 
+    printf("%s Heap: %p\n", LOG_SYM_SUC, kpcb.heap);
 
     // Map boot memory (bootloader set memory. i.e. GDT, TSS)
     map_memory_range(kpcb.ctx, (void*)(PAGE_FRAME_ALLOCATOR_END + 1), (void*) (PAGE_FRAME_ALLOCATOR_END + PROC_SLOT_SIZE), (void*)(0x0));
@@ -37,4 +37,5 @@ void init_kernel_process(void) {
 
     // Flush TSS - NOTICE! TSS address is HARDCODED in `gdt64.s` file
     flush_tss();
+    printf("%s TSS\n", LOG_SYM_SUC);
 }

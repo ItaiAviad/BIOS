@@ -33,7 +33,7 @@
 #define KERNEL_STACK_TOP KERNEL_VBASE - 0x10
 // #define KERNEL_STACK 0xF000
 
-#define KERNEL_END (10 * MB) // 2MB
+#define KERNEL_END (10 * MB) // 10MB (8 + 2)
 
 // Kernel Page Frame Allocator
 #define PAGE_FRAME_ALLOCATOR_START KERNEL_END
@@ -69,8 +69,10 @@
 
 
 // Process memory layout (see ProcessMemoryLayout.md)
-#define PROC_MEM_SIZE PAGE_SIZE * 0x1000 // 8MB
-#define PROC_BIN_ADDR 0x400000
+#define PROC_MEM_SIZE PAGE_SIZE * 0x1000 // 16MB
+#ifndef PROC_BIN_ADDR
+#define PROC_BIN_ADDR 0x400000 // 4MB
+#endif
 #define PROC_BIN_SIZE PAGE_SIZE * 0x20 // 128KB
 
 #define PROC_SLOT_SIZE PAGE_SIZE * 0x20 // 128KB
@@ -86,7 +88,7 @@
 #define PROC_KERNEL_ADDR PROC_MEM_SIZE / 2
 #define PROC_KERNEL_SIZE PROC_MEM_SIZE / 2
 
-#define PROC_SLOTS_OFFSET 8 // save slots for binary, pfa, pml4t
-#define PROC_SLOTS PROC_MEM_SIZE / 2 / (PROC_STACK_SIZE) - PROC_SLOTS_OFFSET
+#define PROC_SLOTS_OFFSET ((PROC_BIN_ADDR) / (PROC_SLOT_SIZE)) + 8 // save slots for binary, pfa, pml4t
+#define PROC_SLOTS (PROC_MEM_SIZE) / 2 / (PROC_STACK_SIZE) - (PROC_SLOTS_OFFSET)
 
 #endif

@@ -67,6 +67,9 @@ int64_t syscall_handler(pt_regs *regs) {
         invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
         set_pml4_address((uint64_t*) (PML4_KERNEL));
     }
+    if (number == 0) {
+        printf("");
+    }
 
     int SYS_T_LEN = sizeof(SYSCALL_TABLE) / sizeof(SYSCALL_TABLE[0]);
     if (number >= SYS_T_LEN || SYSCALL_TABLE[number] == NULL) {
@@ -75,9 +78,7 @@ int64_t syscall_handler(pt_regs *regs) {
 
     int64_t ret = SYSCALL_TABLE[number](regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9);
 
-    if (prev_cr3 != (uint64_t) (PML4_KERNEL)) {
-        
-    }
+    // Switch back to Kernel PML4
     flush_tlb();
     invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
     set_pml4_address((uint64_t*) (prev_cr3));

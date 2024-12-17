@@ -10,7 +10,7 @@ void shcmd_pwd(int argc, char *argv[]) {
         memcpy(cwd + strlen(cwd), tty0.cwd[i], MAX_DIR_NAME);
         memcpy(cwd + strlen(cwd), "/", 1);
     }
-    
+
     printf("%s", cwd);
     if (argv && argc) // argv exists (pwd command called)
         printf("\n");

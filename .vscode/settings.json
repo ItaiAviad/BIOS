@@ -102,6 +102,7 @@
     "cstring": "c",
     "idt.h": "c",
     "process.h": "c",
-    "sched.h": "c"
+    "sched.h": "c",
+    "cdefs.h": "c"
 }
 }

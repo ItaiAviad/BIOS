@@ -62,6 +62,9 @@ enum SYSCALL_NR {
     sys_tty_init,
     sys_ursp,
     sys_scanf,
+    sys_memset,
+    sys_memcpy,
+    sys_fgets,
 };
 
 #if defined(__is_libk)
@@ -87,6 +90,9 @@ static const syscall_t SYSCALL_TABLE[] = {
     [sys_tty_init] = tty_init,
     [sys_ursp] = ursp,
     [sys_scanf] = scanf,
+    [sys_memset] = memset,
+    [sys_memcpy] = memcpy,
+    [sys_fgets] = fgets,
 };
 
 #pragma GCC diagnostic pop
