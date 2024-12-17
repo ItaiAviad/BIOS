@@ -174,13 +174,13 @@ pm_end:
 [bits 64]
 
 lm:
-    ; Copy kernel from KERNEL_LOAD_ADDR to 4MB (0x400000)
+    ; Copy kernel from KERNEL_LOAD_ADDR to ~8MB
     mov rsi, KERNEL_LOAD_ADDR
     mov rdi, KERNEL_VBASE
     mov rcx, (TOTAL_SIZE_IN_SECTORS * sector_size) / 8  ; Total bytes / 8 bytes per move
     rep movsq  ; Copy 64-bit words
 
-    ; Jump to kernel at 4MB
+    ; Jump to kernel at ~8MB
     jmp KERNEL_VBASE
     jmp hlt
 
