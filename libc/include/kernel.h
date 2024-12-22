@@ -38,8 +38,6 @@ void shutdown(void);
 
 void tty_init(void);
 
-void ursp(uint64_t rsp);
-
 /**
  * @brief Syscall wrapper to clear stdin buffer
  * 

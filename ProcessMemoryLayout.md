@@ -4,12 +4,12 @@
 
 |Name|Size (bytes)|Virtual Address|
 |--|--|--|
-|**binary**|0x20000 (128KB)|0x0|
+|**binary**|0x20000 (128KB)|0x400000 (4MB)|
 |**page frame allocator (pfa)**|128KB|after **binary**|
 |**pml4t**|0x1000 (4KB)|after **pfa**|
 |**stack**|128KB|random*|
 |**heap**|128KB|random*|
-|**kernel** (higher half)|(2MB)|0x400000 (4MB)|
+|**kernel** (higher half)|(2MB)|8MB|
 |**kernel pfa**|1MB|after **kernel**|
 |**boot** (bootloader memory (gdt, tss))||after kernel pfa|
 

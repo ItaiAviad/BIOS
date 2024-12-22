@@ -7,12 +7,9 @@ syscall_entry:
     ; cli
 
     ; Switch to kernel stack
-    ; REX.W WRGSBASE rsp
-    ; mov qword [gs:0], rsp
     swapgs
     mov qword [gs:8], rsp ; save user stack
     mov rsp, [gs:0] ; load kernel stack
-    ; mov rsp, qword [gs:8]
 
     ; Additional arguments are pushed here (in syscall function)
     ; Save all general-purpose registers

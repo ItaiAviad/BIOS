@@ -5,7 +5,7 @@ void init_kernel_process(void) {
         .pid = 0,
         .state = 0,
 
-        .entry = (void*) KERNEL_VBASE,
+        .entry = (void*) KERNEL_VBASE - KERNEL_LOAD_ADDR,
         // .pfa = {}, // initialized in init_kernel_paging()->init_page_frame_allocator()
         // .ctx = {}, // initialized in init_kernel_paging()
         .stack = (void*) ((uint64_t) KERNEL_STACK_TOP),

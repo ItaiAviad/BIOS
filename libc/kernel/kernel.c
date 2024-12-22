@@ -38,15 +38,6 @@ void tty_init(void) {
 #endif
 }
 
-void ursp(uint64_t rsp) {
-#if defined(__is_libk)
-    map_memory_range(kpcb.ctx, (void*) (rsp - MB), (void*) rsp, (void*) (rsp - MB));
-    set_rsp(rsp);
-#else
-    syscall(sys_ursp, rsp);
-#endif
-}
-
 void stdin_clear() {
 #if defined(__is_libk)
     for (int i = 0; i < buffer_len(); ++i) {

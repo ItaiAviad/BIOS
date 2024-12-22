@@ -101,7 +101,6 @@ void user_init() {
 
     // Read binary into process memory
     read(0, 0, PROC_BIN_SIZE, (void*) (PROC_BIN_ADDR));
-    // memcpy((void*) PROC_BIN_ADDR, (void*) pcb.entry + PROC_BIN_ADDR, PROC_BIN_SIZE);
 
     // PML4T
     kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)pcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;

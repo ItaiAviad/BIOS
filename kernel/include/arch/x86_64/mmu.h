@@ -42,10 +42,6 @@ typedef struct Context {
 } Context;
 
 __attribute__((unused))
-// Context kpcb.ctx;
-__attribute__((unused))
-// PageFrameAllocator kernel_allocator;
-__attribute__((unused))
 void* heap_malloc_state_base;
 // ----------------------------------------------
 
