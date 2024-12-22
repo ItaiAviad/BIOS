@@ -128,9 +128,7 @@ void invlpg(void* addr) {
 }
 
 void flush_tlb() {
-    sti();
     set_pml4_address(get_pml4_address());
-    cli();
 }
 
 uint64_t* get_pml4_address() {
