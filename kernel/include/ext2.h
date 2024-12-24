@@ -4,6 +4,8 @@
 
 #include <types.h>
 
+#define EXT2_START_OFFSET 0x400
+
 typedef struct ext2_super_block {
     uint32_t inodecount;         // Total number of inodes
     uint32_t blockcount;         // Total number of blocks
@@ -65,6 +67,8 @@ typedef struct ext2_super_block {
     uint32_t first_meta_bg;        // First metablock block group
     uint32_t reserved[190];        // Padding to make superblock size 1024 bytes
 } ext2_super_block;
+
+void mount_ext2(uint64_t disk_id , uint64_t start_offset, char* mount_point);
 
 
 #endif
