@@ -21,7 +21,7 @@ void init_vfs() {
     memcpy(vfs_root->name, ROOT_DIR_NAME, strlen(ROOT_DIR_NAME));
 }
 
-vfs_node *get_create_node_in_path(char *path) {
+vfs_node *get_hardware_create_node_in_path(char *path) {
     path = preprocess_path(path);
 
     if (path[0] != ROOT_DIR_NAME[0]) { // This function always expects absulute path
@@ -68,7 +68,7 @@ vfs_node *get_create_node_in_path(char *path) {
 }
 
 vfs_node *mount_file_system(char *path, uint64_t disk_number, uint64_t disk_offset, enum file_system_type type) {
-    vfs_node *mount_node = get_create_node_in_path(path);
+    vfs_node *mount_node = get_hardware_create_node_in_path(path);
     filesystem_data *data = malloc(sizeof(filesystem_data));
     data->disk_number = disk_number;
     data->start_offset = disk_offset;

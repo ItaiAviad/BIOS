@@ -25,6 +25,10 @@
 #include <elf.h>
 #include <process.h>
 
+#include <vfs.h>
+#include <ext2.h>
+
+
 extern void jump_usermode(void* entry, void* sp);
 void user_init();
 
@@ -57,6 +61,8 @@ int kmain(void) {
     printf("%s Syscall\n", LOG_SYM_SUC);
 
     srand(time());
+
+    get_hardware_create_node_in_path("/hello");
 
     // usermode
     user_init();

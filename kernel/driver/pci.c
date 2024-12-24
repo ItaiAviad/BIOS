@@ -134,7 +134,7 @@ void check_function(uint8_t bus, uint8_t slot, uint8_t function) {
         pciDevice->subclass = get_subclass(bus, slot, function);
         pciDevice->progIf = get_prog_if(bus, slot, function);
 
-        append_node(&list_pci_devices, (void *)pciDevice);
+        hardware_append_node(&list_pci_devices, (void *)pciDevice);
     }
 }
 

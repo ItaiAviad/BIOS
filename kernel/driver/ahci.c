@@ -73,7 +73,7 @@ void setup_ahci_controllers() {
                                    PCI_OFFSET_INTERRUPT_LINE, 2);
             initialize_ahci(abar, device);
             probe_port(abar);
-            append_node(&ahci_devices, device);
+            hardware_append_node(&ahci_devices, device);
         }
         head = head->next;
     }
@@ -129,7 +129,7 @@ void probe_port(HBA_MEM *abar) {
                 disk_curr->drive_data.ahci_drive_data.port = (struct HBA_PORT*) (abar->ports + i);
                 disk_curr->drive_data.ahci_drive_data.ahci_bar = (struct HBA_MEM*) abar;
 
-                append_node(&list_drives, disk_curr);
+                hardware_append_node(&list_drives, disk_curr);
 
             } else if (dt == AHCI_DEV_SATAPI) {
                 printf("SATAPI drive found at port %d\n", i);

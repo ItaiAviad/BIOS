@@ -30,7 +30,7 @@ extern vfs_node *vsf_root;
 
 void create_dir(char* dir_path);
 void init_vfs();
-vfs_node* get_create_node_in_path(char* path);
+vfs_node* get_hardware_create_node_in_path(char* path);
 vfs_node* mount_file_system(char* path, uint64_t disk_number, uint64_t disk_offset, enum file_system_type type);
 
 #endif
