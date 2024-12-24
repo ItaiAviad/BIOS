@@ -51,6 +51,7 @@ int kmain(void) {
 
     // Setup AHCI and enumerate Disks
     enumerate_disks();
+    print_disks();
 
     // Init Syscall
     init_syscall();
@@ -100,7 +101,13 @@ void user_init() {
     map_memory_range(kpcb.ctx, (void*) (PROC_BIN_ADDR), (void*) (PROC_MEM_SIZE / 2 - 1), (void*) (pcb.entry + PROC_BIN_ADDR));
 
     // Read binary into process memory
-    read(0, 0, PROC_BIN_SIZE, (void*) (PROC_BIN_ADDR));
+    // read(0, 0, PROC_BIN_SIZE, (void*) (PROC_BIN_ADDR));
+
+    void* elf_bin = readelf((void*) PROC_BIN_ADDR, false);
+    if (!elf_bin) {
+        printf("Error reading elf binary\n");
+        while (1) {}
+    }
 
     // PML4T
     kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)pcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
@@ -165,5 +172,7 @@ void user_init() {
     invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
     set_pml4_address((uint64_t *) pcb.ctx.pml4);
 
+    // printf("123\n");
     jump_usermode((void*)PROC_BIN_ADDR, (void*)(pcb.stack));
+    while (1) {}
 }
