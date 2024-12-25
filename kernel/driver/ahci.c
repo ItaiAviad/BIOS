@@ -349,6 +349,8 @@ bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t
         spin++;
         if (spin == 1000000) {
             printf("Port is hung\n");
+            stop_cmd(port);
+			start_cmd(port);
         }
         io_wait();
     }
@@ -426,8 +428,8 @@ bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t 
 		if (spin == 1000000)
 		{
 			printf("Port is hung\n");
-			// stop_cmd(port);
-			// start_cmd(port);
+			stop_cmd(port);
+			start_cmd(port);
 		}
 		io_wait();
 	}

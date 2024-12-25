@@ -1,6 +1,6 @@
 #include <arch/x86_64/tty.h>
 #include <arch/x86_64/io.h>
-
+#include <process.h>
 #include <arch/x86_64/vga.h>
 
 static const int64_t VGA_WIDTH = 80;
@@ -91,6 +91,7 @@ void terminal_clear(void) {
 }
 
 void terminal_initialize(void) {
+    map_memory_range(kpcb.ctx, VGA_MEMORY, VGA_MEMORY+VGA_HEIGHT*VGA_WIDTH-1, VGA_MEMORY);
     // Cursor Setup
     enable_cursor(0, 0);
 

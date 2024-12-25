@@ -3,6 +3,7 @@
 #define EXT2_H
 
 #include <types.h>
+#include <vfs.h>
 
 #define EXT2_START_OFFSET 0x400
 
@@ -69,6 +70,6 @@ typedef struct ext2_super_block {
 } ext2_super_block;
 
 void mount_ext2(uint64_t disk_id , uint64_t start_offset, char* mount_point);
-
+ext2_super_block* ext2_read_super_block(filesystem_data* fs_data);
 
 #endif

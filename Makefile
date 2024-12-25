@@ -123,9 +123,13 @@ $(FLOPPY_BIN): kernel boot user
 	$(DD) if=/dev/zero of=$@ bs=1 seek=$$FILE_SIZE count=$$PADDING conv=notrunc,fsync; \
 	$(DD) if=/dev/zero of=$@ bs=$(SECTOR_SIZE) seek=$$(($$FILE_SIZE + $$PADDING)) count=2048 conv=notrunc,fsync
 
-	# Write user code to disk
 	$(DD) if=/dev/zero of=$(DISK) count=2048 # 1MB
-	$(DD) if=$(USER_BIN) of=$(DISK) conv=notrunc
+
+	# # Write user code to disk
+	# $(DD) if=$(USER_BIN) of=$(DISK) conv=notrunc
+
+	# Create filesystem on disk
+	mkfs.ext2 $(DISK)
 
 # Bootloader
 boot: $(BOOT_BIN)
@@ -204,9 +208,9 @@ run:
 	-drive file=$(FLOPPY_BIN),format=raw,if=floppy \
 	-drive id=disk,file=$(DISK),format=raw,if=none \
 	-device ahci,id=ahci \
-	-device ide-hd,drive=disk,bus=ahci.0
-	# -d int,cpu_reset,in_asm,guest_errors \
-	# -no-reboot -D log.txt
+	-device ide-hd,drive=disk,bus=ahci.0 \
+	-d int,cpu_reset,in_asm,guest_errors,exec,page,unimp \
+	-no-reboot -D log.txt
 
 run_debugger: 
 	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) \

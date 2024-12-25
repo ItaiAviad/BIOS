@@ -26,7 +26,6 @@
 #include <process.h>
 
 #include <vfs.h>
-#include <ext2.h>
 
 
 extern void jump_usermode(void* entry, void* sp);
@@ -34,23 +33,25 @@ void user_init();
 
 int kmain(void) {
     // TTY - Terminal
-    terminal_initialize();
-    printf("%s Terminal\n", LOG_SYM_SUC);
 
     // ISR - Interrupt Service Routines
     init_isr_handlers();
-    printf("%s ISRs\n", LOG_SYM_SUC);
+    // printf("%s ISRs\n", LOG_SYM_SUC);
 
     // PIC - Programmable Interrupt Controller
     // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
-    printf("%s PIC\n", LOG_SYM_SUC);
+    // printf("%s PIC\n", LOG_SYM_SUC);
 
     // Initialize Kernel Process (Paging, Stack, Heap, etc.)
     init_kernel_process();
 
+    terminal_initialize();
+    printf("%s Terminal\n", LOG_SYM_SUC);
+
     // Init PCI
     enumerate_pci();
+
     printf("%s PCI\n", LOG_SYM_SUC);
 
     // Setup AHCI and enumerate Disks
@@ -58,14 +59,11 @@ int kmain(void) {
 
     // Init Syscall
     init_syscall();
-    printf("%s Syscall\n", LOG_SYM_SUC);
+    // printf("%s Syscall\n", LOG_SYM_SUC);
 
-    srand(time());
-
-    get_hardware_create_node_in_path("/hello");
-
-    // usermode
-    user_init();
+    mount_file_system("/", 0, EXT2_START_OFFSET,FILESYSTEM_TYPE_EXT2);
+    ext2_super_block* super_block = ext2_read_super_block(vfs_get_create_node_in_path("/")->data);
+    printf("block_size: %d", (1024 << super_block->blockcount));
     
     while (1) {}
     return 0;
