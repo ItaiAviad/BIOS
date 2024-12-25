@@ -18,7 +18,14 @@ char* gets_s(char* str, size_t size) {
     uint32_t i = 0;
     do {
         c = getchar();
-        if (c == -2) // Ignore extended keycodes: see `getchar()`
+        if (c == CAN) { // cancel all input, clear buffer and printf backspaces
+            for (unsigned int i = 0; i < strlen(str); ++i)
+                printf("%c", '\b');
+            i = 0;
+            memset(str, 0, strlen(str));
+            continue;
+        }
+        if (c >= KEYCODES_EXT_START) // Ignore extended keycodes: see `getchar()`
             continue;
         if (c == 0x1B) // Ignore ESC
             continue;
@@ -54,11 +61,11 @@ char* gets_s(char* str, size_t size) {
 
 char *fgets(char *str, int n, __attribute__((unused)) FILE *stream) {
     char* ret = NULL;
-#if defined(__is_libk)
+// #if defined(__is_libk)
     ret = gets_s(str, n);
-#else
-    ret = (char*) syscall(sys_fgets, str, n, stream);
-#endif
+// #else
+    // ret = (char*) syscall(sys_fgets, str, n, stream);
+// #endif
     return ret;
 }
 

@@ -11,6 +11,8 @@
 
 #define EOF (-1)
 
+#define EKR (-2) // Extended Keycode Return value
+
 typedef struct _iobuf
 {
     char*   _ptr;

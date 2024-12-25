@@ -24,6 +24,8 @@ typedef struct {
     bool right;
 } keyboard_state;
 
+
+#define CAN 0x18
 // Extended Keycodes
 enum KEYCODES_EXT {
     KEYCODES_EXT_START = 0x100,
@@ -31,6 +33,7 @@ enum KEYCODES_EXT {
     CURSOR_LEFT,
     CURSOR_RIGHT,
     CURSOR_DOWN,
+    REQUEST_EMPTY,
 };
 void keycode_ext_handler(int c);
 

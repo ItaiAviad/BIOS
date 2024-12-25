@@ -40,9 +40,11 @@ void tty_init(void) {
 
 void stdin_clear() {
 #if defined(__is_libk)
-    for (int i = 0; i < buffer_len(); ++i) {
-        buffer_put_c('\b');
-    }
+    // for (int i = 0; i < buffer_len(); ++i) {
+    //     buffer_put_c('\b');
+    // }
+    // buffer_clear();
+    buffer_put_c(CAN); // send cancel to getchar, clear buffer
 #else
     syscall(sys_stdin_clear);
 #endif

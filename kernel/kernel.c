@@ -51,7 +51,6 @@ int kmain(void) {
 
     // Setup AHCI and enumerate Disks
     enumerate_disks();
-    print_disks();
 
     // Init Syscall
     init_syscall();

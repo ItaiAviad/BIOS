@@ -126,7 +126,7 @@ $(FLOPPY_BIN): kernel boot user
 	# Write user code to disk
 	$(DD) if=/dev/zero of=$(DISK) count=2048 # 1MB
 	# $(DD) if=$(USER_BIN) of=$(DISK) conv=notrunc
-	$(DD) if=build/user.elf of=$(DISK) conv=notrunc
+	$(DD) if=build/user.elf of=$(DISK) conv=notrunc # elf
 
 # Bootloader
 boot: $(BOOT_BIN)
