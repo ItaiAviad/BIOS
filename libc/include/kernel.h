@@ -33,7 +33,6 @@ enum KEYCODES_EXT {
     CURSOR_LEFT,
     CURSOR_RIGHT,
     CURSOR_DOWN,
-    REQUEST_EMPTY,
 };
 void keycode_ext_handler(int c);
 
