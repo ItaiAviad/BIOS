@@ -42,6 +42,11 @@
 #define PRDT_WRITE_SIZE_PER_ENTRY \
     (16 * SECTOR_SIZE) // Must be dividable by the size of a sector
 
+
+#define IDENTIFY_TIMEOUT 100000
+#define READ_TIMEOUT IDENTIFY_TIMEOUT
+#define WRITE_TIMEOUT READ_TIMEOUT
+
 extern linkedListNode *ahci_devices;
 
 //________________fis_________
