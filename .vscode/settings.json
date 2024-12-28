@@ -106,6 +106,7 @@
     "cdefs.h": "c",
     "pci.h": "c",
     "elf.h": "c",
-    "types.h": "c"
+    "types.h": "c",
+    "if.h": "c"
 }
 }

@@ -106,7 +106,7 @@ LIBK_FLAGS := $(CFLAGS) -D__is_libk
 
 .PHONY: all build boot always run clean
 
-all: build
+all: build network_setup
 
 # Build Disk (Floppy Image)
 build: $(FLOPPY_BIN)
@@ -193,6 +193,50 @@ $(OBJ_DIR)/%.libc.o: %.c
 	mkdir -p $(dir $@)
 	$(CC) $(LIBC_FLAGS) -c $< -o $@
 
+build_cleanup:
+	rm -rf $(BUILD_DIR)/*
+	rm -f *_tempwhy
+
+# -----------------------------------------------
+# Network
+# See: https://wiki.qemu.org/Documentation/Networking
+#      https://gist.github.com/extremecoders-re/e8fd8a67a515fee0c873dcafc81d811c
+#      https://wiki.osdev.org/RTL8139
+
+NET := biosnet0
+VND := rtl8139# Virtual Network Device
+BRIDGE := br0
+TAP := tap0
+ETHIF := enp0s20f0u2u1c2 # (ethernet interface)
+network_setup:
+	sudo brctl addbr $(BRIDGE)
+	sudo ip addr flush dev $(ETHIF)
+	sudo brctl addif $(BRIDGE) $(ETHIF)
+
+	# tap
+	sudo tunctl -t $(TAP) -u $(shell whoami)
+	sudo brctl addif $(BRIDGE) $(TAP)
+
+	sudo ifconfig $(ETHIF) up
+	sudo ifconfig $(TAP) up
+	sudo ifconfig $(BRIDGE) up
+
+	brctl show
+
+	# dhcp
+	sudo dhclient -v $(BRIDGE)
+
+network_cleanup:
+	sudo brctl delif $(BRIDGE) $(TAP) || exit 1
+	-sudo tunctl -d $(TAP)
+	-sudo brctl delif $(BRIDGE) $(ETHIF)
+	-sudo ifconfig $(BRIDGE) down
+	-sudo brctl delbr $(BRIDGE)
+	-sudo ifconfig $(ETHIF) up
+
+	# dhcp
+	-sudo dhclient -v $(ETHIF)
+
 # ------------------------------------------------
 
 always:
@@ -205,7 +249,11 @@ run:
 	-drive file=$(FLOPPY_BIN),format=raw,if=floppy \
 	-drive id=disk,file=$(DISK),format=raw,if=none \
 	-device ahci,id=ahci \
-	-device ide-hd,drive=disk,bus=ahci.0
+	-device ide-hd,drive=disk,bus=ahci.0 \
+	-netdev tap,id=$(NET),ifname=$(TAP),script=no,downscript=no \
+	-device $(VND),netdev=$(NET),id=$(VND),mac=de:ad:be:ef:ca:fe \
+	-object filter-dump,id=f1,netdev=$(NET),file=dump.dat
+
 	# -d int,cpu_reset,in_asm,guest_errors \
 	# -no-reboot -D log.txt
 
@@ -222,6 +270,4 @@ run_debug_bochs:
 	bochs -qf $(BOCHS_CONFIG)
 	rm -f $(BOCHS_CONFIG)
 
-clean:
-	rm -rf $(BUILD_DIR)/*
-	rm -f *_tempwhy
+clean: build_cleanup network_cleanup
