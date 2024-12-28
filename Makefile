@@ -245,6 +245,7 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 run:
+	echo "Running..."
 	qemu-system-x86_64 -m 8G \
 	-drive file=$(FLOPPY_BIN),format=raw,if=floppy \
 	-drive id=disk,file=$(DISK),format=raw,if=none \
