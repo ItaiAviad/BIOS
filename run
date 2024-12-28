@@ -1,0 +1,13 @@
+#!/bin/bash
+
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+trap ctrl_c INT
+
+function ctrl_c() {
+        printf "${RED}Ctrl+C happened${NC}\n"
+}
+
+make clean; make; make run; make clean
+

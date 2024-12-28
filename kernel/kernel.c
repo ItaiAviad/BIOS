@@ -48,6 +48,7 @@ int kmain(void) {
     // Init PCI
     enumerate_pci();
     printf("%s PCI\n", LOG_SYM_SUC);
+    print_pci_devices();
 
     // Setup AHCI and enumerate Disks
     enumerate_disks();

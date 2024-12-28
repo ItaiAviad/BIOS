@@ -160,20 +160,21 @@ void enumerate_pci() {
 
 void print_pci_devices() {
     linkedListNode *head = (linkedListNode *)list_pci_devices;
-    #ifdef DEBUG
+#ifdef DEBUG
     printf("__PCI__\n");
-    #endif
+#endif
     while (head != NULL) {
-        #ifdef DEBUG
+        // #ifdef DEBUG
         PCIDevice *device = (PCIDevice *)head->data;
-        printf("%x:%x.%x %x %x %x %x, ", device->bus, device->slot, device->function,
-               device->vendorId, device->deviceId, device->classCode, device->subclass);
-        #endif
+        printf("%x:%x.%x %x %x %x %x %x\n", device->bus, device->slot, device->function,
+               device->vendorId, device->deviceId, device->classCode, device->subclass,
+               get_bar0(device->bus, device->slot, device->function));
+        // #endif
         head = (linkedListNode *)head->next;
     }
-    #ifdef DEBUG
+#ifdef DEBUG
     printf("__PCI_END__\n");
-    #endif
+#endif
 }
 
 void *assign_bar(PCIDevice device, uint8_t bar_num) {
@@ -191,11 +192,11 @@ void *assign_bar(PCIDevice device, uint8_t bar_num) {
         return NULL;
     }
 
-    map_memory_range_with_flags(kpcb.ctx, (void*) (uint64_t) orig_reg_val, (void*) (uint64_t) orig_reg_val + bar_size - 1, (void*) (uint64_t) orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE | PAGE_USER, 0);
+    map_memory_range_with_flags(kpcb.ctx, (void *)(uint64_t)orig_reg_val, (void *)(uint64_t)orig_reg_val + bar_size - 1, (void *)(uint64_t)orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE | PAGE_USER, 0);
 
     flush_tlb();
 
     pci_config_write_dword(device.bus, device.slot, device.function, config_space_offset, orig_reg_val);
-    
-    return (void *)(uint64_t) orig_reg_val;
+
+    return (void *)(uint64_t)orig_reg_val;
 }
