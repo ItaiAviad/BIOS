@@ -106,7 +106,7 @@ LIBK_FLAGS := $(CFLAGS) -D__is_libk
 
 .PHONY: all build boot always run clean
 
-all: build network_setup
+all: build
 
 # Build Disk (Floppy Image)
 build: $(FLOPPY_BIN)
@@ -244,7 +244,7 @@ always:
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(OBJ_DIR)/kernel
 
-run:
+run: network_setup
 	echo "Running..."
 	qemu-system-x86_64 -m 8G \
 	-drive file=$(FLOPPY_BIN),format=raw,if=floppy \
