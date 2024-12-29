@@ -115,8 +115,6 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
             buffer_put(in);
         }
         else if (isr_num >= (PIC1_OFFSET + RTL8139_INTERRUPT_LINE)) {
-            // printf("GOT ISR %d, %d, %d\n", isr_num, error_code, regs->irq_number);
-            // sleep(500);
             rtl8139_handler(isr_num - PIC1_OFFSET, error_code, regs->irq_number);
         }
 
