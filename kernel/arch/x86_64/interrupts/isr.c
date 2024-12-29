@@ -114,7 +114,7 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
             unsigned char in = inb(PS2_KEYBOARD_PORT_DATA);
             buffer_put(in);
         }
-        else if (isr_num >= (PIC1_OFFSET + RTL8139_INTERRUPT_LINE)) {
+        else if (isr_num == (PIC1_OFFSET + RTL8139_INTERRUPT_LINE)) {
             rtl8139_handler(isr_num - PIC1_OFFSET, error_code, regs->irq_number);
         }
 
