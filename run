@@ -18,11 +18,12 @@ LIGHT_GRAY='\033[0;37m'
 WHITE='\033[1;37m'
 NC='\033[0m' # No Color
 
-trap ctrl_c INT
-
 function ctrl_c() {
-        printf "${RED}Ctrl+C happened${NC}\n"
+    printf "${RED}Ctrl+C happened${NC}\n"
 }
+
+trap ctrl_c INT
+trap ctrl_c SIGINT
 
 printf "${RED}"
 make clean;
@@ -37,4 +38,3 @@ printf "${NC}"
 printf "${RED}"
 make clean;
 printf "${NC}"
-

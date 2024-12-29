@@ -227,12 +227,12 @@ network_setup:
 	sudo dhclient -v $(BRIDGE)
 
 network_cleanup:
-	sudo brctl delif $(BRIDGE) $(TAP)
-	sudo tunctl -d $(TAP)
-	sudo brctl delif $(BRIDGE) $(ETHIF)
-	sudo ifconfig $(BRIDGE) down
-	sudo brctl delbr $(BRIDGE)
-	sudo ifconfig $(ETHIF) up
+	-sudo brctl delif $(BRIDGE) $(TAP)
+	-sudo tunctl -d $(TAP)
+	-sudo brctl delif $(BRIDGE) $(ETHIF)
+	-sudo ifconfig $(BRIDGE) down
+	-sudo brctl delbr $(BRIDGE)
+	-sudo ifconfig $(ETHIF) up
 
 	# dhcp
 	# -sudo dhclient -v $(ETHIF)

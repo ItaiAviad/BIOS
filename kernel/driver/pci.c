@@ -1,6 +1,6 @@
-#include "arch/x86_64/io.h"
-#include "arch/x86_64/mlayout.h"
-#include "arch/x86_64/mmu.h"
+#include <arch/x86_64/io.h>
+#include <arch/x86_64/mlayout.h>
+#include <arch/x86_64/mmu.h>
 #include <arch/x86_64/hardwareMem.h>
 #include <memory.h>
 #include <pci.h>
@@ -130,6 +130,9 @@ void check_function(uint8_t bus, uint8_t slot, uint8_t function) {
         pciDevice->vendorId = get_vendor_id(bus, slot, function);
         pciDevice->deviceId = get_product_id(bus, slot, function);
 
+        pciDevice->command = get_command(bus, slot, function);
+        pciDevice->status = get_status(bus, slot, function);
+
         pciDevice->classCode = get_class_code(bus, slot, function);
         pciDevice->subclass = get_subclass(bus, slot, function);
         pciDevice->progIf = get_prog_if(bus, slot, function);
@@ -166,9 +169,8 @@ void print_pci_devices() {
     while (head != NULL) {
         // #ifdef DEBUG
         PCIDevice *device = (PCIDevice *)head->data;
-        printf("%x:%x.%x %x %x %x %x %x\n", device->bus, device->slot, device->function,
-               device->vendorId, device->deviceId, device->classCode, device->subclass,
-               get_bar0(device->bus, device->slot, device->function));
+        printf("%x:%x.%x %x %x %x %x\n", device->bus, device->slot, device->function,
+               device->vendorId, device->deviceId, device->classCode, device->subclass);
         // #endif
         head = (linkedListNode *)head->next;
     }

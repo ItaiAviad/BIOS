@@ -118,7 +118,7 @@ static inline void outw(uint16_t port, uint16_t val) {
 static inline uint16_t inw(uint16_t port)
 {
     uint16_t ret;
-    __asm__ volatile ( "inb %w0, %w1"
+    __asm__ volatile ( "in %0, %1"
                    : "=a"(ret)
                    : "Nd"(port)
                    : "memory");

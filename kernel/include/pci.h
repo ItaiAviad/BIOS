@@ -52,6 +52,9 @@ typedef struct PCIDevice {
     uint16_t vendorId;
     uint16_t deviceId;
 
+    uint16_t command;
+    uint16_t status;
+
     // Device type data
     uint8_t classCode;
     uint8_t subclass;

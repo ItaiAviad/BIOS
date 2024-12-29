@@ -1,5 +1,7 @@
 #include <arch/x86_64/isr.h>
 #include <arch/x86_64/mmu.h>
+#include <net/rtl8139.h>
+#include <unistd.h>
 
 // An array of strings in which exception_messages[i] specifies the i-th interrupt error code
 char *isr_exception_messages[] = {
@@ -75,8 +77,9 @@ void init_isr_handlers() {
     idt_gate_init(31, handle_31_isr);
     // IRQs (PIC1 - 0x20-0x27, PIC2 - 0x28-0x2F)
     idt_gate_init(32, handle_32_isr);
-    idt_gate_init(33, handle_33_isr);
+    idt_gate_init(33, handle_33_isr); // Keybaord
     idt_gate_init(34, handle_34_isr);
+    idt_gate_init(PIC1_OFFSET + RTL8139_INTERRUPT_LINE, handle_43_isr); // NIC
 
     update_idt();
 }
@@ -110,6 +113,11 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
         else if (isr_num == IRQ_KEYBOARD + PIC1_OFFSET) { // Keyboard IRQ
             unsigned char in = inb(PS2_KEYBOARD_PORT_DATA);
             buffer_put(in);
+        }
+        else if (isr_num >= (PIC1_OFFSET + RTL8139_INTERRUPT_LINE)) {
+            // printf("GOT ISR %d, %d, %d\n", isr_num, error_code, regs->irq_number);
+            // sleep(500);
+            rtl8139_handler(isr_num - PIC1_OFFSET, error_code, regs->irq_number);
         }
 
         pic_send_eoi(isr_num - PIC1_OFFSET); // Send ACK to PIC

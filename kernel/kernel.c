@@ -24,6 +24,9 @@
 // process
 #include <elf.h>
 #include <process.h>
+// network
+#include <net/if.h>
+#include <net/rtl8139.h>
 
 extern void jump_usermode(void* entry, void* sp);
 void user_init();
@@ -58,6 +61,8 @@ int kmain(void) {
     printf("%s Syscall\n", LOG_SYM_SUC);
 
     srand(time());
+
+    rtl8139_init();
 
     // usermode
     user_init();

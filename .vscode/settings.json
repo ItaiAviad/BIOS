@@ -107,6 +107,10 @@
     "pci.h": "c",
     "elf.h": "c",
     "types.h": "c",
-    "if.h": "c"
+    "if.h": "c",
+    "hardwaremem.h": "c",
+    "rtl8139.h": "c",
+    "isr.h": "c",
+    "time.h": "c"
 }
 }

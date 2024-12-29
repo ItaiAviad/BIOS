@@ -79,5 +79,6 @@ extern void handle_31_isr();
 extern void handle_32_isr();
 extern void handle_33_isr();
 extern void handle_34_isr();
+extern void handle_43_isr(); // NIC
 
 #endif // ISR_H
