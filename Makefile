@@ -208,13 +208,14 @@ VND := rtl8139# Virtual Network Device
 BRIDGE := br0
 TAP := tap0
 ETHIF := enp0s20f0u2u1c2 # (ethernet interface)
+# interface:=$(shell ip addr | awk '/state UP/ {print $$2}' | head -n 1 | awk '{print substr($$0, 1, length($$0)-1)}')
+# ETHIF := $(interface) # (ethernet interface)
 network_setup:
 	sudo brctl addbr $(BRIDGE)
-	sudo ip addr flush dev $(ETHIF)
 	sudo brctl addif $(BRIDGE) $(ETHIF)
 
 	# tap
-	sudo tunctl -t $(TAP) -u $(shell whoami)
+	sudo tunctl -t $(TAP) -u root
 	sudo brctl addif $(BRIDGE) $(TAP)
 
 	sudo ifconfig $(ETHIF) up
@@ -224,18 +225,16 @@ network_setup:
 	brctl show
 
 	# dhcp
-	sudo dhclient -v $(BRIDGE)
 
 network_cleanup:
 	-sudo brctl delif $(BRIDGE) $(TAP)
 	-sudo tunctl -d $(TAP)
 	-sudo brctl delif $(BRIDGE) $(ETHIF)
 	-sudo ifconfig $(BRIDGE) down
-	-sudo brctl delbr $(BRIDGE)
 	-sudo ifconfig $(ETHIF) up
+	-sudo brctl delbr $(BRIDGE)
 
 	# dhcp
-	# -sudo dhclient -v $(ETHIF)
 
 # ------------------------------------------------
 
@@ -246,13 +245,14 @@ always:
 
 run: network_setup
 	echo "Running..."
-	qemu-system-x86_64 -m 8G \
+	sudo qemu-system-x86_64 -m 8G \
 	-drive file=$(FLOPPY_BIN),format=raw,if=floppy \
 	-drive id=disk,file=$(DISK),format=raw,if=none \
 	-device ahci,id=ahci \
 	-device ide-hd,drive=disk,bus=ahci.0 \
+	-machine kernel_irqchip=off \
 	-netdev tap,id=$(NET),ifname=$(TAP),script=no,downscript=no \
-	-device $(VND),netdev=$(NET),id=$(VND),mac=de:ad:be:ef:ca:fe \
+	-device $(VND),netdev=$(NET),id=$(VND),mac=de:ad:be:ef:12:34 \
 	-object filter-dump,id=f1,netdev=$(NET),file=dump.dat
 
 	# -d int,cpu_reset,in_asm,guest_errors \

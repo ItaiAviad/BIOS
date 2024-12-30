@@ -9,14 +9,13 @@
 #include <pci.h>
 #include <memory.h>
 #include <arch/x86_64/pic.h>
+#include <net/ethernet.h>
 
-
-#define MAC_ADDR_SIZE 6
 
 struct nic {
     uint32_t* rx_buf;
     uint16_t ioaddr;
-    uint8_t mac[MAC_ADDR_SIZE];
+    struct mac mac;
 };
 extern struct nic nic;
 
@@ -52,7 +51,8 @@ extern struct nic nic;
 #define RTL8139_INTERRUPT_PIN 11
 #define RTL8139_INTERRUPT_LINE 11
 
-#define RX_BUFFER_SIZE (8*KB + 16 + 2*KB)  // 8KB + 16 for wrap + max packet size
+#define RX_BUFFER_SIZE (8*KB)  // 8KB
+#define RX_BUFFER_LEN (RX_BUFFER_SIZE + 4*1516) // + 16 for wrap + max packet size
 
 #define TOK 0b100
 #define ROK 0b01
