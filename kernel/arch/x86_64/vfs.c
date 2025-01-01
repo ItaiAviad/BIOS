@@ -74,7 +74,7 @@ vfs_node *vfs_get_create_node_in_path(char *path) {
             }
 
             default:
-                printf("The path contains part with name: %s which isn't a valid type\n", current_node->name);
+                printf("VFS: The path contains part with name: %s which isn't a valid type\n", current_node->name);
                 return NULL;
         }
     }
