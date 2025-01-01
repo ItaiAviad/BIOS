@@ -60,8 +60,9 @@ int kmain(void) {
     // Init Syscall
     init_syscall();
     // printf("%s Syscall\n", LOG_SYM_SUC);
-
+    init_vfs();
     mount_file_system("/", 0, EXT2_START_OFFSET,FILESYSTEM_TYPE_EXT2);
+    printf(vfs_get_create_node_in_path("/")->name);
     ext2_super_block* super_block = ext2_read_super_block(vfs_get_create_node_in_path("/")->data);
     printf("block_size: %d", (1024 << super_block->blockcount));
     

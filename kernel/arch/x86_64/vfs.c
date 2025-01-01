@@ -22,50 +22,71 @@ void init_vfs() {
 }
 
 vfs_node *vfs_get_create_node_in_path(char *path) {
-    path = preprocess_path(path);
-
-    if (path[0] != ROOT_DIR_NAME[0]) { // This function always expects absulute path
-        printf("VFS: Invalid Path!");
+    char *current_path_position = preprocess_path(path);
+    if (!current_path_position || path[0] != ROOT_DIR_NAME[0]) { // Ensure valid absolute path
+        printf("VFS: Invalid Path!\n");
         return NULL;
     }
 
-    char *current_name_to_search = strtok(path, PATH_SEPERATOR);
+    char *next_separator_position;
     vfs_node *current_node = vfs_root;
-    while (current_name_to_search) {
+
+    while ((next_separator_position = strchr(current_path_position, PATH_SEPERATOR)) != NULL) {
+        size_t segment_length = next_separator_position - current_path_position;
+
+        if (segment_length == 0) { // Skip redundant separators
+            current_path_position++;
+            continue;
+        }
+
         switch (current_node->type) {
             case VFS_NODE_TYPE_DIR: {
                 linkedListNode *current_list_item = current_node->data;
-                int found = false;
+                int found = 0;
+
                 while (current_list_item) {
-                    if (strcmp(((vfs_node *)current_list_item->data)->name, current_name_to_search) == 0) {
-                        current_node = current_list_item->data;
-                        found = true;
+                    vfs_node *child_node = (vfs_node *)current_list_item->data;
+                    if (memcmp(child_node->name, current_path_position, segment_length) == 0 &&
+                        child_node->name[segment_length] == '\0') {
+                        current_node = child_node;
+                        found = 1;
                         break;
                     }
                     current_list_item = current_list_item->next;
                 }
+
                 if (!found) {
                     vfs_node *new_node = malloc(sizeof(vfs_node));
-                    memcpy(new_node->name, current_name_to_search, strlen(current_name_to_search) + 1);
+                    if (!new_node) {
+                        printf("VFS: Memory allocation failed!\n");
+                        return NULL;
+                    }
+                    memcpy(new_node->name, current_path_position, segment_length);
+                    new_node->name[segment_length] = '\0';
                     new_node->type = VFS_NODE_TYPE_DIR;
+                    new_node->data = NULL; // Initialize other fields as needed
                     append_node((linkedListNode **)&(current_node->data), new_node);
                     current_node = new_node;
                 }
 
-                current_name_to_search = strtok(NULL, PATH_SEPERATOR);
+                current_path_position = next_separator_position + 1;
                 break;
             }
 
-            default: {
-                printf("The path contains part with name: %s which isn't a valid type", current_node->name);
+            default:
+                printf("The path contains part with name: %s which isn't a valid type\n", current_node->name);
                 return NULL;
-            }
         }
     }
 
-    free(path);
+    if (*current_path_position) {
+        printf("VFS: Unhandled path segment: %s\n", current_path_position);
+    }
+
+    free(current_path_position); // Only if dynamically allocated
     return current_node;
 }
+
 
 vfs_node *mount_file_system(char *path, uint64_t disk_number, uint64_t disk_offset, enum file_system_type type) {
     vfs_node *mount_node = vfs_get_create_node_in_path(path);
