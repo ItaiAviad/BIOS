@@ -92,7 +92,7 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
         : "=r"(prev_cr3) // Output
     );
     // Switch to Kernel Virtual Address Space
-    if (prev_cr3 != (uint64_t) (PML4_KERNEL)) {
+    if (prev_cr3 != (uint64_t) (PML4_KERNEL) && prev_cr3 != (uint64_t) (PML4_BOOT)) {
         flush_tlb();
         invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
         set_pml4_address((uint64_t*) (PML4_KERNEL));

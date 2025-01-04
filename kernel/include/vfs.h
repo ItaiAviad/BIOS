@@ -12,6 +12,9 @@ typedef struct filesystem_data{
     uint64_t disk_number;
     uint64_t start_offset;
     enum file_system_type type;
+    int (*mkdir)(char*);
+    int (*writefile)(char*, int, uint64_t, size_t);
+    int (*readfile)(char*, uint64_t, size_t);
 } filesystem_data;
 
 #include <ext2.h>
@@ -34,7 +37,9 @@ extern vfs_node *vsf_root;
 
 void create_dir(char* dir_path);
 void init_vfs();
-vfs_node* vfs_get_create_node_in_path(char* path);
+vfs_node* vfs_get_node(char *path, int return_last_node);
+vfs_node* vfs_mkdir(char* path);
+vfs_node *vfs_mknode(char *path);
 vfs_node* mount_file_system(char* path, uint64_t disk_number, uint64_t disk_offset, enum file_system_type type);
 
 #endif

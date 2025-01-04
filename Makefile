@@ -210,7 +210,7 @@ run:
 	-device ahci,id=ahci \
 	-device ide-hd,drive=disk,bus=ahci.0 \
 	-d int,cpu_reset,in_asm,guest_errors,exec,page,unimp \
-	-no-reboot -D log.txt
+	-no-reboot -no-shutdown -D log.txt
 
 run_debugger: 
 	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) \

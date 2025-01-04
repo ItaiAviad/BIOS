@@ -1,12 +1,15 @@
 #include <arch/x86_64/interrupts.h>
 #include <arch/x86_64/io.h>
 
+extern int interrupts_ready;
+
 void cli(){
     __asm__ volatile ("cli" ::: "memory");
 }
 
 void sti(){
-    __asm__ volatile ("sti" ::: "memory");
+    if(interrupts_ready)
+        __asm__ volatile ("sti" ::: "memory");
 }
 
 void qemu_shutdown(void) {

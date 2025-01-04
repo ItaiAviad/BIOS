@@ -110,11 +110,10 @@ void switch_context(Context ctx) {
     sti();
 }
 
-void set_pml4_address(uint64_t* pml4){
+void set_pml4_address(uint64_t* pml4) {
     __asm__ volatile (
-        "mov %%rax, %0\n"     // Move the address of the PML4 table into the RAX register
-        "mov %%cr3, %%rax\n"  // Move the address from RAX into the CR3 register
-        "mov %%rax, %%cr3\n"
+        "mov %%rax ,%0\n"  // Load the PML4 table address into RAX
+        "mov %%cr3 ,%%rax\n" // Load the address from RAX into CR3
         : 
         : "r" (pml4) // Input operand: the address of the PML4 table
         : "rax" // Clobbered register

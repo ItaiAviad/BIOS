@@ -39,6 +39,9 @@
 #define PCI_OFFSET_INTERRUPT_PIN 0x3D
 #define PCI_OFFSET_MIN_GRANT 0x3E
 #define PCI_OFFSET_MAX_LATENCY 0x3F
+#define PCI_OFFSET_SECONDERY_BUS_NUMBER 0x19
+
+#define PCI_DEBUG
 
 extern linkedListNode *list_pci_devices;
 
@@ -238,6 +241,10 @@ static inline uint8_t get_min_grant(uint8_t bus, uint8_t slot, uint8_t func) {
 
 static inline uint8_t get_max_latency(uint8_t bus, uint8_t slot, uint8_t func) {
     return pci_config_read_word(bus, slot, func, PCI_OFFSET_MAX_LATENCY) & 0xFF;
+}
+
+static inline uint8_t get_secondery_bus(uint8_t bus, uint8_t slot, uint8_t func) {
+    return pci_config_read_word(bus, slot, func, PCI_OFFSET_SECONDERY_BUS_NUMBER) & 0xFF;
 }
 
 #endif

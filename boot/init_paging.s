@@ -37,5 +37,4 @@ init_paging:
     mov cr3, eax
     
     popad
-    sti
     ret

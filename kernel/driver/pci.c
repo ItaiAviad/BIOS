@@ -12,6 +12,11 @@ linkedListNode *list_pci_devices = NULL;
 
 uint16_t pci_config_read_word(uint8_t bus, uint8_t slot, uint8_t func,
                               uint8_t offset) {
+
+    if (offset > 0xFF) {
+        printf("Invalid offset: %x\n", offset);
+        return 0;
+    }
     uint32_t address;
     uint32_t lbus = (uint32_t)bus;
     uint32_t lslot = (uint32_t)slot;
@@ -30,6 +35,10 @@ uint16_t pci_config_read_word(uint8_t bus, uint8_t slot, uint8_t func,
 
 void pci_config_write_word(uint8_t bus, uint8_t slot, uint8_t func,
                            uint8_t offset, uint16_t value) {
+    if (offset > 0xFF) {
+        printf("Invalid offset: %x\n", offset);
+        return;
+    }
     uint32_t address;
     uint32_t lbus = (uint32_t)bus;
     uint32_t lslot = (uint32_t)slot;
@@ -51,6 +60,10 @@ void pci_config_write_word(uint8_t bus, uint8_t slot, uint8_t func,
 
 uint32_t pci_config_read_dword(uint8_t bus, uint8_t slot, uint8_t func,
                                uint8_t offset) {
+    if (offset > 0xFF) {
+        printf("Invalid offset: %x\n", offset);
+        return 0;
+    }
     uint32_t address;
     uint32_t lbus = (uint32_t)bus;
     uint32_t lslot = (uint32_t)slot;
@@ -85,6 +98,9 @@ void pci_config_write_dword(uint8_t bus, uint8_t slot, uint8_t func,
 }
 
 void check_device(uint8_t bus, uint8_t device) {
+#ifdef PCI_DEBUG
+    printf("Checking device: %d on bus: %d\n", device, bus);
+#endif
     uint8_t function = 0;
 
     uint16_t vendorID = get_vendor_id(bus, device, function);
@@ -104,6 +120,9 @@ void check_device(uint8_t bus, uint8_t device) {
 
 void check_bus(uint8_t bus) {
     uint8_t device = {0};
+#ifdef PCI_DEBUG
+    printf("checking bus: %d", bus);
+#endif
 
     for (device = 0; device < 32; device++) {
         check_device(bus, device);
@@ -111,14 +130,18 @@ void check_bus(uint8_t bus) {
 }
 
 void check_function(uint8_t bus, uint8_t slot, uint8_t function) {
+
+    printf("Checking function:%d device: %d on bus: %d\n",function ,slot, bus);
     uint8_t base_class = 0;
     uint8_t sub_class = 0;
     uint8_t secondary_bus = 0;
 
     base_class = get_class_code(bus, slot, function);
     sub_class = get_subclass(bus, slot, function);
+
+
     if ((base_class == 0x6) && (sub_class == 0x4)) {
-        secondary_bus = get_subclass(bus, slot, function);
+        secondary_bus = get_secondery_bus(bus, slot, function);
         check_bus(secondary_bus);
     } else {
 
@@ -160,20 +183,20 @@ void enumerate_pci() {
 
 void print_pci_devices() {
     linkedListNode *head = (linkedListNode *)list_pci_devices;
-    #ifdef DEBUG
+#ifdef DEBUG
     printf("__PCI__\n");
-    #endif
+#endif
     while (head != NULL) {
-        #ifdef DEBUG
+#ifdef DEBUG
         PCIDevice *device = (PCIDevice *)head->data;
         printf("%x:%x.%x %x %x %x %x, ", device->bus, device->slot, device->function,
                device->vendorId, device->deviceId, device->classCode, device->subclass);
-        #endif
+#endif
         head = (linkedListNode *)head->next;
     }
-    #ifdef DEBUG
+#ifdef DEBUG
     printf("__PCI_END__\n");
-    #endif
+#endif
 }
 
 void *assign_bar(PCIDevice device, uint8_t bar_num) {
@@ -191,11 +214,11 @@ void *assign_bar(PCIDevice device, uint8_t bar_num) {
         return NULL;
     }
 
-    map_memory_range_with_flags(kpcb.ctx, (void*) (uint64_t) orig_reg_val, (void*) (uint64_t) orig_reg_val + bar_size - 1, (void*) (uint64_t) orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE | PAGE_USER, 0);
+    map_memory_range_with_flags(kpcb.ctx, (void *)(uint64_t)orig_reg_val, (void *)(uint64_t)orig_reg_val + bar_size - 1, (void *)(uint64_t)orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE | PAGE_USER, 0);
 
     flush_tlb();
 
     pci_config_write_dword(device.bus, device.slot, device.function, config_space_offset, orig_reg_val);
-    
-    return (void *)(uint64_t) orig_reg_val;
+
+    return (void *)(uint64_t)orig_reg_val;
 }

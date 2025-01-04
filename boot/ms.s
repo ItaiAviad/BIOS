@@ -82,5 +82,4 @@ elevate_lm:
         mov rbp, KERNEL_VBASE
         mov rsp, rbp
         
-        sti
         jmp lm

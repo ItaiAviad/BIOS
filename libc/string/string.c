@@ -12,6 +12,58 @@ char *strchr(const char *s, int c) {
     return c ? NULL : (char *)s;
 }
 
+char *strrchr(const char *str, int c) {
+    const char *last_occurrence = NULL;
+
+    // Iterate through the string
+    while (*str) {
+        if (*str == (char)c) {
+            last_occurrence = str; // Update the pointer to the last occurrence
+        }
+        str++;
+    }
+
+    // Check if the character to search for is the null terminator
+    if (c == '\0') {
+        return (char *)str; // Return a pointer to the null terminator
+    }
+
+    return (char *)last_occurrence; // Return the last occurrence, or NULL if not found
+}
+
+
+char *strstr(const char *haystack, const char *needle) {
+    // Handle special cases: empty needle
+    if (!needle || *needle == '\0') {
+        return (char *)haystack; // Return the start of haystack
+    }
+
+    // Handle special case: empty haystack
+    if (!haystack || *haystack == '\0') {
+        return NULL;
+    }
+
+    const char *h, *n;
+    for (; *haystack != '\0'; haystack++) {
+        // Start comparing from the current position in haystack
+        h = haystack;
+        n = needle;
+
+        // Compare characters of needle and haystack
+        while (*h == *n && *n != '\0') {
+            h++;
+            n++;
+        }
+
+        // If we've reached the end of the needle, we found a match
+        if (*n == '\0') {
+            return (char *)haystack;
+        }
+    }
+
+    // No match found
+    return NULL;
+}
 
 char *strtok(char *str, const char *delim) {
     static char *start = NULL, *end;
