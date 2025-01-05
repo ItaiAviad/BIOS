@@ -95,7 +95,7 @@ MISC_FLAGS = -DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) -DKERNEL_STACK_START_ADDR=$(
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
 endif
-CFLAGS := -ffreestanding -m64 -march=x86-64 -masm=intel -nostdlib -Wall -g -Wextra -O0 $(INCLUDES) $(MISC_FLAGS)
+CFLAGS := -ffreestanding -m64 -fno-stack-protector -march=x86-64 -masm=intel -Wall -g -Wextra -O0 $(INCLUDES) $(MISC_FLAGS)
 NASMFLAGS := -f elf64 -g -DUSER_LOAD_ADDR=$(USER_LOAD_ADDR)
 LDFLAGS_KERNEL := -T $(KERNEL_LD) $(INCLUDES)
 LDFLAGS_USER := -T $(USER_LD) $(INCLUDES)
@@ -209,7 +209,7 @@ run:
 	-drive id=disk,file=$(DISK),format=raw,if=none \
 	-device ahci,id=ahci \
 	-device ide-hd,drive=disk,bus=ahci.0 \
-	-d int,cpu_reset,in_asm,guest_errors,exec,page,unimp \
+	-d int,cpu_reset,in_asm -trace syscall \
 	-no-reboot -no-shutdown -D log.txt
 
 run_debugger: 

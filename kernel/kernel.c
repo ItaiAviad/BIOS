@@ -63,7 +63,7 @@ int kmain(void) {
     printf("%s PCI\n", LOG_SYM_SUC);
 
     // Setup AHCI and enumerate Disks
-    // enumerate_disks();
+    enumerate_disks();
 
     // Init Syscall
     init_syscall();

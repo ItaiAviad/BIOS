@@ -23,7 +23,7 @@ QUADWORD_SIZE:          equ 0x08
     push r13
     push r14
     push r15
-    mov rax, cr2
+    mov  rax, cr2
     push rax
 %endmacro
 
