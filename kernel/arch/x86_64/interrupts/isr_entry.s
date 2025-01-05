@@ -70,7 +70,6 @@ QUADWORD_SIZE:          equ 0x08
 %macro ISR_NOERRCODE 1
     global handle_%1_isr
     handle_%1_isr:
-    cli
 
     push qword 0 ; Push a zero error code into the stack
     push qword %1
@@ -80,7 +79,6 @@ QUADWORD_SIZE:          equ 0x08
     ; Pop the stack so iretq would find the IP
     add rsp, 0x10
 
-    sti
 
     iretq
 %endmacro
@@ -88,7 +86,6 @@ QUADWORD_SIZE:          equ 0x08
 %macro ISR_ERRCODE 1
     global handle_%1_isr
     handle_%1_isr:
-    cli
 
     push qword %1
 
@@ -97,7 +94,6 @@ QUADWORD_SIZE:          equ 0x08
     ; Pop the stack so iretq would find the IP
     add rsp, 0x10
 
-    sti
 
     iretq
 %endmacro
