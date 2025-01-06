@@ -209,7 +209,7 @@ run:
 	-drive id=disk,file=$(DISK),format=raw,if=none \
 	-device ahci,id=ahci \
 	-device ide-hd,drive=disk,bus=ahci.0 \
-	-d int,cpu_reset,in_asm -trace syscall \
+	-d int,cpu_reset,in_asm \
 	-no-reboot -no-shutdown -D log.txt
 
 run_debugger: 
