@@ -81,7 +81,7 @@ void init_isr_handlers() {
     update_idt();
 }
 
-void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
+void isr_handler(const uint64_t isr_num, const uint64_t error_code, registers* regs){
 
     // Virtual Address Space
     // Save current VAS
