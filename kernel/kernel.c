@@ -69,11 +69,10 @@ int kmain(void) {
     init_syscall();
     // printf("%s Syscall\n", LOG_SYM_SUC);
     init_vfs();
-    vfs_mkdir("/tmp");
-    printf(vfs_get_node("/tmp", false)->name, false);
-    // mount_file_system("/", 0, EXT2_START_OFFSET,FILESYSTEM_TYPE_EXT2);
-    // ext2_super_block* super_block = ext2_read_super_block(vfs_get_node("/", false)->data);
-    // printf("block_size: %d", (1024 << super_block->blockcount));
+    mount_file_system("/", 0, EXT2_START_OFFSET,FILESYSTEM_TYPE_EXT2);
+    ext2_super_block* super_block = ext2_read_super_block(vfs_get_node("/").found_node->data);
+    printf("block_size: %d\n", (1024 << super_block->blockcount));
+    printf("Mounted!");
     
     while (1) {}
     return 0;

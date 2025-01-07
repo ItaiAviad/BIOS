@@ -19,6 +19,7 @@
 #define LOG_SYM_SUC "[+]"
 #define LOG_SYM_FAI "[-]"
 #define LOG_SYM_INF "[*]"
+#define LOG_SYM_DEBUG "[D]"
 #define LOG_SYM_ERR "[!]"
 
 typedef struct keyboard_t {

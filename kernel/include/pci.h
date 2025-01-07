@@ -41,7 +41,13 @@
 #define PCI_OFFSET_MAX_LATENCY 0x3F
 #define PCI_OFFSET_SECONDERY_BUS_NUMBER 0x19
 
-#define PCI_DEBUG
+// #define PCI_DEBUG
+
+#ifdef PCI_DEBUG
+    #define PCI_DEBUG_PRINT(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#else
+    #define PCI_DEBUG_PRINT(fmt, ...)
+#endif
 
 extern linkedListNode *list_pci_devices;
 

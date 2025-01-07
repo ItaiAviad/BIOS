@@ -17,17 +17,17 @@ size_t cmdslots;
 void initialize_ahci(HBA_MEM *abar, __attribute__((unused)) PCIDevice *device) {
 
     while ((abar->bohc & 0b1) == 1) {
-        printf("Ahci not ready, value: %d\n", abar->bohc);
+        AHCI_DEBUG_PRINT("Ahci not ready, value: %d\n", abar->bohc);
     }
 
 #ifdef DEBUG
-    printf("Bios to os hand over done value:%d\n", abar->bohc);
+    AHCI_DEBUG_PRINT("Bios to os hand over done value:%d\n", abar->bohc);
 #endif
 
     abar->bohc |= 0b10;
 
     while (abar->bohc & 0b10) {
-        printf("Abar still reseting\n");
+        AHCI_DEBUG_PRINT("Abar still reseting\n");
     }
 
     // Enable AHCI by setting the AHCI Enable (AE) bit in the Global Host Control
@@ -35,14 +35,14 @@ void initialize_ahci(HBA_MEM *abar, __attribute__((unused)) PCIDevice *device) {
     // in the Global Host Control (GHC) register
     abar->ghc |= (1 << 31) | 0b10;
     while (!(abar->ghc & (1 << 31))) {
-        printf("Ahci not ready, value: %d\n", abar->ghc & (1 << 31));
+        AHCI_DEBUG_PRINT("Ahci not ready, value: %d\n", abar->ghc & (1 << 31));
     }
 
     // Check capabilities and configure ports
-    printf("%s AHCI\n", LOG_SYM_SUC);
+    AHCI_DEBUG_PRINT("AHCI\n");
 #ifdef DEBUG
-    printf("AHCI GHC: %d\n", abar->ghc);
-    printf("AHCI Capabilities: %d\n", abar->cap);
+    AHCI_DEBUG_PRINT("AHCI GHC: %d\n", abar->ghc);
+    AHCI_DEBUG_PRINT("AHCI Capabilities: %d\n", abar->cap);
 #endif
 
     cmdslots = ((abar->cap >> 8) & 0x1F) + 1;
@@ -62,7 +62,7 @@ void setup_ahci_controllers() {
                 continue;
             }
 #ifdef DEBUG
-            printf("Abar addr: %d\n", abar);
+            AHCI_DEBUG_PRINT("Abar addr: %d\n", abar);
 #endif
             uint16_t command_reg = pci_config_read_dword(
                 device->bus, device->slot, device->function, PCI_OFFSET_COMMAND);
@@ -107,7 +107,7 @@ void probe_port(HBA_MEM *abar) {
     // Search disk in implemented ports
     uint32_t pi = abar->pi;
 #ifdef DEBUG
-    printf("Pi: %d\n", pi);
+    AHCI_DEBUG_PRINT("Pi: %d\n", pi);
 #endif
     int i = 0;
     while (i < 32) {
@@ -115,7 +115,7 @@ void probe_port(HBA_MEM *abar) {
             port_reset((HBA_PORT *)abar->ports + i);
             int dt = check_type(&abar->ports[i]);
             if (dt == AHCI_DEV_SATA) {
-                printf("%s SATA drive found at port %d\n", LOG_SYM_INF, i);
+                AHCI_DEBUG_PRINT("SATA drive found at port %d\n", i);
                 port_rebase(abar->ports + i);
 
                 ATA_IDENTIFY_DEVICE *ata_id = hardware_allocate_mem(sizeof(ATA_IDENTIFY_DEVICE), 0);
@@ -132,14 +132,14 @@ void probe_port(HBA_MEM *abar) {
                 hardware_append_node(&list_drives, disk_curr);
 
             } else if (dt == AHCI_DEV_SATAPI) {
-                printf("SATAPI drive found at port %d\n", i);
+                AHCI_DEBUG_PRINT("SATAPI drive found at port %d\n", i);
             } else if (dt == AHCI_DEV_SEMB) {
-                printf("SEMB drive found at port %d\n", i);
+                AHCI_DEBUG_PRINT("SEMB drive found at port %d\n", i);
             } else if (dt == AHCI_DEV_PM) {
-                printf("PM drive found at port %d\n", i);
+                AHCI_DEBUG_PRINT("PM drive found at port %d\n", i);
             } else {
 #ifdef DEBUG
-                printf("No drive found at port %d\n", i);
+                AHCI_DEBUG_PRINT("No drive found at port %d\n", i);
 #endif
             }
         }
@@ -225,7 +225,7 @@ int find_cmdslot(HBA_PORT *port) {
             return i;
         slots >>= 1;
     }
-    printf("Cannot find free command list entry\n");
+    AHCI_DEBUG_PRINT("Cannot find free command list entry\n");
     return -1;
 }
 
@@ -263,7 +263,7 @@ bool get_identify_sata(volatile HBA_PORT *port, uint16_t *buf) {
     while ((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ))) {
         spin++;
         if (spin == 1000000) {
-            printf("Port is hung\n");
+            AHCI_DEBUG_PRINT("Port is hung\n");
             stop_cmd(port);
             start_cmd(port);
         }
@@ -279,12 +279,12 @@ bool get_identify_sata(volatile HBA_PORT *port, uint16_t *buf) {
             break;
 
         if (port->is & HBA_PxIS_TFES) { // Task file error
-            printf("Identify disk error\n");
+            AHCI_DEBUG_PRINT("Identify disk error\n");
             return 0;
         }
 
         if (--timeout == 0) {
-            printf("Timeout retrying...\n");
+            AHCI_DEBUG_PRINT("Timeout retrying...\n");
             stop_cmd(port);
             start_cmd(port);
             return get_identify_sata(port, buf);
@@ -293,7 +293,7 @@ bool get_identify_sata(volatile HBA_PORT *port, uint16_t *buf) {
 
     // Check again
     if (port->is & HBA_PxIS_TFES) {
-        printf("Identify disk error\n");
+        AHCI_DEBUG_PRINT("Identify disk error\n");
         return 0;
     }
 
@@ -356,7 +356,7 @@ bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t
     while ((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ))) {
         spin++;
         if (spin == 1000000) {
-            printf("Port is hung\n");
+            AHCI_DEBUG_PRINT("Port is hung\n");
             stop_cmd(port);
             start_cmd(port);
         }
@@ -372,12 +372,12 @@ bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t
             break;
 
         if (port->is & HBA_PxIS_TFES) { // Task file error
-            printf("Identify disk error\n");
+            AHCI_DEBUG_PRINT("Identify disk error\n");
             return 0;
         }
 
         if (--timeout == 0) {
-            printf("Timeout retrying...\n");
+            AHCI_DEBUG_PRINT("Timeout retrying...\n");
             stop_cmd(port);
             start_cmd(port);
             return write_ahci(port, start, count, buf);
@@ -385,7 +385,7 @@ bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t
     }
     // Check again
     if (port->is & HBA_PxIS_TFES) {
-        printf("Write disk error\n");
+        AHCI_DEBUG_PRINT("Write disk error\n");
         return 0;
     }
 
@@ -436,7 +436,7 @@ bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t 
     while ((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ))) {
         spin++;
         if (spin == 1000000) {
-            printf("Port is hung\n");
+            AHCI_DEBUG_PRINT("Port is hung\n");
             stop_cmd(port);
             start_cmd(port);
         }
@@ -450,12 +450,12 @@ bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t 
             break;
 
         if (port->is & HBA_PxIS_TFES) { // Task file error
-            printf("Identify disk error\n");
+            AHCI_DEBUG_PRINT("Identify disk error\n");
             return 0;
         }
 
         if (--timeout == 0) {
-            printf("Timeout retrying...\n");
+            AHCI_DEBUG_PRINT("Timeout retrying...\n");
             stop_cmd(port);
             start_cmd(port);
             return read_ahci(port, start, count, buf); // Handle timeout appropriately
@@ -463,7 +463,7 @@ bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t 
     }
     // Check again
     if (port->is & HBA_PxIS_TFES) {
-        printf("Read disk error\n");
+        AHCI_DEBUG_PRINT("Read disk error\n");
         return 0;
     }
     return true;

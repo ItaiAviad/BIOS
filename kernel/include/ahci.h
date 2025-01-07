@@ -7,6 +7,14 @@
 #include <pci.h>
 
 
+#define AHCI_DEBUG
+
+#ifdef AHCI_DEBUG
+    #define AHCI_DEBUG_PRINT(fmt, ...) printf("%s " fmt, LOG_SYM_INF, ##__VA_ARGS__)
+#else
+    #define AHCI_DEBUG_PRINT(fmt, ...)
+#endif
+
 #define AHCI_CONFIG_BAR_NUM 5
 
 #define SATA_SIG_ATA 0x00000101   // SATA drive

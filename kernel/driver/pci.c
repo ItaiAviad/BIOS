@@ -86,7 +86,7 @@ void pci_config_write_dword(uint8_t bus, uint8_t slot, uint8_t func,
 
 void check_device(uint8_t bus, uint8_t device) {
 #ifdef PCI_DEBUG
-    printf("Checking device: %d on bus: %d\n", device, bus);
+    PCI_DEBUG_PRINT("Checking device: %d on bus: %d\n", device, bus);
 #endif
     uint8_t function = 0;
 
@@ -108,7 +108,7 @@ void check_device(uint8_t bus, uint8_t device) {
 void check_bus(uint8_t bus) {
     uint8_t device = {0};
 #ifdef PCI_DEBUG
-    printf("checking bus: %d", bus);
+    PCI_DEBUG_PRINT("checking bus: %d", bus);
 #endif
 
     for (device = 0; device < 32; device++) {
@@ -118,7 +118,7 @@ void check_bus(uint8_t bus) {
 
 void check_function(uint8_t bus, uint8_t slot, uint8_t function) {
 
-    printf("Checking function:%d device: %d on bus: %d\n",function ,slot, bus);
+    PCI_DEBUG_PRINT("Checking function:%d device: %d on bus: %d\n",function ,slot, bus);
     uint8_t base_class = 0;
     uint8_t sub_class = 0;
     uint8_t secondary_bus = 0;
@@ -171,18 +171,18 @@ void enumerate_pci() {
 void print_pci_devices() {
     linkedListNode *head = (linkedListNode *)list_pci_devices;
 #ifdef DEBUG
-    printf("__PCI__\n");
+    PCI_DEBUG_PRINT("__PCI__\n");
 #endif
     while (head != NULL) {
 #ifdef DEBUG
         PCIDevice *device = (PCIDevice *)head->data;
-        printf("%x:%x.%x %x %x %x %x, ", device->bus, device->slot, device->function,
+        PCI_DEBUG_PRINT("%x:%x.%x %x %x %x %x, ", device->bus, device->slot, device->function,
                device->vendorId, device->deviceId, device->classCode, device->subclass);
 #endif
         head = (linkedListNode *)head->next;
     }
 #ifdef DEBUG
-    printf("__PCI_END__\n");
+    PCI_DEBUG_PRINT("__PCI_END__\n");
 #endif
 }
 
