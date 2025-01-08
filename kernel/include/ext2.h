@@ -7,6 +7,8 @@
 
 #define EXT2_START_OFFSET 0x400
 
+#define EXT2_ROOT_INODE 2
+
 typedef struct ext2_super_block {
     uint32_t inodecount;         // Total number of inodes
     uint32_t blockcount;         // Total number of blocks
@@ -69,7 +71,11 @@ typedef struct ext2_super_block {
     uint32_t reserved[190];        // Padding to make superblock size 1024 bytes
 } ext2_super_block;
 
-void mount_ext2(uint64_t disk_id , uint64_t start_offset, char* mount_point);
-ext2_super_block* ext2_read_super_block(filesystem_data* fs_data);
+void ext2_init(filesystem_data* fs_data);
+ext2_super_block ext2_read_super_block(filesystem_data* fs_data);
+
+inline size_t s_block_get_block_size(ext2_super_block s_block){
+    return 1024 << s_block.log_block_size;
+}
 
 #endif

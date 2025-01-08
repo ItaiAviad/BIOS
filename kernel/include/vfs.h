@@ -34,6 +34,7 @@ enum vfs_status{OK ,DIR_ALREADY_EXISTS, UNSUPPORTED, INVALID_PATH, NO_DIR, MEMOR
 typedef struct filesystem_data{
     uint64_t disk_number;
     uint64_t start_offset;
+    uint64_t* mount_data;
     enum file_system_type type;
 } filesystem_data;
 
