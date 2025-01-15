@@ -3,9 +3,12 @@
 #define EXT2_H
 
 #include <types.h>
+#include <math.h>
 #include <vfs.h>
 
-#define EXT2_START_OFFSET 0x400
+#define EXT2_START_OFFSET (0x400)
+
+#define EXT2_BLOCK_GROUP_TABLE_OFFSET (0x400) // Offset after the initial fs offset
 
 #define EXT2_ROOT_INODE 2
 
@@ -20,7 +23,7 @@ typedef struct ext2_super_block {
     uint32_t log_frag_size;        // Fragment size
     uint32_t blockper_group;     // Number of blocks per group
     uint32_t fragper_group;      // Number of fragments per group
-    uint32_t inodeper_group;     // Number of inodes per group
+    uint32_t number_of_inodes_per_group;     // Number of inodes per group
     uint32_t mtime;                // Last mount time (UNIX timestamp)
     uint32_t wtime;                // Last write time (UNIX timestamp)
     uint16_t mnt_count;            // Number of times the filesystem has been mounted
@@ -71,11 +74,51 @@ typedef struct ext2_super_block {
     uint32_t reserved[190];        // Padding to make superblock size 1024 bytes
 } ext2_super_block;
 
-void ext2_init(filesystem_data* fs_data);
-ext2_super_block ext2_read_super_block(filesystem_data* fs_data);
+typedef struct ext2_block_group_descriptor{
+    uint32_t addr_block_usage_bitmap;
+    uint32_t addr_inode_usage_bitmap;
+    uint32_t start_block_inode_table;
+    uint16_t number_of_unallocated_blocks;
+    uint16_t number_of_unallocated_inodes;
+    uint16_t number_of_dirs_in_group;
+} ext2_block_group_descriptor;
 
-inline size_t s_block_get_block_size(ext2_super_block s_block){
+
+typedef struct ext2_inode {
+    uint16_t i_mode;        // File mode
+    uint16_t i_uid;         // Low 16 bits of Owner UID
+    uint32_t i_size;        // Size in bytes
+    uint32_t i_atime;       // Access time
+    uint32_t i_ctime;       // Creation time
+    uint32_t i_mtime;       // Modification time
+    uint32_t i_dtime;       // Deletion time
+    uint16_t i_gid;         // Low 16 bits of Group ID
+    uint16_t i_links_count; // Links count
+    uint32_t i_blocks;      // Blocks count
+    uint32_t i_flags;       // File flags
+    uint32_t i_osd1;        // OS-dependent value
+    uint32_t i_block[15];   // Pointers to blocks
+    uint32_t i_generation;  // File version (used by NFS)
+    uint32_t i_file_acl;    // File ACL
+    uint32_t i_dir_acl;     // Directory ACL (only if i_size > 4GiB)
+    uint32_t i_faddr;       // Fragment address
+    uint8_t  i_osd2[12];    // OS-dependent value
+} ext2_inode;
+
+
+static inline size_t s_block_get_block_size(ext2_super_block s_block){
     return 1024 << s_block.log_block_size;
 }
+
+static inline size_t get_number_of_block_groups(ext2_super_block superblock){
+    return upper_divide(superblock.inodecount, superblock.number_of_inodes_per_group);
+}
+
+
+void ext2_init(filesystem_data* fs_data);
+ext2_super_block ext2_read_super_block(filesystem_data* fs_data);
+ext2_block_group_descriptor ext2_read_block_group_descriptor(filesystem_data* fs_data, ext2_super_block s_block , uint64_t group_num);
+ext2_inode ext2_read_inode(filesystem_data* fs_data, uint64_t inode_num);
+
 
 #endif

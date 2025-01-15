@@ -77,6 +77,7 @@ USER_OBJ := $(patsubst %, $(OBJ_DIR)/%, $(USER_SRC_S:.s=.o)) \
 
 # Disks
 DISK = disk.img
+MOUNT_POINT = ./fscreate
 
 ### Constants
 SHELL := /bin/bash
@@ -110,6 +111,8 @@ all: build
 
 # Build Disk (Floppy Image)
 build: $(FLOPPY_BIN)
+
+build: $(FLOPPY_BIN)
 $(FLOPPY_BIN): kernel boot user
 	# Write zeroes to disk
 	$(DD) if=/dev/zero of=$@ conv=notrunc,fsync count=65536
@@ -129,7 +132,18 @@ $(FLOPPY_BIN): kernel boot user
 	# $(DD) if=$(USER_BIN) of=$(DISK) conv=notrunc
 
 	# Create filesystem on disk
-	mkfs.ext2 $(DISK)
+		mkdir -p $(MOUNT_POINT)
+		
+		mkfs.ext2 $(DISK)
+
+		sudo mount $(DISK) $(MOUNT_POINT)
+
+		sudo chmod 777 $(MOUNT_POINT)
+
+		touch $(MOUNT_POINT)/test_file.txt
+
+		sudo umount $(MOUNT_POINT)
+
 
 # Bootloader
 boot: $(BOOT_BIN)
