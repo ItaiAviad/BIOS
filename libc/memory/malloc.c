@@ -9,7 +9,7 @@
 void* malloc(size_t size) {
 #if defined(__is_libk)
     // Get Heap
-    malloc_state* heap = (malloc_state*) heap_malloc_state_base;
+    malloc_state* heap = (malloc_state*) g_heap_malloc_state_base;
 
     malloc_chunk new_mchunk;
     size = aalign(size, 0x10); // Align to 16 bytes

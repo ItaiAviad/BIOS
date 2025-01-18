@@ -111,6 +111,9 @@
     "hardwaremem.h": "c",
     "rtl8139.h": "c",
     "isr.h": "c",
-    "time.h": "c"
+    "time.h": "c",
+    "complex": "c",
+    "algorithm": "c",
+    "ethernet.h": "c"
 }
 }

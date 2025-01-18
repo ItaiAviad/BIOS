@@ -207,34 +207,45 @@ NET := biosnet0
 VND := rtl8139# Virtual Network Device
 BRIDGE := br0
 TAP := tap0
+WLAN0 := wlan0
 ETHIF := enp0s20f0u2u1c2 # (ethernet interface)
 # interface:=$(shell ip addr | awk '/state UP/ {print $$2}' | head -n 1 | awk '{print substr($$0, 1, length($$0)-1)}')
 # ETHIF := $(interface) # (ethernet interface)
 network_setup:
 	sudo brctl addbr $(BRIDGE)
 	sudo brctl addif $(BRIDGE) $(ETHIF)
+	# -sudo brctl addif $(BRIDGE) $(WLAN0)
 
 	# tap
 	sudo tunctl -t $(TAP) -u root
+	sudo ip link set $(TAP) promisc on
 	sudo brctl addif $(BRIDGE) $(TAP)
 
-	sudo ifconfig $(ETHIF) up
+	# -sudo ifconfig $(ETHIF) up
 	sudo ifconfig $(TAP) up
 	sudo ifconfig $(BRIDGE) up
 
+	# dhcp
+	sudo dhclient $(BRIDGE)
+
 	brctl show
 
-	# dhcp
-
 network_cleanup:
+	sudo ip link set $(ETHIF) promisc off
+	sudo ip link set $(ETHIF) up
+
 	-sudo brctl delif $(BRIDGE) $(TAP)
 	-sudo tunctl -d $(TAP)
+
 	-sudo brctl delif $(BRIDGE) $(ETHIF)
+	# -sudo brctl delif $(BRIDGE) $(WLAN0)
+
 	-sudo ifconfig $(BRIDGE) down
-	-sudo ifconfig $(ETHIF) up
+
 	-sudo brctl delbr $(BRIDGE)
 
 	# dhcp
+	-sudo dhclient -r $(BRIDGE)
 
 # ------------------------------------------------
 
@@ -243,7 +254,7 @@ always:
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(OBJ_DIR)/kernel
 
-run: network_setup
+run:
 	echo "Running..."
 	sudo qemu-system-x86_64 -m 8G \
 	-drive file=$(FLOPPY_BIN),format=raw,if=floppy \

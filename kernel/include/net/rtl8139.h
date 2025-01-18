@@ -1,6 +1,7 @@
 /* net/rtl8139.h -- declarations for inquiring about the RTL8139
     See: https://wiki.osdev.org/RTL8139
-         https://www.cs.usfca.edu/~cruse/cs326f04/RTL8139D_DataSheet.pdf */
+         https://www.cs.usfca.edu/~cruse/cs326f04/RTL8139D_DataSheet.pdf
+         https://www.cs.usfca.edu/~cruse/cs326f04/RTL8139_ProgrammersGuide.pdf */
 
 #pragma once
 #ifndef _NET_RTL8139_H
@@ -8,16 +9,11 @@
 
 #include <pci.h>
 #include <memory.h>
+#include <time.h>
 #include <arch/x86_64/pic.h>
+
 #include <net/ethernet.h>
-
-
-struct nic {
-    uint32_t* rx_buf;
-    uint16_t ioaddr;
-    struct mac mac;
-};
-extern struct nic nic;
+#include <net/arp.h>
 
 #define RTL8139_DEVICE_ID 0x8139
 
@@ -35,6 +31,8 @@ extern struct nic nic;
 #define RTL8139_OFFSET_TRANSMIT_BUF_1 0x24
 #define RTL8139_OFFSET_TRANSMIT_BUF_2 0x28
 #define RTL8139_OFFSET_TRANSMIT_BUF_3 0x2C
+
+#define RTL8139_OFFSET_TRANSMIT_OK 15
 
 #define RTL8139_OFFSET_RBSTART 0x30
 #define RTL8139_OFFSET_CMD 0x37
@@ -67,7 +65,20 @@ extern struct nic nic;
 
 #define RTL8139_RX_CRC_LEN 4
 
-struct eth_packet {
+#define RTL8139_TRANSMIT_REGISTER_COUNT 4
+#define RTL8139_TX_BUFFER_LEN_MAX 1792
+#define PACKET_MAX_SIZE 1500
+
+struct nic {
+    uint32_t* rx_buf;
+    uint16_t ioaddr;
+    char mac[MAC_ADDR_SIZE];
+    int trrc; // transmit round robin counter (0-3) (current transmit register)
+};
+extern struct nic g_nic;
+
+
+struct packet {
     uint8_t *header;
     int16_t len;
     uint8_t *data;
@@ -75,6 +86,9 @@ struct eth_packet {
 
 void rtl8139_init(void);
 void rtl8139_read_self_mac(void);
+
+void send_packet(void *packet, int packet_len);
+
 void rtl8139_handler(uint8_t isr, uint64_t error, uint64_t irq);
 
 #endif

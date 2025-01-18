@@ -115,7 +115,14 @@ void isr_handler(uint64_t isr_num, uint64_t error_code, registers* regs){
             buffer_put(in);
         }
         else if (isr_num == (PIC1_OFFSET + RTL8139_INTERRUPT_LINE)) {
+            // Switch to Kernel Heap
+            void *tmp_heap_malloc_state_base = g_heap_malloc_state_base;
+            g_heap_malloc_state_base = (void*) KERNEL_HEAP_START;
+
             rtl8139_handler(isr_num - PIC1_OFFSET, error_code, regs->irq_number);
+
+            // Switch back to Process Heap
+            g_heap_malloc_state_base = tmp_heap_malloc_state_base;
         }
 
         pic_send_eoi(isr_num - PIC1_OFFSET); // Send ACK to PIC

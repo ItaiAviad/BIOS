@@ -144,7 +144,7 @@ void user_init() {
     while (heap_slot < PROC_SLOTS_OFFSET || abs(stack_slot - heap_slot) <= 1)
         heap_slot = rand() % (PROC_SLOTS) + (PROC_SLOTS_OFFSET);
     pcb.heap = (void*) (heap_slot * PROC_SLOT_SIZE);
-    // TODO: Update heap_malloc_state_base so kernel mallocs in process's heap
+    // TODO: Update g_heap_malloc_state_base so kernel mallocs in process's heap
     // map_memory_range(pcb.ctx, (void*) (pcb.heap), (void*) (pcb.heap + PROC_STACK_SIZE - 1), (void*) ((uint64_t) pcb.entry + (uint64_t) pcb.heap));
     // pcb.heap += (uint64_t) pcb.entry; // if heap relative to kernel's VAS
     // Init heap
