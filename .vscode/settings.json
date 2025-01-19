@@ -114,6 +114,9 @@
     "time.h": "c",
     "complex": "c",
     "algorithm": "c",
-    "ethernet.h": "c"
+    "ethernet.h": "c",
+    "endian.h": "c",
+    "stdint.h": "c",
+    "stddef.h": "c"
 }
 }

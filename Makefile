@@ -226,7 +226,8 @@ network_setup:
 	sudo ifconfig $(BRIDGE) up
 
 	# dhcp
-	sudo dhclient $(BRIDGE)
+	# sudo dhclient $(BRIDGE)
+	# sudo dhclient $()
 
 	brctl show
 
@@ -245,7 +246,7 @@ network_cleanup:
 	-sudo brctl delbr $(BRIDGE)
 
 	# dhcp
-	-sudo dhclient -r $(BRIDGE)
+	# -sudo dhclient -r $(BRIDGE)
 
 # ------------------------------------------------
 
@@ -254,20 +255,27 @@ always:
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(OBJ_DIR)/kernel
 
-run:
-	echo "Running..."
-	sudo qemu-system-x86_64 -m 8G \
+# Common QEMU command
+QEMU_CMD = sudo qemu-system-x86_64 -m 8G \
 	-drive file=$(FLOPPY_BIN),format=raw,if=floppy \
 	-drive id=disk,file=$(DISK),format=raw,if=none \
 	-device ahci,id=ahci \
 	-device ide-hd,drive=disk,bus=ahci.0 \
-	-machine kernel_irqchip=off \
-	-netdev tap,id=$(NET),ifname=$(TAP),script=no,downscript=no \
-	-device $(VND),netdev=$(NET),id=$(VND),mac=de:ad:be:ef:12:34 \
-	-object filter-dump,id=f1,netdev=$(NET),file=dump.dat
+	-machine kernel_irqchip=off
+
+ron:
+	echo "Running online..."
+	$(QEMU_CMD)
+	# -netdev tap,id=$(NET),ifname=$(TAP),script=no,downscript=no \
+	# -device $(VND),netdev=$(NET),id=$(VND),mac=de:ad:be:ef:12:34 \
+	# -object filter-dump,id=f1,netdev=$(NET),file=dump.dat
 
 	# -d int,cpu_reset,in_asm,guest_errors \
 	# -no-reboot -D log.txt
+
+roff:
+	echo "Running offline..."
+	$(QEMU_CMD)
 
 run_debugger: 
 	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) \

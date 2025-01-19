@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Build + Run Online
+
 BLACK='\033[0;30m'
 DARK_GRAY='\033[1;30m'
 RED='\033[0;31m'
@@ -26,17 +28,17 @@ trap ctrl_c INT
 trap ctrl_c SIGINT
 
 printf "${RED}"
-# make clean;
+make clean;
 printf "${NC}"
 
-make;
+make build;
 
 printf "${LIGHT_PURPLE}"
 make network_setup;
 printf "${NC}"
 
 printf "${BROWN_ORANGE}"
-make run;
+make ron;
 printf "${NC}"
 
 printf "${RED}"

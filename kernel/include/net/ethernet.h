@@ -7,8 +7,10 @@
 
 #include <types.h>
 #include <stdio.h>
+#include <endian.h>
 
-#define ETH_FRAME_MIN_SIZE 64
+#define ETH_FRAME_MIN_SIZE 60
+#define ETH_FRAME_MIN_SIZE_FCS ETH_FRAME_MIN_SIZE + 4
 
 #define MAC_ADDR_SIZE 6
 

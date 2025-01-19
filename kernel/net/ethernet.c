@@ -2,7 +2,8 @@
 #include <string.h>
 
 void print_mac(char mac[MAC_ADDR_SIZE]) {
-    printf("%x:%x:%x:%x:%x:%x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    uint8_t *hw = (uint8_t *)mac;
+    printf("%x:%x:%x:%x:%x:%x", hw[0], hw[1], hw[2], hw[3], hw[4], hw[5]);
 }
 
 uint16_t ethernet_type_reverse(uint16_t type) {
@@ -11,7 +12,7 @@ uint16_t ethernet_type_reverse(uint16_t type) {
 
 void *encapsulate_ethernet(void *packet, int *lenp, char hwdst[MAC_ADDR_SIZE], char hwsrc[MAC_ADDR_SIZE], uint16_t type) {
     struct ethernet eth = {
-        .type = ethernet_type_reverse(type)
+        .type = htobe16(type),
     };
     memcpy(eth.hwdst, hwdst, MAC_ADDR_SIZE);
     memcpy(eth.hwsrc, hwsrc, MAC_ADDR_SIZE);

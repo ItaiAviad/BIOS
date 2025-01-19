@@ -1,5 +1,6 @@
 #include <net/ipv4.h>
 
 void print_ipv4(char ipv4[IPV4_ADDR_SIZE]) {
-    printf("%x.%x.%x.%x", ipv4[0], ipv4[1], ipv4[2], ipv4[3]);
+    char *ip = (char *)ipv4;
+    printf("%x.%x.%x.%x", ip[0], ip[1], ip[2], ip[3]);
 }

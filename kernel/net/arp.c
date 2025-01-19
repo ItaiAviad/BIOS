@@ -6,12 +6,12 @@ void send_arp(uint16_t oper, char sha[MAC_ADDR_SIZE], char spa[IPV4_ADDR_SIZE], 
     int packet_len = 0;
 
     struct arp arp = {
-        .htype = ARP_HTYPE_ETH,
-        .ptype = PTYPE_IPV4,
+        .htype = htobe16(ARP_HTYPE_ETH),
+        .ptype = htobe16(PTYPE_IPV4),
 
         .hlen = ARP_HLEN_ETH,
         .plen = ARP_PLEN_IPV4,
-        .oper = oper,
+        .oper = htobe16(oper),
     };
 
     // Addresses
@@ -24,7 +24,11 @@ void send_arp(uint16_t oper, char sha[MAC_ADDR_SIZE], char spa[IPV4_ADDR_SIZE], 
     memcpy(packet, &arp, packet_len);
 
     // Ethernet encapsulation
-    encapsulate_ethernet(packet, &packet_len, sha, g_nic.mac, PTYPE_ARP);
+    char eth_broadcast[MAC_ADDR_SIZE] = {0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
+    if (oper == ARP_OPER_REQUEST) // broadcast
+        encapsulate_ethernet(packet, &packet_len, eth_broadcast, sha, PTYPE_ARP);
+    else if (oper == ARP_OPER_REPLY)
+        encapsulate_ethernet(packet, &packet_len, tha, sha, PTYPE_ARP);
 
     send_packet(packet, packet_len);
 
