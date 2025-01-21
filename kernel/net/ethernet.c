@@ -1,12 +1,12 @@
 #include <net/ethernet.h>
 #include <string.h>
 
-void print_mac(char mac[MAC_ADDR_SIZE]) {
+void print_mac(unsigned char mac[MAC_ADDR_SIZE]) {
     uint8_t *hw = (uint8_t *)mac;
     printf("%x:%x:%x:%x:%x:%x", hw[0], hw[1], hw[2], hw[3], hw[4], hw[5]);
 }
 
-void *encapsulate_ethernet(void *packet, int *lenp, char hwdst[MAC_ADDR_SIZE], char hwsrc[MAC_ADDR_SIZE], uint16_t type) {
+void *encapsulate_ethernet(void *packet, int *lenp, unsigned char hwdst[MAC_ADDR_SIZE], unsigned char hwsrc[MAC_ADDR_SIZE], uint16_t type) {
     struct ethernet_header eth_header = {
         .type = htobe16(type),
     };

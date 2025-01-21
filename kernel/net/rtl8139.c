@@ -1,12 +1,15 @@
 #include <net/rtl8139.h>
+#include <net/dns.h>
 // See: https://www.cs.usfca.edu/~cruse/cs326f04/RTL8139D_DataSheet.pdf
 // See: https://www.cs.usfca.edu/~cruse/cs326f04/RTL8139_ProgrammersGuide.pdf
 
 struct nic g_nic = {
     .rx_buf = (uint32_t *)0x0,
     .ioaddr = 0x0,
-    .mac = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
     .trrc = 0x0,
+
+    .mac = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
+    .ipv4 = {0x0, 0x0, 0x0, 0x0},
 };
 
 void rtl8139_init(void) {
@@ -61,7 +64,6 @@ void rtl8139_init(void) {
 
     // Enable RTL8139 NIC IRQ
     irq_clear_mask(RTL8139_INTERRUPT_LINE);
-    printf("FIN INIT\n");
 }
 
 void rtl8139_read_self_mac(void) {
@@ -73,12 +75,11 @@ void handle_packet(struct packet *pkt) {
     if (pkt->len <= 0)
         return;
 
-    irq_set_mask(RTL8139_INTERRUPT_LINE);
+    // irq_set_mask(RTL8139_INTERRUPT_LINE);
 
     // Parse Ethernet header
     struct ethernet_header *eth_header = (struct ethernet_header *)pkt->data;
     eth_header->type = be16toh(eth_header->type);
-    printf("GOT PACKET\n");
 
     // Check if it's an ARP packet
     if (eth_header->type == PTYPE_ARP) {
@@ -106,7 +107,7 @@ void handle_packet(struct packet *pkt) {
         }
     }
 
-    irq_clear_mask(RTL8139_INTERRUPT_LINE);
+    // irq_clear_mask(RTL8139_INTERRUPT_LINE);
 }
 
 void receive_packet() {
@@ -159,11 +160,12 @@ void rtl8139_handler(__attribute__((unused)) uint8_t isr, __attribute__((unused)
         receive_packet();
     }
     if (status & ROK && receive_cnt == 5) {
-        char spa[IPV4_ADDR_SIZE] = {10, 0, 0, 138};
-        // char hwdst[MAC_ADDR_SIZE] = {0xe0, 0x4e, 0x7a, 0x13, 0x75, 0x19};
-        char hwdst[MAC_ADDR_SIZE] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-        char tpa[IPV4_ADDR_SIZE] = {10, 0, 0, 31};
-        send_arp(ARP_OPER_REQUEST, g_nic.mac, spa, hwdst, tpa);
+        unsigned char spa[IPV4_ADDR_SIZE] = {10, 0, 0, 138};
+        // unsigned char hwdst[MAC_ADDR_SIZE] = {0xe0, 0x4e, 0x7a, 0x13, 0x75, 0x19};
+        unsigned char hwdst[MAC_ADDR_SIZE] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+        unsigned char tpa[IPV4_ADDR_SIZE] = {10, 0, 0, 31};
+        // send_arp(ARP_OPER_REQUEST, g_nic.mac, spa, hwdst, tpa);
+        send_dns("www.google.com");
     }
     if(status & TOK) { // Sent
         // printf("Packet sent!\n");

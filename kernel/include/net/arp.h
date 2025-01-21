@@ -7,6 +7,9 @@
 
 #include <types.h>
 #include <stdio.h>
+#include <time.h>
+#include <unistd.h>
+
 #include <net/ethernet.h>
 #include <net/ipv4.h>
 
@@ -60,26 +63,41 @@ __attribute__((packed)) struct arp_header {
     uint8_t plen;
     uint16_t oper;
 
-    char sha[MAC_ADDR_SIZE]; // Sender Hardware Address
-    char spa[IPV4_ADDR_SIZE]; // Sender Protocol Address
+    unsigned char sha[MAC_ADDR_SIZE]; // Sender Hardware Address
+    unsigned char spa[IPV4_ADDR_SIZE]; // Sender Protocol Address
 
-    char tha[MAC_ADDR_SIZE]; // Target Hardware Address
-    char tpa[IPV4_ADDR_SIZE]; // Target Protocol Address
+    unsigned char tha[MAC_ADDR_SIZE]; // Target Hardware Address
+    unsigned char tpa[IPV4_ADDR_SIZE]; // Target Protocol Address
 };
 
-#define ARP_WAIT_TIMEOUT 1000 // Timeout in milliseconds
+#define ARP_WAIT_TIMEOUT 3000 // Timeout in milliseconds
 #define ARP_CACHE_TTL 30000 // 30 seconds
 #define ARP_CACHE_CLEANUP_INTERVAL 10000 // Check cache every 10 seconds
 
 struct arp_entry {
-    char ip[IPV4_ADDR_SIZE];
-    char mac[MAC_ADDR_SIZE];
+    unsigned char ip[IPV4_ADDR_SIZE];
+    unsigned char mac[MAC_ADDR_SIZE];
     uint64_t timestamp; // Time when the entry was added
 };
 
-void cache_arp_entry(char ip[IPV4_ADDR_SIZE], char mac[MAC_ADDR_SIZE]);
-char *find_mac_in_cache(char ip[IPV4_ADDR_SIZE]);
+void cache_arp_entry(unsigned char ip[IPV4_ADDR_SIZE], unsigned char mac[MAC_ADDR_SIZE]);
+unsigned char *find_mac_in_cache(unsigned char ip[IPV4_ADDR_SIZE]);
 
-void send_arp(uint16_t oper, char sha[MAC_ADDR_SIZE], char spa[IPV4_ADDR_SIZE], char tha[MAC_ADDR_SIZE], char tpa[IPV4_ADDR_SIZE]);
+void send_arp(uint16_t oper, unsigned char sha[MAC_ADDR_SIZE], unsigned char spa[IPV4_ADDR_SIZE], unsigned char tha[MAC_ADDR_SIZE], unsigned char tpa[IPV4_ADDR_SIZE]);
+
+/**
+ * @brief Wait for ARP entry of `ip` to appear in ARP Cache
+ * 
+ * @param ip 
+ * @return unsigned char* can be NULL
+ */
+unsigned char *wait_for_arp_entry(unsigned char ip[IPV4_ADDR_SIZE]);
+/**
+ * @brief Get MAC by IPv4
+ * 
+ * @param ip 
+ * @return unsigned char* can be NULL
+ */
+unsigned char *get_mac(unsigned char ip[IPV4_ADDR_SIZE]);
 
 #endif

@@ -1,8 +1,7 @@
 #include <net/ipv4.h>
 
-void print_ipv4(char ipv4[IPV4_ADDR_SIZE]) {
-    char *ip = (char *)ipv4;
-    printf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+void print_ipv4(volatile unsigned char ipv4[IPV4_ADDR_SIZE]) {
+    printf("%d.%d.%d.%d", ipv4[0], ipv4[1], ipv4[2], ipv4[3]);
 }
 
 // Calculate the IPv4 header checksum
@@ -30,7 +29,7 @@ uint16_t ipv4_checksum(void *vdata, size_t length) {
     return ~sum;
 }
 
-void *encapsulate_ipv4(void *packet, int *lenp, int protocol, char src_ip[IPV4_ADDR_SIZE], char dst_ip[IPV4_ADDR_SIZE]) {
+void *encapsulate_ipv4(void *packet, int *lenp, int protocol, unsigned char src_ip[IPV4_ADDR_SIZE], unsigned char dst_ip[IPV4_ADDR_SIZE]) {
     struct ipv4_header ipv4_header = {
         .version_ihl = IPV4_VERSION_IPV4 << 4 | sizeof(struct ipv4_header) / 4,
         .dscp_ecn = 0x0,

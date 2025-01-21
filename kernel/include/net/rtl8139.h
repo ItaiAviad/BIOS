@@ -14,6 +14,7 @@
 
 #include <net/ethernet.h>
 #include <net/arp.h>
+#include <net/ipv4.h>
 
 #define RTL8139_DEVICE_ID 0x8139
 
@@ -72,8 +73,10 @@
 struct nic {
     uint32_t* rx_buf;
     uint16_t ioaddr;
-    char mac[MAC_ADDR_SIZE];
     int trrc; // transmit round robin counter (0-3) (current transmit register)
+
+    unsigned char mac[MAC_ADDR_SIZE];
+    unsigned char ipv4[IPV4_ADDR_SIZE];
 };
 extern struct nic g_nic;
 

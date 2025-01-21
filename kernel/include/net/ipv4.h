@@ -63,16 +63,16 @@ __attribute__((packed)) struct ipv4_header {
     uint8_t ttl;
     uint8_t protocol;
     uint16_t header_checksum;
-    char src_addr[IPV4_ADDR_SIZE];
-    char dst_addr[IPV4_ADDR_SIZE];
+    unsigned char src_addr[IPV4_ADDR_SIZE];
+    unsigned char dst_addr[IPV4_ADDR_SIZE];
     // uint32_t options;
 };
 
-void print_ipv4(char ipv4[IPV4_ADDR_SIZE]);
+void print_ipv4(volatile unsigned char ipv4[IPV4_ADDR_SIZE]);
 
 // Calculate the IPv4 header checksum
 uint16_t ipv4_checksum(void *vdata, size_t length);
 
-void *encapsulate_ipv4(void *packet, int *lenp, int protocol, char src_ip[IPV4_ADDR_SIZE], char dst_ip[IPV4_ADDR_SIZE]);
+void *encapsulate_ipv4(void *packet, int *lenp, int protocol, unsigned char src_ip[IPV4_ADDR_SIZE], unsigned char dst_ip[IPV4_ADDR_SIZE]);
 
 #endif

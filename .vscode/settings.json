@@ -118,6 +118,7 @@
     "endian.h": "c",
     "stdint.h": "c",
     "stddef.h": "c",
-    "arp.h": "c"
+    "arp.h": "c",
+    "ipv4.h": "c"
 }
 }
