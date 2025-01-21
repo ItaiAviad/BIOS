@@ -52,7 +52,7 @@ In an ARP reply this field is used to indicate the address of the host that orig
 Internetwork address of the intended receiver.
 */
 
-__attribute__((packed)) struct arp {
+__attribute__((packed)) struct arp_header {
     uint16_t htype;
     uint16_t ptype;
 

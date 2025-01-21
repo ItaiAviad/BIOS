@@ -117,6 +117,7 @@
     "ethernet.h": "c",
     "endian.h": "c",
     "stdint.h": "c",
-    "stddef.h": "c"
+    "stddef.h": "c",
+    "arp.h": "c"
 }
 }

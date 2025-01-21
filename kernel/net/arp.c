@@ -5,7 +5,7 @@ void send_arp(uint16_t oper, char sha[MAC_ADDR_SIZE], char spa[IPV4_ADDR_SIZE], 
     void *packet = malloc(PACKET_MAX_SIZE);
     int packet_len = 0;
 
-    struct arp arp = {
+    struct arp_header arp = {
         .htype = htobe16(ARP_HTYPE_ETH),
         .ptype = htobe16(PTYPE_IPV4),
 
@@ -20,7 +20,7 @@ void send_arp(uint16_t oper, char sha[MAC_ADDR_SIZE], char spa[IPV4_ADDR_SIZE], 
     memcpy(arp.tha, tha, MAC_ADDR_SIZE);
     memcpy(arp.tpa, tpa, IPV4_ADDR_SIZE);
 
-    packet_len += sizeof(struct arp);
+    packet_len += sizeof(struct arp_header);
     memcpy(packet, &arp, packet_len);
 
     // Ethernet encapsulation

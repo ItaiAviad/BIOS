@@ -61,6 +61,7 @@ void rtl8139_init(void) {
 
     // Enable RTL8139 NIC IRQ
     irq_clear_mask(RTL8139_INTERRUPT_LINE);
+    printf("FIN INIT\n");
 }
 
 void rtl8139_read_self_mac(void) {
@@ -69,27 +70,42 @@ void rtl8139_read_self_mac(void) {
 }
 
 void handle_packet(struct packet *pkt) {
-    irq_set_mask(RTL8139_INTERRUPT_LINE);
-
-    // printf("Received packet of length %d\n", pkt->len);
-    // Dump the first few bytes
-    // for (int i = 0; i < pkt->len && i < 20; i++) {
-    //     printf("%x ", pkt->data[i]);
-    // }
-    // printf("\n");
     if (pkt->len <= 0)
         return;
-    
-    struct ethernet *eth = malloc(sizeof(struct ethernet));
-    memcpy(eth, pkt->data, sizeof(struct ethernet));
-    eth->type = ethernet_type_reverse(eth->type);
 
-    printf("%d ", time());
-    print_mac(eth->hwdst);
-    printf(" ");
-    print_mac(eth->hwsrc);
-    printf(", type/len: %x\n", eth->type);
-    free(eth);
+    irq_set_mask(RTL8139_INTERRUPT_LINE);
+
+    // Parse Ethernet header
+    struct ethernet_header *eth_header = (struct ethernet_header *)pkt->data;
+    eth_header->type = be16toh(eth_header->type);
+    printf("GOT PACKET\n");
+
+    // Check if it's an ARP packet
+    if (eth_header->type == PTYPE_ARP) {
+        struct arp_header *arp = (struct arp_header *)(pkt->data + sizeof(struct ethernet_header));
+
+        printf("GOT ARP PACKET\n");
+        // Check if it's an ARP reply
+        if (htobe16(arp->oper) == ARP_OPER_REPLY) {
+            print_ipv4(arp->spa);
+            printf(" is at ");
+            print_mac(arp->sha);
+            printf("\n");
+
+            // Cache the MAC address for the given IP
+            // cache_arp_entry(arp->spa, arp->sha);
+        }
+        else if (htobe16(arp->oper) == ARP_OPER_REQUEST) {
+            if (!memcmp((void *)arp->tha, (void *)g_nic.mac, 6) ||
+                !memcmp((void *)arp->sha, (void *)g_nic.mac, 6)) {
+                printf("Who has ");
+                print_ipv4(arp->tpa);
+                printf("? Tell ");
+                print_ipv4(arp->spa);
+                printf("\n");
+            }
+        }
+    }
 
     irq_clear_mask(RTL8139_INTERRUPT_LINE);
 }
@@ -126,32 +142,33 @@ void send_packet(void *packet, int packet_len) {
     // Wait for Transmit OK
     while (!(inl(g_nic.ioaddr + RTL8139_OFFSET_TRANSMIT_CMD_0 + 4*g_nic.trrc) & (0x1 << RTL8139_OFFSET_TRANSMIT_OK))) {}
 
-    printf("Packet sent!\n");
-
     g_nic.trrc++;
     g_nic.trrc %= 4;
 }
 
 void rtl8139_handler(__attribute__((unused)) uint8_t isr, __attribute__((unused)) uint64_t error, __attribute__((unused)) uint64_t irq) {
+    // Packet status
     uint16_t status = inw(g_nic.ioaddr + RTL8139_OFFSET_ISR);
-    outw(g_nic.ioaddr + RTL8139_OFFSET_ISR, RTL8139_ALLOW_ROK_TOK);
-    static int i = 0;
 
-    // printf("status: %b\n", status);
+    // Acknowledge the interrupt
+    outw(g_nic.ioaddr + RTL8139_OFFSET_ISR, RTL8139_ALLOW_ROK_TOK);
+
+    static int receive_cnt = 0;
+
     if (status & ROK) { // Received
-        i++;
-        // receive_packet();
+        receive_cnt++;
+        receive_packet();
     }
-    if (status & ROK && i == 20) {
+    if (status & ROK && receive_cnt == 5) {
         char spa[IPV4_ADDR_SIZE] = {10, 0, 0, 138};
-        char hwdst[MAC_ADDR_SIZE] = {0xe0, 0x4e, 0x7a, 0x13, 0x75, 0x19};
+        // char hwdst[MAC_ADDR_SIZE] = {0xe0, 0x4e, 0x7a, 0x13, 0x75, 0x19};
+        char hwdst[MAC_ADDR_SIZE] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
         char tpa[IPV4_ADDR_SIZE] = {10, 0, 0, 31};
-        printf("Sending ARP request\n");
         send_arp(ARP_OPER_REQUEST, g_nic.mac, spa, hwdst, tpa);
     }
-    // if(status & TOK) { // Sent
-    //     printf("Sent packet!\n");
-    // }
+    if(status & TOK) { // Sent
+        // printf("Packet sent!\n");
+    }
 }
 
 
