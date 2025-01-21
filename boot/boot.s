@@ -58,7 +58,26 @@ rm:
     mov ax, (KERNEL_LOAD_ADDR_SEGMENT) ; Destination address
     mov es, ax
     mov ax, ((bootloader_end - _start) + SECTOR_SIZE - 1) / SECTOR_SIZE ; LBA (sector address/offset)
+
+    mov cl, TOTAL_SIZE_IN_SECTORS
+    cmp cl, 128
+    jbe read_less_than_128_sectors
+
+    mov cl, 128
+    call disk_read
+
+    ; Read the remaining sectors
+    mov [drive_number], dl ; BIOS should set dl to drive number
+    ; mov bx, (KERNEL_LOAD_ADDR_OFFSET) ; Destination address offset
+    ; add bx, (128 * SECTOR_SIZE) ; Add the offset of the previous read
+    mov bx, 0x0
+    mov ax, ((KERNEL_LOAD_ADDR + 128 * SECTOR_SIZE) / 16) ; Destination address
+    mov es, ax
+    mov ax, ((bootloader_end - _start + 128 * SECTOR_SIZE) + SECTOR_SIZE - 1) / SECTOR_SIZE ; LBA (sector address/offset)
     mov cl, TOTAL_SIZE_IN_SECTORS ; # of sectors to read
+    sub cl, 128
+
+    read_less_than_128_sectors:
     call disk_read
 
     mov ax, 0
