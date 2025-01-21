@@ -1,5 +1,9 @@
 # Main Makefile
 
+# b => Build
+# r => Run
+# n => Network
+
 # Make Makefile Silent (without repeating @ before commands)
 ifndef VERBOSE
 .SILENT:
@@ -104,7 +108,7 @@ LIBK_FLAGS := $(CFLAGS) -D__is_libk
 
 # -----------------------------------------------
 
-.PHONY: all build boot always run clean
+.PHONY: all build boot always clean
 
 all: build
 
@@ -193,7 +197,8 @@ $(OBJ_DIR)/%.libc.o: %.c
 	mkdir -p $(dir $@)
 	$(CC) $(LIBC_FLAGS) -c $< -o $@
 
-build_cleanup:
+# Build Clean
+bclean:
 	rm -rf $(BUILD_DIR)/*
 	rm -f *_tempwhy
 
@@ -211,9 +216,11 @@ WLAN0 := wlan0
 ETHIF := enp0s20f0u2u1c2 # (ethernet interface)
 # interface:=$(shell ip addr | awk '/state UP/ {print $$2}' | head -n 1 | awk '{print substr($$0, 1, length($$0)-1)}')
 # ETHIF := $(interface) # (ethernet interface)
-network_setup:
+
+# Network Setup
+nsetup:
 	sudo brctl addbr $(BRIDGE)
-	sudo brctl addif $(BRIDGE) $(ETHIF)
+	-sudo brctl addif $(BRIDGE) $(ETHIF)
 	# -sudo brctl addif $(BRIDGE) $(WLAN0)
 
 	# tap
@@ -226,14 +233,14 @@ network_setup:
 	sudo ifconfig $(BRIDGE) up
 
 	# dhcp
-	# sudo dhclient $(BRIDGE)
-	# sudo dhclient $()
+	sudo dhclient $(BRIDGE)
 
 	brctl show
 
-network_cleanup:
-	sudo ip link set $(ETHIF) promisc off
-	sudo ip link set $(ETHIF) up
+# Network Clean
+nclean:
+	-sudo ip link set $(ETHIF) promisc off
+	-sudo ip link set $(ETHIF) up
 
 	-sudo brctl delif $(BRIDGE) $(TAP)
 	-sudo tunctl -d $(TAP)
@@ -246,7 +253,7 @@ network_cleanup:
 	-sudo brctl delbr $(BRIDGE)
 
 	# dhcp
-	# -sudo dhclient -r $(BRIDGE)
+	-sudo dhclient -r $(BRIDGE)
 
 # ------------------------------------------------
 
@@ -265,10 +272,10 @@ QEMU_CMD = sudo qemu-system-x86_64 -m 8G \
 
 ron:
 	echo "Running online..."
-	$(QEMU_CMD)
-	# -netdev tap,id=$(NET),ifname=$(TAP),script=no,downscript=no \
-	# -device $(VND),netdev=$(NET),id=$(VND),mac=de:ad:be:ef:12:34 \
-	# -object filter-dump,id=f1,netdev=$(NET),file=dump.dat
+	$(QEMU_CMD) \
+	-netdev tap,id=$(NET),ifname=$(TAP),script=no,downscript=no \
+	-device $(VND),netdev=$(NET),id=$(VND),mac=de:ad:be:ef:12:34 \
+	-object filter-dump,id=f1,netdev=$(NET),file=dump.dat
 
 	# -d int,cpu_reset,in_asm,guest_errors \
 	# -no-reboot -D log.txt
@@ -290,4 +297,4 @@ run_debug_bochs:
 	bochs -qf $(BOCHS_CONFIG)
 	rm -f $(BOCHS_CONFIG)
 
-clean: build_cleanup network_cleanup
+clean: bclean nclean

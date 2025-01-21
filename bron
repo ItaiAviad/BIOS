@@ -28,13 +28,13 @@ trap ctrl_c INT
 trap ctrl_c SIGINT
 
 printf "${RED}"
-make clean;
+# make clean;
 printf "${NC}"
 
 make build;
 
 printf "${LIGHT_PURPLE}"
-make network_setup;
+make nsetup;
 printf "${NC}"
 
 printf "${BROWN_ORANGE}"
