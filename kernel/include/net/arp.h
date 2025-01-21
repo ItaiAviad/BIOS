@@ -67,6 +67,19 @@ __attribute__((packed)) struct arp_header {
     char tpa[IPV4_ADDR_SIZE]; // Target Protocol Address
 };
 
+#define ARP_WAIT_TIMEOUT 1000 // Timeout in milliseconds
+#define ARP_CACHE_TTL 30000 // 30 seconds
+#define ARP_CACHE_CLEANUP_INTERVAL 10000 // Check cache every 10 seconds
+
+struct arp_entry {
+    char ip[IPV4_ADDR_SIZE];
+    char mac[MAC_ADDR_SIZE];
+    uint64_t timestamp; // Time when the entry was added
+};
+
+void cache_arp_entry(char ip[IPV4_ADDR_SIZE], char mac[MAC_ADDR_SIZE]);
+char *find_mac_in_cache(char ip[IPV4_ADDR_SIZE]);
+
 void send_arp(uint16_t oper, char sha[MAC_ADDR_SIZE], char spa[IPV4_ADDR_SIZE], char tha[MAC_ADDR_SIZE], char tpa[IPV4_ADDR_SIZE]);
 
 #endif

@@ -84,7 +84,6 @@ void handle_packet(struct packet *pkt) {
     if (eth_header->type == PTYPE_ARP) {
         struct arp_header *arp = (struct arp_header *)(pkt->data + sizeof(struct ethernet_header));
 
-        printf("GOT ARP PACKET\n");
         // Check if it's an ARP reply
         if (htobe16(arp->oper) == ARP_OPER_REPLY) {
             print_ipv4(arp->spa);
@@ -93,7 +92,7 @@ void handle_packet(struct packet *pkt) {
             printf("\n");
 
             // Cache the MAC address for the given IP
-            // cache_arp_entry(arp->spa, arp->sha);
+            cache_arp_entry(arp->spa, arp->sha);
         }
         else if (htobe16(arp->oper) == ARP_OPER_REQUEST) {
             if (!memcmp((void *)arp->tha, (void *)g_nic.mac, 6) ||
