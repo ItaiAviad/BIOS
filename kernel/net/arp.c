@@ -48,7 +48,6 @@ unsigned char *wait_for_arp_entry(unsigned char ip[IPV4_ADDR_SIZE]) {
     while (elapsed_time < ARP_WAIT_TIMEOUT) {
         unsigned char *mac = find_mac_in_cache(ip);
         if (mac != NULL) {
-            printf("IPV4 in wait: %d, %u\n", ip[3], ip[3]);
             printf("INPUT IP: ");
             print_ipv4(ip);
             printf("  ");
@@ -68,6 +67,13 @@ unsigned char *wait_for_arp_entry(unsigned char ip[IPV4_ADDR_SIZE]) {
 unsigned char *find_mac_in_cache(unsigned char ip[IPV4_ADDR_SIZE]) {
     for (int i = 0; i < ARP_CACHE_SIZE; i++) {
         if (memcmp(arp_cache[i].ip, ip, IPV4_ADDR_SIZE) == 0) {
+            printf("FOUND: ");
+            print_ipv4(arp_cache[i].ip);
+            printf(" ");
+            print_ipv4(ip);
+            printf(" ");
+            print_mac(arp_cache[i].mac);
+            printf("\n");
             return arp_cache[i].mac;
         }
     }

@@ -80,6 +80,7 @@ void handle_packet(struct packet *pkt) {
     // Parse Ethernet header
     struct ethernet_header *eth_header = (struct ethernet_header *)pkt->data;
     eth_header->type = be16toh(eth_header->type);
+    // printf("GOT PACKET, eth type: %x \n", eth_header->type);
 
     // Check if it's an ARP packet
     if (eth_header->type == PTYPE_ARP) {
@@ -160,11 +161,12 @@ void rtl8139_handler(__attribute__((unused)) uint8_t isr, __attribute__((unused)
         receive_packet();
     }
     if (status & ROK && receive_cnt == 5) {
-        unsigned char spa[IPV4_ADDR_SIZE] = {10, 0, 0, 138};
+        // unsigned char spa[IPV4_ADDR_SIZE] = {10, 0, 0, 138};
         // unsigned char hwdst[MAC_ADDR_SIZE] = {0xe0, 0x4e, 0x7a, 0x13, 0x75, 0x19};
-        unsigned char hwdst[MAC_ADDR_SIZE] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
-        unsigned char tpa[IPV4_ADDR_SIZE] = {10, 0, 0, 31};
+        // unsigned char hwdst[MAC_ADDR_SIZE] = {0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+        // unsigned char tpa[IPV4_ADDR_SIZE] = {10, 0, 0, 31};
         // send_arp(ARP_OPER_REQUEST, g_nic.mac, spa, hwdst, tpa);
+
         send_dns("www.google.com");
     }
     if(status & TOK) { // Sent

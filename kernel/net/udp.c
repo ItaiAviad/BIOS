@@ -8,7 +8,7 @@ void *encapsulate_udp(void *packet, int *lenp, int src_port, int dst_port) {
         .src_port = be16toh(src_port),
         .dst_port = be16toh(dst_port),
 
-        .length = be16toh((*lenp) / 8),
+        .length = be16toh(*lenp),
         .checksum = be16toh(0x0),
     };
 
