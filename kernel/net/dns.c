@@ -6,7 +6,8 @@ unsigned char *send_dns(char *name) {
     if (name == NULL || strlen(name) <= 0)
         printf("DNS: Invalid name server\n");
     
-    void *packet = malloc(PACKET_MAX_SIZE);
+    // void *packet = malloc(PACKET_MAX_SIZE);
+    unsigned char packet[PACKET_MAX_SIZE];
     int packet_len = 0;
 
     // Application Layer (DNS)
@@ -61,11 +62,12 @@ unsigned char *send_dns(char *name) {
     g_nic.ipv4[0] = 10;
     g_nic.ipv4[1] = 0;
     g_nic.ipv4[2] = 0;
-    g_nic.ipv4[3] = 19;
+    g_nic.ipv4[3] = 24;
     encapsulate_ipv4(packet, &packet_len, IPV4_PROTOCOL_UDP, g_nic.ipv4, dst_ip);
 
     // Data Link Layer (Ethernet)
     // Get destination MAC address (ARP)
+    printf("REQUESTED DOMAIN NAME: %s\n", name);
     printf("ARP REQ: \n");
     unsigned char dst_ipv4[IPV4_ADDR_SIZE] = {10, 0, 0, 138};
     unsigned char *mac = get_mac(dst_ipv4);
@@ -80,7 +82,7 @@ unsigned char *send_dns(char *name) {
 
     send_packet(packet, packet_len);
 
-    free(packet);
+    // free(packet);
 
     return dst_mac;
 }

@@ -12,6 +12,7 @@
 
 #include <net/ethernet.h>
 #include <net/ipv4.h>
+#include <net/rtl8139.h>
 
 // Hardware Type (HTYPE): 16bits
 #define ARP_HTYPE_ETH 0x1
@@ -80,6 +81,8 @@ struct arp_entry {
     uint64_t timestamp; // Time when the entry was added
 };
 
+void clear_arp_cache();
+
 void cache_arp_entry(unsigned char ip[IPV4_ADDR_SIZE], unsigned char mac[MAC_ADDR_SIZE]);
 unsigned char *find_mac_in_cache(unsigned char ip[IPV4_ADDR_SIZE]);
 
@@ -99,5 +102,12 @@ unsigned char *wait_for_arp_entry(unsigned char ip[IPV4_ADDR_SIZE]);
  * @return unsigned char* can be NULL
  */
 unsigned char *get_mac(unsigned char ip[IPV4_ADDR_SIZE]);
+
+/**
+ * @brief Handle receive of ARP Request/Reply
+ * 
+ * @param pkt 
+ */
+void handle_packet_arp(struct packet *pkt);
 
 #endif

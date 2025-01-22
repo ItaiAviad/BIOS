@@ -64,6 +64,7 @@ enum SYSCALL_NR {
     sys_memset,
     sys_memcpy,
     sys_fgets,
+    sys_send_dns_request,
 };
 
 #if defined(__is_libk)
@@ -91,6 +92,7 @@ static const syscall_t SYSCALL_TABLE[] = {
     [sys_memset] = memset,
     [sys_memcpy] = memcpy,
     [sys_fgets] = fgets,
+    [sys_send_dns_request] = send_dns_request,
 };
 
 #pragma GCC diagnostic pop

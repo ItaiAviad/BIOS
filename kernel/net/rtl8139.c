@@ -1,4 +1,7 @@
 #include <net/rtl8139.h>
+#include <net/ethernet.h>
+#include <net/arp.h>
+#include <net/ipv4.h>
 #include <net/dns.h>
 // See: https://www.cs.usfca.edu/~cruse/cs326f04/RTL8139D_DataSheet.pdf
 // See: https://www.cs.usfca.edu/~cruse/cs326f04/RTL8139_ProgrammersGuide.pdf
@@ -62,6 +65,9 @@ void rtl8139_init(void) {
     print_mac(g_nic.mac);
     printf("\n");
 
+    // ARP Cache
+    clear_arp_cache();
+
     // Enable RTL8139 NIC IRQ
     irq_clear_mask(RTL8139_INTERRUPT_LINE);
 }
@@ -80,32 +86,11 @@ void handle_packet(struct packet *pkt) {
     // Parse Ethernet header
     struct ethernet_header *eth_header = (struct ethernet_header *)pkt->data;
     eth_header->type = be16toh(eth_header->type);
-    // printf("GOT PACKET, eth type: %x \n", eth_header->type);
+    printf("GOT PACKET, eth type: %x \n", eth_header->type);
 
     // Check if it's an ARP packet
     if (eth_header->type == PTYPE_ARP) {
-        struct arp_header *arp = (struct arp_header *)(pkt->data + sizeof(struct ethernet_header));
-
-        // Check if it's an ARP reply
-        if (htobe16(arp->oper) == ARP_OPER_REPLY) {
-            print_ipv4(arp->spa);
-            printf(" is at ");
-            print_mac(arp->sha);
-            printf("\n");
-
-            // Cache the MAC address for the given IP
-            cache_arp_entry(arp->spa, arp->sha);
-        }
-        else if (htobe16(arp->oper) == ARP_OPER_REQUEST) {
-            if (!memcmp((void *)arp->tha, (void *)g_nic.mac, 6) ||
-                !memcmp((void *)arp->sha, (void *)g_nic.mac, 6)) {
-                printf("Who has ");
-                print_ipv4(arp->tpa);
-                printf("? Tell ");
-                print_ipv4(arp->spa);
-                printf("\n");
-            }
-        }
+        handle_packet_arp(pkt);
     }
 
     // irq_clear_mask(RTL8139_INTERRUPT_LINE);
@@ -156,7 +141,9 @@ void rtl8139_handler(__attribute__((unused)) uint8_t isr, __attribute__((unused)
 
     static int receive_cnt = 0;
 
+    // printf("status: %b\n", status);
     if (status & ROK) { // Received
+        printf("Packet Received (interrupt)!\n");
         receive_cnt++;
         receive_packet();
     }
@@ -167,10 +154,10 @@ void rtl8139_handler(__attribute__((unused)) uint8_t isr, __attribute__((unused)
         // unsigned char tpa[IPV4_ADDR_SIZE] = {10, 0, 0, 31};
         // send_arp(ARP_OPER_REQUEST, g_nic.mac, spa, hwdst, tpa);
 
-        send_dns("www.google.com");
+        // send_dns("www.google.com");
     }
     if(status & TOK) { // Sent
-        // printf("Packet sent!\n");
+        printf("Packet Sent (interrupt)!\n");
     }
 }
 
