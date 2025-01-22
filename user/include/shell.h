@@ -81,6 +81,9 @@ void shcmd_bc(int argc, char *argv[]);
 // Clear tty
 void shcmd_clear(int argc, char *argv[]);
 
+// nslookup
+void shcmd_nslookup(int argc, char *argv[]);
+
 typedef void (*shcmd)(int argc, char *argv[]);
 
 // Notice! Indices of shcmd_str eand shcmd_table must match!
@@ -92,6 +95,7 @@ static const char shcmd_str[MAX_CMDS][MAX_CMD_STR] = {
     "exit",
     "bc",
     "clear",
+    "nslookup",
 };
 
 static const shcmd shcmd_table[MAX_CMDS] = {
@@ -102,6 +106,7 @@ static const shcmd shcmd_table[MAX_CMDS] = {
     shcmd_exit,
     shcmd_bc,
     shcmd_clear,
+    shcmd_nslookup,
 };
 
 

@@ -52,4 +52,11 @@ void stdin_clear();
  */
 void stdin_insert(const char* s);
 
+/**
+ * @brief Send a DNS Request
+ * 
+ * @param s 
+ */
+void send_dns_request(const char* s);
+
 #endif

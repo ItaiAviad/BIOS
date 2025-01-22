@@ -5,6 +5,8 @@
 #include <arch/x86_64/interrupts.h>
 #include <arch/x86_64/mmu.h>
 #include <arch/x86_64/io.h>
+
+#include <net/dns.h>
 #else
 #include <shell.h>
 #endif
@@ -57,5 +59,13 @@ void stdin_insert(const char* s) {
     }
 #else
     syscall(sys_stdin_insert, s);
+#endif
+}
+
+void send_dns_request(const char* s) {
+#if defined(__is_libk)
+    send_dns(s);
+#else
+    syscall(sys_send_dns_request, s);
 #endif
 }
