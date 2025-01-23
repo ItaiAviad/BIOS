@@ -407,3 +407,11 @@ nohup.out
 log.txt
 log_debug.txt
 dump.dat
+./bron
+BIOS.drawio
+bochs_config
+.clangd
+.clang-format
+compile_commands.json
+.vscode/*
+.vscode/
