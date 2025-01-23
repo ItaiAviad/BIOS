@@ -12,7 +12,35 @@
 
 #define EXT2_ROOT_INODE 2
 
-typedef struct ext2_super_block {
+#ifdef EXT2_DEBUG
+    #define EXT2_DEBUG_PRINT(fmt, ...) printf("%s VFS: " fmt, LOG_SYM_DEBUG, ##__VA_ARGS__)
+#else
+    #define EXT2_DEBUG_PRINT(fmt, ...)
+#endif
+
+#ifdef EXT2_INFO
+    #define EXT2_INFO_PRINT(fmt, ...) printf("%s VFS: " fmt, LOG_SYM_INF, ##__VA_ARGS__)
+#else
+    #define EXT2_INFO_PRINT(fmt, ...)
+#endif
+
+#ifdef EXT2_ERR
+    #define EXT2_ERR_PRINT(fmt, ...) printf("%s VFS: " fmt, LOG_SYM_ERR, ##__VA_ARGS__)
+#else
+    #define EXT2_ERR_PRINT(fmt, ...)
+#endif
+
+typedef enum ext2_type_indicators_ext2{
+    fifo = 0x1000,
+    char_dev = 0x2000,
+    dir = 0x4000,
+    blk_dev = 0x6000,
+    reg_file = 0x8000,
+    symbo_link = 0xA000,
+    unix_socket = 0xC000
+} ext2_type_indicator;
+
+typedef struct  __attribute__((packed)) ext2_super_block {
     uint32_t inodecount;         // Total number of inodes
     uint32_t blockcount;         // Total number of blocks
     uint32_t r_blockcount;       // Number of reserved blocks
@@ -74,7 +102,7 @@ typedef struct ext2_super_block {
     uint32_t reserved[190];        // Padding to make superblock size 1024 bytes
 } ext2_super_block;
 
-typedef struct ext2_block_group_descriptor{
+typedef struct  __attribute__((packed)) ext2_block_group_descriptor{
     uint32_t addr_block_usage_bitmap;
     uint32_t addr_inode_usage_bitmap;
     uint32_t start_block_inode_table;
@@ -84,7 +112,7 @@ typedef struct ext2_block_group_descriptor{
 } ext2_block_group_descriptor;
 
 
-typedef struct ext2_inode {
+typedef struct  __attribute__((packed)) ext2_inode {
     uint16_t i_mode;        // File mode
     uint16_t i_uid;         // Low 16 bits of Owner UID
     uint32_t i_size;        // Size in bytes
@@ -106,19 +134,27 @@ typedef struct ext2_inode {
 } ext2_inode;
 
 
-static inline size_t s_block_get_block_size(ext2_super_block s_block){
-    return 1024 << s_block.log_block_size;
+typedef struct  __attribute__((packed)) ext2_dir_entry {
+    uint32_t inode;
+    uint16_t size_of_entry;
+    uint8_t name_length;
+    uint8_t type_indicator;
+    char name[];
+} ext2_dir_entry;
+
+static inline size_t s_block_get_block_size(ext2_super_block* s_block){
+    return 1024 << s_block->log_block_size;
 }
 
-static inline size_t get_number_of_block_groups(ext2_super_block superblock){
-    return upper_divide(superblock.inodecount, superblock.number_of_inodes_per_group);
+static inline size_t get_number_of_block_groups(ext2_super_block* superblock){
+    return upper_divide(superblock->inodecount, superblock->number_of_inodes_per_group);
 }
-
 
 void ext2_init(filesystem_data* fs_data);
 ext2_super_block ext2_read_super_block(filesystem_data* fs_data);
-ext2_block_group_descriptor ext2_read_block_group_descriptor(filesystem_data* fs_data, ext2_super_block s_block , uint64_t group_num);
-ext2_inode ext2_read_inode(filesystem_data* fs_data, uint64_t inode_num);
-
-
+ext2_block_group_descriptor ext2_read_block_group_descriptor(filesystem_data* fs_data, ext2_super_block* s_block , uint64_t group_num);
+ext2_inode* ext2_read_inode_metadata(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num);
+void* ext2_read_inode(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num, size_t* size_read);
+uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, char* path);//Returns 0 on fail
+ext2_dir_entry ext2_find_inode_in_dir_by_name(filesystem_data* fs_data, ext2_super_block* s_block, int dir_inode_num, char* name, size_t name_size); //Returns 0 on fail
 #endif

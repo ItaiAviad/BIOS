@@ -33,6 +33,21 @@ void user_init();
 
 int interrupts_ready;
 
+void print_hex(void* data, size_t length) {
+    unsigned char* byte_data = (unsigned char*)data;
+    for (size_t i = 0; i < length; i++) {
+        printf("%x ", byte_data[i]);
+        // Add a newline after every 16 bytes for better readability
+        if ((i + 1) % 16 == 0) {
+            printf("\n");
+        }
+    }
+    // If the last line isn't a multiple of 16, print a newline
+    if (length % 16 != 0) {
+        printf("\n");
+    }
+}
+
 int kmain(void) {
 
     interrupts_ready = false;
@@ -73,8 +88,12 @@ int kmain(void) {
     ext2_super_block super_block = ext2_read_super_block(vfs_get_node("/").found_node->data);
     printf("Mounted!\n");
     printf("block_size: %d\n", (1024 << super_block.blockcount));
-    printf("Inode 2: %x", ext2_read_inode(vfs_get_node("/").found_node->data, 2).i_mode);
-    
+    size_t size_read = 0;
+    void* read_data = ext2_read_inode(vfs_get_node("/").found_node->data, &super_block, 2, &size_read);
+    print_hex(read_data, 100);
+    printf("read: %d", size_read);
+    int inode_num = ext2_get_inode_number_at_path(vfs_get_node("/").found_node->data, "/test_file.txt");
+    printf("%d", inode_num);
     while (1) {}
     return 0;
 }

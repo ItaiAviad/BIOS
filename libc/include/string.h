@@ -50,6 +50,8 @@ void* memset(void*, char, size_t);
 size_t strlen(const char*);
 
 
+int strncmp(const void* aptr, const void* bptr, size_t size);
+
 /**
  * @brief Find the first occurrence of a character in a string
  * 

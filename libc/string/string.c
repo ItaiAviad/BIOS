@@ -12,6 +12,38 @@ char *strchr(const char *s, int c) {
     return c ? NULL : (char *)s;
 }
 
+/**
+ * @brief Compare two strings
+ * 
+ * @return int 
+ */
+int strncmp(const void* aptr, const void* bptr, size_t size) {
+    const unsigned char* a = (const unsigned char*)aptr;
+    const unsigned char* b = (const unsigned char*)bptr;
+
+    for (size_t i = 0; i < size; i++) {
+        // Check if either string has ended
+        if (a[i] == '\0' && b[i] == '\0') {
+            return 0; // Both strings end at the same position
+        } else if (a[i] == '\0') {
+            return -1; // First string ends before the second
+        } else if (b[i] == '\0') {
+            return 1; // Second string ends before the first
+        }
+
+        // Compare the characters
+        if (a[i] < b[i]) {
+            return -1;
+        } else if (a[i] > b[i]) {
+            return 1;
+        }
+    }
+
+    // If we complete the loop, the strings are equal up to `size`
+    return 0;
+}
+
+
 char *strrchr(const char *str, int c) {
     const char *last_occurrence = NULL;
 

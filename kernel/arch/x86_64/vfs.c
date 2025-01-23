@@ -4,7 +4,7 @@
 
 vfs_node *vfs_root = (vfs_node *)NULL;
 
-static inline char *preprocess_path(const char *original_string) {
+char *preprocess_path(const char *original_string) {
     if (!original_string || *original_string == '\0') {
         return NULL; // Invalid input
     }

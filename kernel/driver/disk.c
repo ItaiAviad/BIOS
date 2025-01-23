@@ -47,6 +47,7 @@ disk *find_disk(uint64_t id) {
 }
 
 void read(uint64_t disk_id, uint64_t offset, size_t size, void* buffer) {
+    printf("Reading: 0x%x\n", offset);
     disk *disk = find_disk(disk_id);
 
     switch (disk->disk_type) {

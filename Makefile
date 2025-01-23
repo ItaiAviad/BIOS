@@ -96,7 +96,7 @@ MISC_FLAGS = -DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) -DKERNEL_STACK_START_ADDR=$(
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
 endif
-CFLAGS := -mno-red-zone -mno-mmx -mno-sse -msoft-float -ffreestanding -m64 -fno-stack-protector -march=x86-64 -masm=intel -Wall -g -Wextra -O0 $(INCLUDES) $(MISC_FLAGS)
+CFLAGS :=  -O0 -mno-red-zone -mno-mmx -mno-sse -msoft-float -ffreestanding -m64 -fno-stack-protector -march=x86-64 -masm=intel -Wall -g -Wextra $(INCLUDES) $(MISC_FLAGS)
 NASMFLAGS := -f elf64 -g -DUSER_LOAD_ADDR=$(USER_LOAD_ADDR)
 LDFLAGS_KERNEL := -T $(KERNEL_LD) $(INCLUDES)
 LDFLAGS_USER := -T $(USER_LD) $(INCLUDES)
@@ -124,7 +124,7 @@ $(FLOPPY_BIN): kernel boot user
 	FILE_SIZE=$$(stat -c %s $@); \
 	PADDING=$$(( $(SECTOR_SIZE) - FILE_SIZE % $(SECTOR_SIZE) )); \
 	$(DD) if=/dev/zero of=$@ bs=1 seek=$$FILE_SIZE count=$$PADDING conv=notrunc,fsync; \
-	$(DD) if=/dev/zero of=$@ bs=$(SECTOR_SIZE) seek=$$(($$FILE_SIZE + $$PADDING)) count=2048 conv=notrunc,fsync
+	# $(DD) if=/dev/zero of=$@ bs=$(SECTOR_SIZE) seek=$$(($$FILE_SIZE + $$PADDING)) count=2048 conv=notrunc,fsync
 
 	$(DD) if=/dev/zero of=$(DISK) count=2048 # 1MB
 

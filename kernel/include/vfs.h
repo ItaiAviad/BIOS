@@ -70,4 +70,5 @@ vfs_node* vfs_mkdir(char* path);
 vfs_node *vfs_mknode(char *path);
 vfs_node* mount_file_system(char* path, uint64_t disk_number, uint64_t disk_offset, enum file_system_type type);
 
+char *preprocess_path(const char *original_string);
 #endif
