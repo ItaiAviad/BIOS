@@ -75,7 +75,7 @@ This project is an educational operating system built from scratch for the x86\_
 
 ## Build
 
-1. Set up a cross-compiler by following `crosscompiler.md`.
+1. Set up a cross-compiler by following [`crosscompiler.md`](./crosscompiler.md).
 2. Build the project:
    ```sh
    make

@@ -415,3 +415,5 @@ bochs_config
 compile_commands.json
 .vscode/*
 .vscode/
+bron
+generate_compile_commands.sh
