@@ -140,7 +140,7 @@ $(FLOPPY_BIN): kernel boot user
 
 		sudo chmod 777 $(MOUNT_POINT)
 
-		touch $(MOUNT_POINT)/test_file.txt
+		sudo sh -c 'echo "hi if you read this it means that everything works" > $(MOUNT_POINT)/test_file.txt'
 
 		sudo umount $(MOUNT_POINT)
 
