@@ -13,29 +13,6 @@ ext2_super_block ext2_read_super_block(filesystem_data* fs_data){
     return super_block;
 }
 
-
-ext2_dir_entry ext2_find_inode_in_dir_by_name(filesystem_data* fs_data, ext2_super_block* s_block, int dir_inode_num, char* inode_name, size_t name_size){
-    uint64_t size_read = 0;
-    void* data = ext2_read_inode(fs_data, s_block, dir_inode_num, &size_read);
-    ext2_dir_entry* curr_entry = data;
-
-
-
-    while((((void*)curr_entry) - data + 1) < size_read){
-
-        if(name_size == strlen(curr_entry->name_length) && strncmp(inode_name, curr_entry->name, min(curr_entry->name_length, name_size)) == 0){
-            return *(curr_entry);
-        } 
-
-        curr_entry = ((uint64_t) curr_entry) + curr_entry->size_of_entry-1;
-    }
-
-    free(data);
-    ext2_dir_entry ret = {0};
-    return ret;
-
-}
-
 ext2_block_group_descriptor ext2_read_block_group_descriptor(filesystem_data* fs_data, ext2_super_block* s_block , uint64_t group_num){
     ext2_block_group_descriptor block_group_descriptor;
     uint64_t block_size = s_block_get_block_size(s_block);
@@ -52,6 +29,82 @@ ext2_inode* ext2_read_inode_metadata(filesystem_data* fs_data, ext2_super_block*
     uint64_t addr = ((block_group_descriptor.start_block_inode_table-1) * s_block_get_block_size(super_block)) + (inode_table_index * super_block->inode_size);
     ext2_inode* ret = malloc(super_block->inode_size);
     read(fs_data->disk_number, fs_data->start_offset + addr, super_block->inode_size, ret);
+    return ret;
+}
+
+ext2_dir_entry ext2_find_inode_in_dir_by_name(filesystem_data* fs_data, ext2_super_block* s_block, int dir_inode_num, char* inode_name, size_t name_size){
+    uint64_t size_read = 0;
+    void* data = ext2_read_inode(fs_data, s_block, dir_inode_num, &size_read);
+    ext2_dir_entry* curr_entry = data;
+
+
+
+    while((((void*)curr_entry) - data + 1) < size_read){
+
+        if(strncmp(inode_name, curr_entry->name, min(curr_entry->name_length, name_size)) == 0){
+            return *(curr_entry);
+        } 
+
+        curr_entry = ((uint64_t) curr_entry) + curr_entry->size_of_entry;
+    }
+
+    free(data);
+    ext2_dir_entry ret = {0};
+    return ret;
+
+}
+
+uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, char* path){
+    char* path_preproccesed = preprocess_path(path);
+    ext2_super_block s_block = ext2_read_super_block(fs_data);
+    uint64_t ret = 0;
+    if (!path_preproccesed) {
+        EXT2_ERR_PRINT("Memory allocation failed!");
+        return ret;
+    }
+
+    if (*path_preproccesed == '\0') {
+        EXT2_ERR_PRINT("Invalid Path!\n");
+        free(path_preproccesed);
+        return ret;
+    }
+
+    EXT2_DEBUG_PRINT("Searching for node with path: %s\n", path_preproccesed);
+
+    uint64_t current_inode = EXT2_ROOT_INODE;
+
+    char *current_path_position = path_preproccesed;
+    char *current_seperator_position = path_preproccesed;
+
+    // Skip the root `/` explicitly
+    if (*current_path_position == PATH_SEPERATOR) {
+        current_path_position++;
+    }
+
+    while (*current_path_position) {
+
+        char *next_separator_position = strchr(current_path_position, PATH_SEPERATOR);
+        if (!next_separator_position) {
+            next_separator_position = strchr(current_path_position, '\0');
+        }
+
+        ext2_dir_entry found_inode = ext2_find_inode_in_dir_by_name(fs_data, &s_block, current_inode, current_path_position, next_separator_position-current_path_position);
+        current_inode = found_inode.inode;
+        if(!next_separator_position || *(next_separator_position) == '\0'){
+            free(preprocess_path);
+            return current_inode;
+        }
+        if(((ext2_type_indicator)found_inode.type_indicator) != dir){
+            free(preprocess_path);
+            return ret;
+        }
+        current_path_position = next_separator_position + 1; // Skip separator
+
+    }
+
+
+
+    free(preprocess_path);
     return ret;
 }
 
@@ -277,59 +330,4 @@ void* ext2_read_inode(filesystem_data* fs_data, ext2_super_block* super_block, u
     free(inode_meta);
     *size_read = (size_t)actual_bytes_read;
     return data;
-}
-
-
-uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, char* path){
-    char* path_preproccesed = preprocess_path(path);
-    ext2_super_block s_block = ext2_read_super_block(fs_data);
-    uint64_t ret = 0;
-    if (!path_preproccesed) {
-        EXT2_ERR_PRINT("Memory allocation failed!");
-        return ret;
-    }
-
-    if (*path_preproccesed == '\0') {
-        EXT2_ERR_PRINT("Invalid Path!\n");
-        free(path_preproccesed);
-        return ret;
-    }
-
-    EXT2_DEBUG_PRINT("Searching for node with path: %s\n", path_preproccesed);
-
-    uint64_t current_inode = EXT2_ROOT_INODE;
-
-    char *current_path_position = path_preproccesed;
-    char *current_seperator_position = path_preproccesed;
-
-    // Skip the root `/` explicitly
-    if (*current_path_position == PATH_SEPERATOR) {
-        current_path_position++;
-    }
-
-    while (*current_path_position) {
-
-        char *next_separator_position = strchr(current_path_position, PATH_SEPERATOR);
-        if (!next_separator_position) {
-            next_separator_position = strchr(current_path_position, '\0');
-        }
-
-        if(!next_separator_position){
-            free(preprocess_path);
-            return current_inode;
-        }
-        ext2_dir_entry found_inode = ext2_find_inode_in_dir_by_name(fs_data, &s_block, current_inode, current_path_position, next_separator_position-current_path_position);
-        if(((ext2_type_indicator)found_inode.type_indicator) != dir){
-            free(preprocess_path);
-            return ret;
-        }
-        current_inode = found_inode.inode;
-        current_path_position = next_separator_position + 1; // Skip separator
-
-    }
-
-
-
-    free(preprocess_path);
-    return ret;
 }
