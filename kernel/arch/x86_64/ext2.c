@@ -94,7 +94,8 @@ uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, char* path){
             free(preprocess_path);
             return current_inode;
         }
-        if(((ext2_type_indicator)found_inode.type_indicator) != dir){
+        if(((ext2_type_indicator)found_inode.type_indicator) != EXT2_FT_DIR){
+            // The path doesn't exist, return a zeroed object
             free(preprocess_path);
             return ret;
         }

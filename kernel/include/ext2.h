@@ -31,13 +31,15 @@
 #endif
 
 typedef enum ext2_type_indicators_ext2{
-    fifo = 0x1000,
-    char_dev = 0x2000,
-    dir = 0x4000,
-    blk_dev = 0x6000,
-    reg_file = 0x8000,
-    symbo_link = 0xA000,
-    unix_socket = 0xC000
+    EXT2_FT_UNKNOWN = 0,
+    EXT2_FT_REG_FILE = 1,
+    EXT2_FT_DIR = 2,
+    EXT2_FT_CHRDEV = 3,
+    EXT2_FT_BLKDEV = 4,
+    EXT2_FT_FIFO = 5,
+    EXT2_FT_SOCK = 6,
+    EXT2_FT_SYMLINK = 7
+
 } ext2_type_indicator;
 
 typedef struct  __attribute__((packed)) ext2_super_block {
