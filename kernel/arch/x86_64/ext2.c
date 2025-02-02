@@ -54,9 +54,32 @@ ext2_dir_entry ext2_find_inode_in_dir_by_name(filesystem_data* fs_data, ext2_sup
 
 }
 
-uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, char* path){
-    char* path_preproccesed = preprocess_path(path);
+linkedListNode* ext2_list_dir(filesystem_data* fs_data, char* path){
+    linkedListNode* ret = NULL;
     ext2_super_block s_block = ext2_read_super_block(fs_data);
+    uint64_t dir_inode_num = ext2_get_inode_number_at_path(fs_data, &s_block ,path);
+
+    if(!dir_inode_num){
+        EXT2_INFO_PRINT("Couldn't find inode!");
+    }
+
+    uint64_t size_read = 0;
+    void* data = ext2_read_inode(fs_data, &s_block, dir_inode_num, &size_read);
+    ext2_dir_entry* curr_entry = data;
+
+    while((((void*)curr_entry) - data + 1) < size_read){
+        char* str = malloc(curr_entry->name_length+1);
+        memcpy(str, curr_entry->name, curr_entry->name_length);
+        str[curr_entry->name_length] = 0;
+        append_node(&ret, str);
+        curr_entry = ((uint64_t) curr_entry) + curr_entry->size_of_entry;
+    }
+    free(data);
+    return ret;
+}
+
+uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_block* s_block, char* path){
+    char* path_preproccesed = preprocess_path(path);
     uint64_t ret = 0;
     if (!path_preproccesed) {
         EXT2_ERR_PRINT("Memory allocation failed!");
@@ -88,7 +111,7 @@ uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, char* path){
             next_separator_position = strchr(current_path_position, '\0');
         }
 
-        ext2_dir_entry found_inode = ext2_find_inode_in_dir_by_name(fs_data, &s_block, current_inode, current_path_position, next_separator_position-current_path_position);
+        ext2_dir_entry found_inode = ext2_find_inode_in_dir_by_name(fs_data, s_block, current_inode, current_path_position, next_separator_position-current_path_position);
         current_inode = found_inode.inode;
         if(!next_separator_position || *(next_separator_position) == '\0'){
             free(preprocess_path);

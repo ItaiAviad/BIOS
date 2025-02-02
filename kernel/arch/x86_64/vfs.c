@@ -4,6 +4,73 @@
 
 vfs_node *vfs_root = (vfs_node *)NULL;
 
+linkedListNode *vfs_list_dir(char *path) {
+    linkedListNode *ret = NULL;
+
+    VFS_DEBUG_PRINT("Creating directory for path: %s\n", path);
+
+    // Find the parent folder
+    vfs_get_node_return_t vfs_get_node_ret = vfs_get_node(path);
+
+    vfs_node *found = vfs_get_node_ret.found_node;
+    if (!found) {
+        VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
+        goto list_dir_cleanup;
+    }
+
+    switch (found->type) {
+        case VFS_NODE_TYPE_DIR: {
+
+            linkedListNode *current_list_item = found->data;
+            while (current_list_item) {
+                vfs_node *child_node = (vfs_node *)current_list_item->data;
+                size_t stringlen = strlen(child_node->name);
+                char* str_cp = malloc(strlen(child_node->name)+1);
+                memcpy(str_cp, child_node->name, strlen(child_node->name));
+                str_cp[stringlen] = 0;
+                append_node(&ret, str_cp);
+
+                
+                current_list_item = current_list_item->next;
+            }
+            break;
+        }
+        case VFS_NODE_TYPE_FILE_SYSTEM: {
+            if(vfs_get_node_ret.status != CONTINUES_IN_FILE_SYSTEM){
+                goto list_dir_cleanup;
+            }
+            filesystem_data *fs = ((filesystem_data *)found->data);
+            char* remaining_path = vfs_get_node_ret.remaining_path;
+            if(!remaining_path){
+                remaining_path = "/";
+            }
+            switch (fs->type) {
+                case FILESYSTEM_TYPE_EXT2: {
+                    ret = ext2_list_dir(fs, remaining_path);
+                    break;
+                }
+
+                default: {
+                    break;
+                }
+            }
+
+            break;
+        }
+
+        default: {
+            goto list_dir_cleanup;
+            break;
+        }
+    }
+
+list_dir_cleanup:
+    if (vfs_get_node_ret.path_searched) {
+        free(vfs_get_node_ret.path_searched);
+    }
+    return ret;
+}
+
 char *preprocess_path(const char *original_string) {
     if (!original_string || *original_string == '\0') {
         return NULL; // Invalid input
@@ -24,22 +91,6 @@ char *preprocess_path(const char *original_string) {
         *(--current) = '\0';
     }
     return ret_str;
-}
-
-static inline int count_char_repeats(const char *str, char c) {
-    if (str == NULL) {
-        return 0; // Handle NULL input safely
-    }
-
-    int count = 0;
-    const char *ptr = str;
-
-    while ((ptr = strchr(ptr, c)) != NULL) {
-        count++;
-        ptr++; // Move past the current occurrence
-    }
-
-    return count;
 }
 
 vfs_node *find_child_node(vfs_node *parent, const char *segment, size_t segment_length) {
@@ -75,18 +126,18 @@ vfs_node *vfs_mkdir(char *path) {
     // If no remaining path, the directory already exists
     if (vfs_get_node_ret.remaining_path == NULL) {
         VFS_ERR_PRINT("The directory already exists: %s\n", path);
-        goto cleanup;
+        goto cleanup_mkdir;
     }
 
     vfs_node *parent_folder = vfs_get_node_ret.found_node;
     if (!parent_folder) {
         VFS_DEBUG_PRINT("Parent folder not found for path: %s\n", path);
-        goto cleanup;
+        goto cleanup_mkdir;
     }
 
     if (parent_folder->type != VFS_NODE_TYPE_DIR) {
         VFS_DEBUG_PRINT("Parent is not a directory: %s\n", parent_folder->name);
-        goto cleanup;
+        goto cleanup_mkdir;
     }
 
     switch (parent_folder->type) {
@@ -96,7 +147,7 @@ vfs_node *vfs_mkdir(char *path) {
 
             if (strchr(dir_name, PATH_SEPERATOR) != NULL) {
                 VFS_DEBUG_PRINT("The dir before doesn't exist!\n");
-                goto cleanup;
+                goto cleanup_mkdir;
             }
 
             VFS_DEBUG_PRINT("Parent folder name: %s, creating child directory: %s\n", parent_folder->name, dir_name);
@@ -105,7 +156,7 @@ vfs_node *vfs_mkdir(char *path) {
             vfs_node *new_node = malloc(sizeof(vfs_node));
             if (!new_node) {
                 VFS_ERR_PRINT("Memory allocation failed!\n");
-                goto cleanup;
+                goto cleanup_mkdir;
             }
 
             // Initialize the new node
@@ -123,18 +174,17 @@ vfs_node *vfs_mkdir(char *path) {
 
             return new_node;
         }
-        case VFS_NODE_TYPE_FILE_SYSTEM:{
-            //TODO:
+        case VFS_NODE_TYPE_FILE_SYSTEM: {
+            // TODO:
             break;
         }
 
-
-        default:{
-            goto cleanup;
+        default: {
+            goto cleanup_mkdir;
         }
     }
 
-cleanup:
+cleanup_mkdir:
     if (vfs_get_node_ret.path_searched) {
         free(vfs_get_node_ret.path_searched);
     }
@@ -179,29 +229,27 @@ vfs_get_node_return_t vfs_get_node(char *path) {
         if (!next_separator_position) {
             next_separator_position = strchr(current_path_position, '\0');
         }
-        if (!next_separator_position) {
-            // No more separators, print the remaining path directly
-            VFS_DEBUG_PRINT("Current node: %s, looking for segment: %s\n", current_node->name, current_path_position);
-        } else {
-            size_t segment_length = next_separator_position - current_path_position;
-            char *segment = malloc(segment_length + 1);
-            if (!segment) {
-                VFS_ERR_PRINT("Memory allocation failed!\n");
-                ret.status = MEMORY_ERR;
+
+                // Ensure the current node is a directory
+        switch (current_node->type)
+        {
+            case VFS_NODE_TYPE_DIR:
+                break;
+            case VFS_NODE_TYPE_FILE_SYSTEM:{
+                ret.found_node = current_node;
+                ret.remaining_path = current_seperator_position;
+                ret.status = CONTINUES_IN_FILE_SYSTEM;
+                VFS_DEBUG_PRINT("Returning last found node: %s\n", current_node->name);
                 return ret;
             }
-            memcpy(segment, current_path_position, segment_length);
-            segment[segment_length] = '\0';
-            VFS_DEBUG_PRINT("Current node: %s, looking for segment: %s\n", current_node->name, segment);
-            free(segment);
-        }
-
-        // Ensure the current node is a directory
-        if (current_node->type != VFS_NODE_TYPE_DIR) {
-            VFS_DEBUG_PRINT("Node type at %s is not a directory!\n", current_node->name);
-            free(path_preproccesed);
-            ret.status = NO_DIR;
-            return ret;
+                
+            
+            default:{
+                    VFS_DEBUG_PRINT("Node type at %s is not a directory!\n", current_node->name);
+                    free(path_preproccesed);
+                    ret.status = NO_DIR;
+                    return ret;
+                }
         }
 
         // Search for the child node directly
@@ -235,12 +283,12 @@ vfs_node *mount_file_system(char *path, uint64_t disk_number, uint64_t disk_offs
         VFS_ERR_PRINT("Couldn't mount filesystem, The path doesn't exist!");
         goto cleanup;
     }
-    if(vfs_get_node_ret.found_node->type != VFS_NODE_TYPE_DIR){
+    if (vfs_get_node_ret.found_node->type != VFS_NODE_TYPE_DIR) {
         VFS_ERR_PRINT("Couldn't mount filesystem, Can't mount in a node which isn't a dir");
         goto cleanup;
     }
 
-    if(vfs_get_node_ret.found_node->data != NULL){
+    if (vfs_get_node_ret.found_node->data != NULL) {
         VFS_ERR_PRINT("Couldn't mount filesystem, Can't mount a non empty dir");
         goto cleanup;
     }

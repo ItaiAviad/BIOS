@@ -91,12 +91,18 @@ int kmain(void) {
     printf("Mounted!\n");
     printf("block_size: %d\n", (1024 << super_block.blockcount));
     size_t size_read = 0;
-    int inode_num = ext2_get_inode_number_at_path(vfs_get_node("/mnt/mount1").found_node->data, "/test/test_file.txt");
+    int inode_num = ext2_get_inode_number_at_path(vfs_get_node("/mnt/mount1").found_node->data, &super_block, "/test/test_file.txt");
     printf("%d", inode_num);
     void* read_data = ext2_read_inode(vfs_get_node("/mnt/mount1").found_node->data, &super_block, inode_num, &size_read);
     print_hex(read_data, 100);
     printf("read: %d", size_read);
     printf(read_data);
+
+    linkedListNode* list = vfs_list_dir( "/mnt/mount1/test/");
+    while(list){
+        printf("%s\n",list->data);
+        list = list->next;
+    }
     while (1) {}
     return 0;
 }

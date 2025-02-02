@@ -29,7 +29,7 @@
 #include <linkedList.h>
 
 enum file_system_type{FILESYSTEM_TYPE_EXT2, FILESYSTEM_TYPE_UNKNOWN};
-enum vfs_status{OK ,DIR_ALREADY_EXISTS, UNSUPPORTED, INVALID_PATH, NO_DIR, MEMORY_ERR};
+enum vfs_status{OK , CONTINUES_IN_FILE_SYSTEM, DIR_ALREADY_EXISTS, UNSUPPORTED, INVALID_PATH, NO_DIR, MEMORY_ERR};
 
 typedef struct filesystem_data{
     uint64_t disk_number;
@@ -71,4 +71,5 @@ vfs_node *vfs_mknode(char *path);
 vfs_node* mount_file_system(char* path, uint64_t disk_number, uint64_t disk_offset, enum file_system_type type);
 
 char *preprocess_path(const char *original_string);
+linkedListNode* vfs_list_dir(char* path);
 #endif

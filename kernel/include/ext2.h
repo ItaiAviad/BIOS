@@ -2,15 +2,18 @@
 
 #define EXT2_H
 
+#include <vfs.h>
 #include <types.h>
 #include <math.h>
-#include <vfs.h>
+#include <linkedList.h>
 
 #define EXT2_START_OFFSET (0x400)
 
 #define EXT2_BLOCK_GROUP_TABLE_OFFSET (0x400) // Offset after the initial fs offset
 
 #define EXT2_ROOT_INODE 2
+
+#define EXT2_INFO
 
 #ifdef EXT2_DEBUG
     #define EXT2_DEBUG_PRINT(fmt, ...) printf("%s VFS: " fmt, LOG_SYM_DEBUG, ##__VA_ARGS__)
@@ -170,13 +173,21 @@ ext2_inode* ext2_read_inode_metadata(filesystem_data* fs_data, ext2_super_block*
 void* ext2_read_inode(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num, size_t* size_read);
 
 /**
- * @brief Finds the inode number at 
+ * @brief Finds the inode number at a path
  * @param fs_data The data about the filesystem
  * @param path The path to find the inode in
+ * @param s_block The superblock of the filesystem
  * @return 0 on fail, inode num at success 
  */
-uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, char* path);
+uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_block* s_block, char* path);
 
 
 ext2_dir_entry ext2_find_inode_in_dir_by_name(filesystem_data* fs_data, ext2_super_block* s_block, int dir_inode_num, char* name, size_t name_size); //Returns 0 on fail
+
+/**
+ * @brief List the content of a dir in path
+ * @param fs_data The data about the filesystem
+ * @return Null on fail, pointer to linkedListNode at success 
+ */
+linkedListNode* ext2_list_dir(filesystem_data* fs_data, char* path); //Returns a linked list of entity names in the dir, should be used to perform ls
 #endif
