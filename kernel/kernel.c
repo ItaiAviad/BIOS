@@ -98,7 +98,7 @@ int kmain(void) {
     printf("read: %d", size_read);
     printf(read_data);
 
-    linkedListNode* list = vfs_list_dir( "/mnt/mount1/test/");
+    linkedListNode* list = vfs_list_dir( "/mnt/mount1/");
     while(list){
         printf("%s\n",list->data);
         list = list->next;

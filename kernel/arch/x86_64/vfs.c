@@ -7,8 +7,6 @@ vfs_node *vfs_root = (vfs_node *)NULL;
 linkedListNode *vfs_list_dir(char *path) {
     linkedListNode *ret = NULL;
 
-    VFS_DEBUG_PRINT("Creating directory for path: %s\n", path);
-
     // Find the parent folder
     vfs_get_node_return_t vfs_get_node_ret = vfs_get_node(path);
 
@@ -36,7 +34,7 @@ linkedListNode *vfs_list_dir(char *path) {
             break;
         }
         case VFS_NODE_TYPE_FILE_SYSTEM: {
-            if(vfs_get_node_ret.status != CONTINUES_IN_FILE_SYSTEM){
+            if(vfs_get_node_ret.status != CONTINUES_IN_FILE_SYSTEM && vfs_get_node_ret.status != OK){
                 goto list_dir_cleanup;
             }
             filesystem_data *fs = ((filesystem_data *)found->data);

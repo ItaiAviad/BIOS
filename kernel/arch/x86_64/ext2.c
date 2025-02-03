@@ -61,6 +61,7 @@ linkedListNode* ext2_list_dir(filesystem_data* fs_data, char* path){
 
     if(!dir_inode_num){
         EXT2_INFO_PRINT("Couldn't find inode!");
+        return;
     }
 
     uint64_t size_read = 0;
@@ -92,7 +93,13 @@ uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_bloc
         return ret;
     }
 
+
     EXT2_DEBUG_PRINT("Searching for node with path: %s\n", path_preproccesed);
+
+    if (strcmp(path_preproccesed, "/") == 0) {
+        free(path_preproccesed);
+        return EXT2_ROOT_INODE;
+    }
 
     uint64_t current_inode = EXT2_ROOT_INODE;
 
@@ -114,12 +121,12 @@ uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_bloc
         ext2_dir_entry found_inode = ext2_find_inode_in_dir_by_name(fs_data, s_block, current_inode, current_path_position, next_separator_position-current_path_position);
         current_inode = found_inode.inode;
         if(!next_separator_position || *(next_separator_position) == '\0'){
-            free(preprocess_path);
+            free(path_preproccesed);
             return current_inode;
         }
         if(((ext2_type_indicator)found_inode.type_indicator) != EXT2_FT_DIR){
             // The path doesn't exist, return a zeroed object
-            free(preprocess_path);
+            free(path_preproccesed);
             return ret;
         }
         current_path_position = next_separator_position + 1; // Skip separator
@@ -128,7 +135,7 @@ uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_bloc
 
 
 
-    free(preprocess_path);
+    free(path_preproccesed);
     return ret;
 }
 
