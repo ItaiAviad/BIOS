@@ -80,8 +80,10 @@ linkedListNode* ext2_list_dir(filesystem_data* fs_data, char* path){
 }
 
 uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_block* s_block, char* path){
-    char* path_preproccesed = preprocess_path(path);
     uint64_t ret = 0;
+    char* path_preproccesed = preprocess_path(path);
+    uint64_t current_inode = EXT2_ROOT_INODE;
+
     if (!path_preproccesed) {
         EXT2_ERR_PRINT("Memory allocation failed!");
         return ret;
@@ -93,15 +95,13 @@ uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_bloc
         return ret;
     }
 
-
     EXT2_DEBUG_PRINT("Searching for node with path: %s\n", path_preproccesed);
 
-    if (strcmp(path_preproccesed, "/") == 0) {
+    // Handle the edge case where the path is: "/"
+    if (strcmp(path_preproccesed, "/") == 0) { 
         free(path_preproccesed);
         return EXT2_ROOT_INODE;
     }
-
-    uint64_t current_inode = EXT2_ROOT_INODE;
 
     char *current_path_position = path_preproccesed;
     char *current_seperator_position = path_preproccesed;
