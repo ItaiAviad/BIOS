@@ -68,7 +68,9 @@ void init_vfs();
 vfs_get_node_return_t vfs_get_node(char *path);
 vfs_node* vfs_mkdir(char* path);
 vfs_node *vfs_mknode(char *path);
+size_t vfs_get_file_size(char *path);
 vfs_node* mount_file_system(char* path, uint64_t disk_number, uint64_t disk_offset, enum file_system_type type);
+size_t vfs_read(char *path, size_t offset_bytes, size_t count_bytes, void* out_buffer);
 
 char *preprocess_path(const char *original_string);
 linkedListNode* vfs_list_dir(char* path);

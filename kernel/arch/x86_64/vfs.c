@@ -69,8 +69,104 @@ list_dir_cleanup:
     return ret;
 }
 
-linkedListNode *vfs_read(char *path, size_t offset, size_t count_bytes) {
-    // @Todo
+size_t vfs_read(char *path, size_t offset_bytes, size_t count_bytes, void* out_buffer) {
+    size_t ret = 0;
+
+    // Find the parent folder
+    vfs_get_node_return_t vfs_get_node_ret = vfs_get_node(path);
+
+    vfs_node *found = vfs_get_node_ret.found_node;
+    if (!found) {
+        VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
+        goto list_dir_cleanup;
+    }
+
+    switch (found->type) {
+        case VFS_NODE_TYPE_FILE_SYSTEM: {
+            if(vfs_get_node_ret.status != CONTINUES_IN_FILE_SYSTEM && vfs_get_node_ret.status != OK){
+                goto list_dir_cleanup;
+            }
+            filesystem_data *fs = ((filesystem_data *)found->data);
+            char* remaining_path = vfs_get_node_ret.remaining_path;
+            if(!remaining_path){
+                remaining_path = "/";
+            }
+            switch (fs->type) {
+                case FILESYSTEM_TYPE_EXT2: {
+                    ext2_super_block s_block = ext2_read_super_block(fs);
+                    ret = ext2_read_inode(fs, &s_block, ext2_get_inode_number_at_path(fs, &s_block, remaining_path), offset_bytes, count_bytes, out_buffer);
+                    break;
+                }
+
+                default: {
+                    break;
+                }
+            }
+
+            break;
+        }
+
+        default: {
+            goto list_dir_cleanup;
+            break;
+        }
+    }
+
+list_dir_cleanup:
+    if (vfs_get_node_ret.path_searched) {
+        free(vfs_get_node_ret.path_searched);
+    }
+    return ret;
+}
+
+size_t vfs_get_file_size(char *path) {
+    size_t ret = 0;
+
+    // Find the parent folder
+    vfs_get_node_return_t vfs_get_node_ret = vfs_get_node(path);
+
+    vfs_node *found = vfs_get_node_ret.found_node;
+    if (!found) {
+        VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
+        goto list_dir_cleanup;
+    }
+
+    switch (found->type) {
+        case VFS_NODE_TYPE_FILE_SYSTEM: {
+            if(vfs_get_node_ret.status != CONTINUES_IN_FILE_SYSTEM && vfs_get_node_ret.status != OK){
+                goto list_dir_cleanup;
+            }
+            filesystem_data *fs = ((filesystem_data *)found->data);
+            char* remaining_path = vfs_get_node_ret.remaining_path;
+            if(!remaining_path){
+                remaining_path = "/";
+            }
+            switch (fs->type) {
+                case FILESYSTEM_TYPE_EXT2: {
+                    ext2_super_block s_block = ext2_read_super_block(fs);
+                    ret = ext2_get_inode_size(fs, &s_block, ext2_get_inode_number_at_path(fs, &s_block, remaining_path));
+                    break;
+                }
+
+                default: {
+                    break;
+                }
+            }
+
+            break;
+        }
+
+        default: {
+            goto list_dir_cleanup;
+            break;
+        }
+    }
+
+list_dir_cleanup:
+    if (vfs_get_node_ret.path_searched) {
+        free(vfs_get_node_ret.path_searched);
+    }
+    return ret;
 }
 
 char *preprocess_path(const char *original_string) {

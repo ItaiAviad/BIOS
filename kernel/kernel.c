@@ -88,8 +88,6 @@ int kmain(void) {
     vfs_mkdir("/mnt/mount1");
     mount_file_system("/mnt/mount1", 0, EXT2_START_OFFSET,FILESYSTEM_TYPE_EXT2);
 
-
-
     linkedListNode* list = vfs_list_dir("/mnt/mount1"); // The test
 
     while(list){
@@ -97,14 +95,10 @@ int kmain(void) {
         list = list->next;
     }
 
-
-    filesystem_data* fs_data = vfs_get_node("/mnt/mount1").found_node->data;
-    ext2_super_block s_block = ext2_read_super_block(fs_data);
-    uint64_t inode_num = ext2_get_inode_number_at_path(fs_data, &s_block, "/test/test_file.txt");
-    size_t size = ext2_get_inode_size(fs_data, &s_block, inode_num);
+    size_t size = vfs_get_file_size("/mnt/mount1/test/test_file.txt");
 
     void* buff = malloc(size);
-    ext2_read_inode(fs_data, &s_block, inode_num, 0, size, buff);
+    vfs_read("/mnt/mount1/test/test_file.txt", 0, size, buff);
 
     printf("%s", buff);
 
