@@ -18,9 +18,11 @@ extern "C" {
  * @return int 
  */
 int pow(int, int);
-int min(int, int);
-int max(int, int);
-int upper_divide(int numerator, int denominator);
+
+
+#define MIN(a, b)         ((a) < (b) ? (a) : (b))
+#define MAX(a, b)         ((a) < (b) ? (b) : (a))
+#define UPPER_DIVIDE(n,d) (((n) + (d) - 1) / (d))
 
 #ifdef __cplusplus
 }

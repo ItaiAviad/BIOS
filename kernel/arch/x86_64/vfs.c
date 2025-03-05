@@ -69,6 +69,10 @@ list_dir_cleanup:
     return ret;
 }
 
+linkedListNode *vfs_read(char *path, size_t offset, size_t count_bytes) {
+    // @Todo
+}
+
 char *preprocess_path(const char *original_string) {
     if (!original_string || *original_string == '\0') {
         return NULL; // Invalid input

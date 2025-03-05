@@ -44,7 +44,7 @@ void* malloc(size_t size) {
 
     if (!found_free) {
         // Expand the heap
-        size_t data_size = max(HEAP_CHUNK_MIN_SIZE_BYTES - sizeof(malloc_chunk), size);
+        size_t data_size = MAX(HEAP_CHUNK_MIN_SIZE_BYTES - sizeof(malloc_chunk), size);
         new_mchunk.mchunk_prev_size = 0;
         new_mchunk.mchunk_size = sizeof(malloc_chunk) + data_size;
 

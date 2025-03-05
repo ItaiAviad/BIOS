@@ -311,7 +311,7 @@ bool write_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t
     cmdheader += slot;
     cmdheader->cfl = sizeof(FIS_REG_H2D) / sizeof(uint32_t); // Command FIS size
     cmdheader->w = 1;                                        // Write to device
-    cmdheader->prdtl = upper_divide(count, PRDT_WRITE_SIZE_PER_ENTRY /
+    cmdheader->prdtl = UPPER_DIVIDE(count, PRDT_WRITE_SIZE_PER_ENTRY /
                                                SECTOR_SIZE); // PRDT entries count
 
     HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL *)(cmdheader->ctba);
@@ -402,7 +402,7 @@ bool read_ahci(volatile HBA_PORT *port, uint64_t start, uint32_t count, uint8_t 
     cmdheader += slot;
     cmdheader->cfl = sizeof(FIS_REG_H2D) / sizeof(uint32_t); // Command FIS size
     cmdheader->w = 0;                                        // Read from device
-    cmdheader->prdtl = upper_divide(count, PRDT_READ_SIZE_PER_ENTRY /
+    cmdheader->prdtl = UPPER_DIVIDE(count, PRDT_READ_SIZE_PER_ENTRY /
                                                SECTOR_SIZE); // PRDT entries count
     HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL *)(cmdheader->ctba);
     memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) + (cmdheader->prdtl - 1) * sizeof(HBA_PRDT_ENTRY));

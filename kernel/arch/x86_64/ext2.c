@@ -33,15 +33,19 @@ ext2_inode* ext2_read_inode_metadata(filesystem_data* fs_data, ext2_super_block*
 }
 
 ext2_dir_entry ext2_find_inode_in_dir_by_name(filesystem_data* fs_data, ext2_super_block* s_block, int dir_inode_num, char* inode_name, size_t name_size){
-    uint64_t size_read = 0;
-    void* data = ext2_read_inode(fs_data, s_block, dir_inode_num, &size_read);
+
+    size_t size = ext2_get_inode_size(fs_data, s_block, dir_inode_num);
+    void* data = malloc(size);
+
+
+    uint64_t size_read = ext2_read_inode(fs_data, s_block, dir_inode_num, 0, size, data);
     ext2_dir_entry* curr_entry = data;
 
 
 
     while((((void*)curr_entry) - data + 1) < size_read){
 
-        if(strncmp(inode_name, curr_entry->name, min(curr_entry->name_length, name_size)) == 0){
+        if(strncmp(inode_name, curr_entry->name, MIN(curr_entry->name_length, name_size)) == 0){
             return *(curr_entry);
         } 
 
@@ -64,8 +68,11 @@ linkedListNode* ext2_list_dir(filesystem_data* fs_data, char* path){
         return;
     }
 
-    uint64_t size_read = 0;
-    void* data = ext2_read_inode(fs_data, &s_block, dir_inode_num, &size_read);
+    size_t size = ext2_get_inode_size(fs_data, &s_block, dir_inode_num);
+    void* data = malloc(size);
+
+
+    uint64_t size_read = ext2_read_inode(fs_data, &s_block, dir_inode_num, 0, size, data);
     ext2_dir_entry* curr_entry = data;
 
     while((((void*)curr_entry) - data + 1) < size_read){
@@ -77,6 +84,11 @@ linkedListNode* ext2_list_dir(filesystem_data* fs_data, char* path){
     }
     free(data);
     return ret;
+}
+
+size_t ext2_get_inode_size(filesystem_data* fs_data, ext2_super_block* s_block, uint64_t inode_num){
+    ext2_inode* inode_meta = ext2_read_inode_metadata(fs_data, s_block, inode_num);
+    return ((uint64_t)inode_meta->i_dir_acl << 32) | inode_meta->i_size;
 }
 
 uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_block* s_block, char* path){
@@ -139,226 +151,222 @@ uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_bloc
     return ret;
 }
 
-// ------------------------------------------------------------------------
-// Helper to read from an array of block pointers (single-indirect).
-// We do NOT assume any special error handling in read(...).
-// ------------------------------------------------------------------------
-static void read_single_indirect_blocks(
-    filesystem_data* fs_data,
-    void*            data,
-    uint32_t         block_num,
-    uint64_t         size_to_read,
-    uint64_t         block_size,
-    uint64_t*        blocks_read
-) {
-    if (block_num == 0) {
-        return;
+
+size_t ext2_read_inode(filesystem_data* fs_data, ext2_super_block* s_block, uint64_t inode_num, size_t offset_bytes, size_t count_bytes, void* out_buffer){
+    size_t max_read_size = ext2_get_inode_size(fs_data, s_block, inode_num);
+    uint64_t block_size = s_block_get_block_size(s_block);
+    uint64_t curr_read_offset = offset_bytes;
+    uint64_t end_offset = MIN(max_read_size, offset_bytes+count_bytes) - 1;
+
+    while (curr_read_offset < end_offset)
+    {
+        uint64_t read_start = ext2_get_nth_block_offset_of_inode(fs_data, s_block, inode_num, curr_read_offset / block_size) + (curr_read_offset % block_size);
+        uint64_t read_size = MIN(block_size, (end_offset - curr_read_offset) + 1);
+        read(fs_data->disk_number, read_start, read_size, out_buffer+(curr_read_offset - offset_bytes));
+        curr_read_offset += read_size - 1;
     }
 
-    // This block contains an array of 32-bit block numbers
-    uint32_t* block_addrs = malloc(block_size);
-    if (!block_addrs) {
-        printf("EXT2: Could not allocate memory for single-indirect block array.\n");
-        return;
-    }
+    return (curr_read_offset - offset_bytes) + 1;
 
-    // Convert block_num to a byte offset on disk using fs_data->start_offset
-    uint64_t offset_on_disk = ((uint64_t)block_num - 1) * block_size + fs_data->start_offset;
-    read(fs_data->disk_number, offset_on_disk, block_size, block_addrs);
-
-    size_t entries = block_size / sizeof(uint32_t);
-    for (size_t i = 0; i < entries; i++) {
-        if ((*blocks_read) * block_size >= size_to_read) {
-            break;
-        }
-        if (block_addrs[i] == 0) {
-            break;  // no more blocks
-        }
-
-        // Figure out how many bytes remain
-        uint64_t left    = size_to_read - (*blocks_read * block_size);
-        size_t   to_read = (left < block_size) ? (size_t)left : (size_t)block_size;
-        size_t   dst     = (size_t)(*blocks_read * block_size);
-
-        // Convert the data block number into a byte offset
-        uint64_t data_block_offset = (uint64_t)(block_addrs[i] - 1) * block_size + fs_data->start_offset;
-        read(fs_data->disk_number, data_block_offset, to_read, (uint8_t*)data + dst);
-
-        (*blocks_read)++;
-    }
-
-    free(block_addrs);
 }
 
-// ------------------------------------------------------------------------
-// Helper to read from a double-indirect block pointer (points to multiple
-// single-indirect arrays).
-// ------------------------------------------------------------------------
-static void read_double_indirect_blocks(
-    filesystem_data* fs_data,
-    void*            data,
-    uint32_t         block_num,
-    uint64_t         size_to_read,
-    uint64_t         block_size,
-    uint64_t*        blocks_read
-) {
+
+/**
+ * Reads a full block from 'block_num' into 'buffer', based on block_size.
+ * Returns 0 on success, non-zero on failure (you can adapt this logic).
+ * You already have a read(...) function; we wrap it for clarity.
+ */
+static int read_full_block(filesystem_data* fs_data, uint32_t block_num, uint64_t block_size, void* buffer)
+{
     if (block_num == 0) {
-        return;
+        return -1; // invalid block number
     }
 
-    // The double-indirect block itself is an array of block pointers
-    uint32_t* outer_block = malloc(block_size);
-    if (!outer_block) {
-        printf("EXT2: Could not allocate memory for double-indirect block.\n");
-        return;
-    }
+    // Convert block_num to a byte offset on disk
+    uint64_t offset_on_disk = ((uint64_t)block_num - 1) * block_size
+                              + fs_data->start_offset;
 
-    // Convert block_num to a byte offset
-    uint64_t offset_on_disk = (uint64_t)(block_num - 1) * block_size + fs_data->start_offset;
-    read(fs_data->disk_number, offset_on_disk, block_size, outer_block);
+    read(fs_data->disk_number, offset_on_disk, block_size, buffer);
 
-    size_t outer_entries = block_size / sizeof(uint32_t);
-    for (size_t i = 0; i < outer_entries; i++) {
-        if ((*blocks_read) * block_size >= size_to_read) {
-            break;
-        }
-        if (outer_block[i] == 0) {
-            break;
-        }
-
-        // Each entry points to a single-indirect block
-        read_single_indirect_blocks(fs_data, data, outer_block[i],
-                                    size_to_read, block_size, blocks_read);
-    }
-
-    free(outer_block);
+    return 0;
 }
 
-// ------------------------------------------------------------------------
-// Helper to read from a triple-indirect block pointer (points to multiple
-// double-indirect arrays).
-// ------------------------------------------------------------------------
-static void read_triple_indirect_blocks(
-    filesystem_data* fs_data,
-    void*            data,
-    uint32_t         block_num,
-    uint64_t         size_to_read,
-    uint64_t         block_size,
-    uint64_t*        blocks_read
-) {
-    if (block_num == 0) {
-        return;
+/**
+ * A helper that returns the "index"-th 32-bit block pointer from the indirect
+ * block "indirect_block_num". In EXT2, an indirect block is just an array
+ * of 32-bit block numbers.
+ *
+ * If something fails or the index is out of range, returns 0.
+ */
+static uint32_t get_indirect_block_entry(filesystem_data* fs_data, uint32_t indirect_block_num, uint64_t block_size, uint32_t index){
+    if (indirect_block_num == 0) {
+        return 0;
     }
 
-    // The triple-indirect block is an array of block pointers,
-    // each pointing to a double-indirect array
-    uint32_t* triple_block = malloc(block_size);
-    if (!triple_block) {
-        printf("EXT2: Could not allocate memory for triple-indirect block.\n");
-        return;
+    uint32_t* block_table = malloc(block_size);
+    if (!block_table) {
+        printf("EXT2: Could not allocate memory for indirect block.\n");
+        return 0;
     }
 
-    // Convert block_num to a byte offset
-    uint64_t offset_on_disk = (uint64_t)(block_num - 1) * block_size + fs_data->start_offset;
-    read(fs_data->disk_number, offset_on_disk, block_size, triple_block);
-
-    size_t entries = block_size / sizeof(uint32_t);
-    for (size_t i = 0; i < entries; i++) {
-        if ((*blocks_read) * block_size >= size_to_read) {
-            break;
-        }
-        if (triple_block[i] == 0) {
-            break;
-        }
-
-        // Each entry points to a double-indirect block
-        read_double_indirect_blocks(fs_data, data, triple_block[i],
-                                    size_to_read, block_size, blocks_read);
+    if (read_full_block(fs_data, indirect_block_num, block_size, block_table) != 0) {
+        free(block_table);
+        return 0;
     }
 
-    free(triple_block);
+    uint32_t entries_per_block = (uint32_t)(block_size / sizeof(uint32_t));
+    uint32_t result = 0;
+    if (index < entries_per_block) {
+        result = block_table[index];
+    }
+    free(block_table);
+    return result;
 }
 
-// ------------------------------------------------------------------------
-// The main function that reads an inode's data (direct + indirect blocks).
-// Uses the above helpers for single/double/triple-indirect sections.
-// ------------------------------------------------------------------------
-void* ext2_read_inode(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num, size_t* size_read){
-    // 1) Read superblock to get block size
+/**
+ * ext2_get_nth_block_offset:
+ *  Given:
+ *    - fs_data:          Your filesystem_data structure (has disk_number, start_offset)
+ *    - super_block:      The ext2 superblock (used to get block_size if needed)
+ *    - inode:            The inode struct, which has i_block[15] pointers
+ *    - block_index:      The logical block index in this file (0-based)
+ *
+ *  Returns:
+ *    The on-disk byte offset where this block is located, or 0 if invalid/unallocated.
+ */
+uint64_t ext2_get_nth_block_offset_of_inode(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num, uint64_t block_index){
+    // 1) Get the actual block size
     uint64_t block_size = s_block_get_block_size(super_block);
 
-    // 2) Read the inode metadata
-    ext2_inode* inode_meta = ext2_read_inode_metadata(fs_data, super_block, inode_num);
-    uint64_t size_to_read = ((uint64_t)inode_meta->i_dir_acl << 32) | inode_meta->i_size;
+    // 2) Each indirect block is an array of 32-bit pointers
+    uint64_t addresses_per_block = block_size / sizeof(uint32_t);
 
-    // 3) Allocate a buffer for the entire file
-    void* data = malloc(size_to_read);
-    if (!data) {
-        printf("EXT2: Couldn't allocate memory for inode data.\n");
-        *size_read = 0;
-        return NULL;
-    }
-
-    // We'll read blocks into 'data', tracking how many blocks have been read
-    uint64_t blocks_read = 0;
+    ext2_inode* inode = ext2_read_inode_metadata(fs_data, super_block, inode_num);
 
     // --------------------------------------------------------------------
-    // 1) Direct blocks (i_block[0..11])
+    // Direct blocks: i_block[0..11]
     // --------------------------------------------------------------------
-    for (int i = 0; i < 12; i++) {
-        if (blocks_read * block_size >= size_to_read) {
-            break;
+    if (block_index < 12) {
+        uint32_t block_num = inode->i_block[block_index];
+        if (block_num == 0) {
+            return 0; // block not allocated
         }
-        if (inode_meta->i_block[i] == 0) {
-            break;
+        return ((uint64_t)block_num - 1) * block_size + fs_data->start_offset;
+    }
+    block_index -= 12;
+
+    // --------------------------------------------------------------------
+    // Single-indirect: i_block[12]
+    // --------------------------------------------------------------------
+    if (block_index < addresses_per_block) {
+        uint32_t single_indirect_num = inode->i_block[12];
+        if (single_indirect_num == 0) {
+            return 0; // no single-indirect block allocated
         }
+        uint32_t block_num = get_indirect_block_entry(fs_data, single_indirect_num,
+                                                      block_size,
+                                                      (uint32_t)block_index);
+        if (block_num == 0) {
+            return 0;
+        }
+        return ((uint64_t)block_num - 1) * block_size + fs_data->start_offset;
+    }
+    block_index -= addresses_per_block;
 
-        uint64_t total_size_left = size_to_read - (blocks_read * block_size);
-        size_t   to_read         = (total_size_left < block_size)
-                                 ? (size_t)total_size_left
-                                 : (size_t)block_size;
-        size_t   dst             = (size_t)(blocks_read * block_size);
+    // --------------------------------------------------------------------
+    // Double-indirect: i_block[13]
+    //    - The double-indirect block is an array of pointers to single-indirect blocks
+    //    - Each single-indirect block is an array of data-block pointers
+    // --------------------------------------------------------------------
+    {
+        uint64_t double_capacity = addresses_per_block * addresses_per_block;
+        if (block_index < double_capacity) {
+            uint32_t double_indirect_num = inode->i_block[13];
+            if (double_indirect_num == 0) {
+                return 0;
+            }
 
-        // Convert this direct block number to a byte offset
-        uint64_t offset_on_disk = ((uint64_t)inode_meta->i_block[i] - 1) * block_size
-                                  + fs_data->start_offset;
+            // First level index: which single-indirect block?
+            uint32_t outer_index = (uint32_t)(block_index / addresses_per_block);
+            // Second level index: which entry inside that single-indirect block?
+            uint32_t inner_index = (uint32_t)(block_index % addresses_per_block);
 
-        // Read from disk into our data buffer
-        read(fs_data->disk_number, offset_on_disk, to_read, (uint8_t*)data + dst);
+            // Get the single-indirect block
+            uint32_t single_block_num = get_indirect_block_entry(fs_data, 
+                                                                 double_indirect_num,
+                                                                 block_size, 
+                                                                 outer_index);
+            if (single_block_num == 0) {
+                return 0;
+            }
 
-        blocks_read++;
+            // Get the final data block from that single-indirect block
+            uint32_t block_num = get_indirect_block_entry(fs_data,
+                                                          single_block_num,
+                                                          block_size,
+                                                          inner_index);
+            if (block_num == 0) {
+                return 0;
+            }
+            return ((uint64_t)block_num - 1) * block_size + fs_data->start_offset;
+        }
+        block_index -= double_capacity;
     }
 
     // --------------------------------------------------------------------
-    // 2) Single indirect block (i_block[12])
+    // Triple-indirect: i_block[14]
+    //    - The triple-indirect block is an array of pointers to double-indirect blocks
+    //    - Each double-indirect block is an array of pointers to single blocks
+    //    - Each single-indirect block is an array of pointers to data blocks
     // --------------------------------------------------------------------
-    if (blocks_read * block_size < size_to_read && inode_meta->i_block[12] != 0) {
-        read_single_indirect_blocks(fs_data, data, inode_meta->i_block[12],
-                                    size_to_read, block_size, &blocks_read);
+    {
+        uint64_t double_capacity = addresses_per_block * addresses_per_block;
+        uint64_t triple_capacity = double_capacity * addresses_per_block;
+        if (block_index < triple_capacity) {
+            uint32_t triple_indirect_num = inode->i_block[14];
+            if (triple_indirect_num == 0) {
+                return 0;
+            }
+
+            // outer_index: which double-indirect block do we use?
+            uint32_t outer_index = (uint32_t)(block_index / double_capacity);
+            // remainder: which block inside that double-indirect block?
+            uint32_t remainder   = (uint32_t)(block_index % double_capacity);
+
+            // Read the triple-indirect block
+            uint32_t double_block_num = get_indirect_block_entry(fs_data,
+                                                                 triple_indirect_num,
+                                                                 block_size,
+                                                                 outer_index);
+            if (double_block_num == 0) {
+                return 0;
+            }
+
+            // Next, we have double-indirect logic again
+            uint32_t outer_index2 = remainder / (uint32_t)addresses_per_block;
+            uint32_t inner_index2 = remainder % (uint32_t)addresses_per_block;
+
+            // Read the next level (single-indirect block)
+            uint32_t single_block_num = get_indirect_block_entry(fs_data,
+                                                                 double_block_num,
+                                                                 block_size,
+                                                                 outer_index2);
+            if (single_block_num == 0) {
+                return 0;
+            }
+
+            // Finally, get the data block pointer
+            uint32_t block_num = get_indirect_block_entry(fs_data,
+                                                          single_block_num,
+                                                          block_size,
+                                                          inner_index2);
+            if (block_num == 0) {
+                return 0;
+            }
+            return ((uint64_t)block_num - 1) * block_size + fs_data->start_offset;
+        }
     }
 
-    // --------------------------------------------------------------------
-    // 3) Double indirect block (i_block[13])
-    // --------------------------------------------------------------------
-    if (blocks_read * block_size < size_to_read && inode_meta->i_block[13] != 0) {
-        read_double_indirect_blocks(fs_data, data, inode_meta->i_block[13],
-                                    size_to_read, block_size, &blocks_read);
-    }
-
-    // --------------------------------------------------------------------
-    // 4) Triple indirect block (i_block[14])
-    // --------------------------------------------------------------------
-    if (blocks_read * block_size < size_to_read && inode_meta->i_block[14] != 0) {
-        read_triple_indirect_blocks(fs_data, data, inode_meta->i_block[14],
-                                    size_to_read, block_size, &blocks_read);
-    }
-
-    // Calculate how many bytes we actually read
-    uint64_t actual_bytes_read = blocks_read * block_size;
-    if (actual_bytes_read > size_to_read) {
-        actual_bytes_read = size_to_read;  // safeguard
-    }
-    free(inode_meta);
-    *size_read = (size_t)actual_bytes_read;
-    return data;
+    // If we get here, the requested block_index is beyond triple-indirect range
+    return 0;
 }

@@ -47,13 +47,12 @@ disk *find_disk(uint64_t id) {
 }
 
 void read(uint64_t disk_id, uint64_t offset, size_t size, void* buffer) {
-    printf("Reading: 0x%x\n", offset);
     disk *disk = find_disk(disk_id);
 
     switch (disk->disk_type) {
         case AHCI_SATA: {// Use a temporary buffer in order to use non sector aligned offsets
             uint64_t offset_sectors = offset / SECTOR_SIZE;
-            uint64_t size_sectors = upper_divide(size, SECTOR_SIZE);
+            uint64_t size_sectors = UPPER_DIVIDE(size, SECTOR_SIZE);
             uint8_t* buffer_temp = malloc(size_sectors*SECTOR_SIZE);
 
             // Set paging section as uncacheable for dma
@@ -80,7 +79,7 @@ void write(uint64_t disk_id, uint64_t offset, size_t size, void* buffer) {
     switch (disk->disk_type) {
         case AHCI_SATA: {// Use a temporary buffer in order to use non sector aligned offsets
             uint64_t offset_sectors = offset / SECTOR_SIZE;
-            uint64_t size_sectors = upper_divide(size, SECTOR_SIZE);
+            uint64_t size_sectors = UPPER_DIVIDE(size, SECTOR_SIZE);
             uint8_t* buffer_temp = malloc(size_sectors*SECTOR_SIZE);
 
             // Its kinda a work around but should be ok.

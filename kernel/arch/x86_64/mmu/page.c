@@ -98,7 +98,7 @@ void switch_context(Context ctx) {
     
     // Map Kernel (In new PML4)
     // Map Kernel + Page Frame Allocator + Pagign Tables in new Kernel Context
-    memset(ctx.allocator->bitmap, 1, upper_divide(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
+    memset(ctx.allocator->bitmap, 1, UPPER_DIVIDE(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
 
     // map_memory_range(ctx, (void*)MBR_LOAD_ADDR, (void*) (MBR_LOAD_ADDR + (1 * MB)), (void*)MBR_LOAD_ADDR);
     map_memory_range(ctx, (void*)0x0, (void*) (0x0 + (3 * MB) - 1), (void*)0x0);

@@ -152,7 +152,7 @@ static inline size_t s_block_get_block_size(ext2_super_block* s_block){
 }
 
 static inline size_t get_number_of_block_groups(ext2_super_block* superblock){
-    return upper_divide(superblock->inodecount, superblock->number_of_inodes_per_group);
+    return UPPER_DIVIDE((uint64_t)superblock->inodecount, (uint64_t)superblock->number_of_inodes_per_group);
 }
 
 void ext2_init(filesystem_data* fs_data);
@@ -160,17 +160,14 @@ ext2_super_block ext2_read_super_block(filesystem_data* fs_data);
 ext2_block_group_descriptor ext2_read_block_group_descriptor(filesystem_data* fs_data, ext2_super_block* s_block , uint64_t group_num);
 
 
+uint64_t ext2_get_nth_block_offset_of_inode(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num, uint64_t block_index);
+
+size_t ext2_get_inode_size(filesystem_data* fs_data, ext2_super_block* s_block, uint64_t inode_num);
+
 ext2_inode* ext2_read_inode_metadata(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num);
 
-/**
- * @brief Reads the metadata of an inode
- * @param fs_data The data about the filesystem
- * @param super_block The superblock
- * @param 
- * @param path The path to find the inode in
- * @return 0 on fail, inode num at success 
- */
-void* ext2_read_inode(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num, size_t* size_read);
+
+size_t ext2_read_inode(filesystem_data* fs_data, ext2_super_block* s_block, uint64_t inode_num, size_t offset_bytes, size_t count_bytes, void* out_buffer);
 
 /**
  * @brief Finds the inode number at a path

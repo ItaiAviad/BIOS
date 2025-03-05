@@ -88,12 +88,25 @@ int kmain(void) {
     vfs_mkdir("/mnt/mount1");
     mount_file_system("/mnt/mount1", 0, EXT2_START_OFFSET,FILESYSTEM_TYPE_EXT2);
 
+
+
     linkedListNode* list = vfs_list_dir("/mnt/mount1"); // The test
 
     while(list){
         printf("%s\n",list->data);
         list = list->next;
     }
+
+
+    filesystem_data* fs_data = vfs_get_node("/mnt/mount1").found_node->data;
+    ext2_super_block s_block = ext2_read_super_block(fs_data);
+    uint64_t inode_num = ext2_get_inode_number_at_path(fs_data, &s_block, "/test/test_file.txt");
+    size_t size = ext2_get_inode_size(fs_data, &s_block, inode_num);
+
+    void* buff = malloc(size);
+    ext2_read_inode(fs_data, &s_block, inode_num, 0, size, buff);
+
+    printf("%s", buff);
 
 
     while (1) {}
@@ -142,7 +155,7 @@ void user_init() {
     init_recursive_paging(pcb.ctx);
     
     // Mark process binary, pfa as allocated
-    memset(pcb.ctx.allocator->bitmap, 0x1, upper_divide(PROC_PML4T_ADDR, PAGE_SIZE));
+    memset(pcb.ctx.allocator->bitmap, 0x1, UPPER_DIVIDE(PROC_PML4T_ADDR, PAGE_SIZE));
 
     // Map process binary, pfa
     // map_memory_range(pcb.ctx, (void*) (PROC_BIN_ADDR), (void*) (PROC_PML4T_ADDR - 1), (void*) (pcb.entry + PROC_BIN_ADDR));

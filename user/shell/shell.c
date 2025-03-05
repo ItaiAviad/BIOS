@@ -70,7 +70,7 @@ int get_cmd(struct tty* tty) {
         tty->cache[tty->ci][argc] = ptr;
 
         // copy token to argv[argc]
-        int len = min(strlen(token), ARG_MAX - 1);
+        int len = MIN(strlen(token), ARG_MAX - 1);
         memset(ptr, 0x0, strlen(ptr));
         memcpy(ptr, token, len);
         ptr[len + 1] = '\0';
