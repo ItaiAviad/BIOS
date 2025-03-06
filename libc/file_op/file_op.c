@@ -44,6 +44,9 @@ int close(int fd){
 
 int read(int fd, void* buf, size_t cnt){
     #if defined(__is_libk)
+        if(!(fdp_arr[fd].flags == O_RDONLY || fdp_arr[fd].flags == O_RDWR)){
+            return -3;
+        }
         if(fdp_arr[fd].file_path == NULL){
             return -1;
         }
@@ -58,6 +61,9 @@ int read(int fd, void* buf, size_t cnt){
 
 int write(int fd, void* buf, size_t cnt){
     #if defined(__is_libk)
+        if(!(fdp_arr[fd].flags == O_WRONLY || fdp_arr[fd].flags == O_RDWR)){
+            return -3;
+        }
         if(fdp_arr[fd].file_path == NULL){
             return -1;
         }
