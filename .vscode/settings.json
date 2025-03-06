@@ -110,6 +110,24 @@
   "string_view": "c",
   "ranges": "c",
   "span": "c",
-  "vector": "c"
+  "vector": "c",
+  "hash_map": "c",
+  "bitset": "c",
+  "initializer_list": "c",
+  "__hash_table": "c",
+  "__split_buffer": "c",
+  "__tree": "c",
+  "deque": "c",
+  "list": "c",
+  "map": "c",
+  "queue": "c",
+  "set": "c",
+  "stack": "c",
+  "unordered_map": "c",
+  "unordered_set": "c",
+  "*.ipp": "c",
+  "chrono": "c",
+  "disk.h": "c",
+  "time.h": "c"
 }
 }

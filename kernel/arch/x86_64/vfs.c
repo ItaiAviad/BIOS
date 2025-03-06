@@ -68,8 +68,12 @@ list_dir_cleanup:
     }
     return ret;
 }
+int64_t vfs_write(char *path, size_t offset_bytes, size_t count_bytes, void* out_buffer){
+    // TODO!!
+    return 0;
+}
 
-size_t vfs_read(char *path, size_t offset_bytes, size_t count_bytes, void* out_buffer) {
+int64_t vfs_read(char *path, size_t offset_bytes, size_t count_bytes, void* out_buffer) {
     size_t ret = 0;
 
     // Find the parent folder
@@ -78,6 +82,7 @@ size_t vfs_read(char *path, size_t offset_bytes, size_t count_bytes, void* out_b
     vfs_node *found = vfs_get_node_ret.found_node;
     if (!found) {
         VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
+        ret = -1;
         goto list_dir_cleanup;
     }
 
@@ -94,7 +99,12 @@ size_t vfs_read(char *path, size_t offset_bytes, size_t count_bytes, void* out_b
             switch (fs->type) {
                 case FILESYSTEM_TYPE_EXT2: {
                     ext2_super_block s_block = ext2_read_super_block(fs);
-                    ret = ext2_read_inode(fs, &s_block, ext2_get_inode_number_at_path(fs, &s_block, remaining_path), offset_bytes, count_bytes, out_buffer);
+                    uint64_t inode_num = ext2_get_inode_number_at_path(fs, &s_block, remaining_path);
+                    if(inode_num == 0){
+                        VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
+                        ret = -1;
+                    }
+                    ret = ext2_read_inode(fs, &s_block, inode_num, offset_bytes, count_bytes, out_buffer);
                     break;
                 }
 
@@ -119,7 +129,7 @@ list_dir_cleanup:
     return ret;
 }
 
-size_t vfs_get_file_size(char *path) {
+int64_t vfs_get_file_size(char *path) {
     size_t ret = 0;
 
     // Find the parent folder
@@ -128,6 +138,7 @@ size_t vfs_get_file_size(char *path) {
     vfs_node *found = vfs_get_node_ret.found_node;
     if (!found) {
         VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
+        ret = -1;
         goto list_dir_cleanup;
     }
 
@@ -144,7 +155,12 @@ size_t vfs_get_file_size(char *path) {
             switch (fs->type) {
                 case FILESYSTEM_TYPE_EXT2: {
                     ext2_super_block s_block = ext2_read_super_block(fs);
-                    ret = ext2_get_inode_size(fs, &s_block, ext2_get_inode_number_at_path(fs, &s_block, remaining_path));
+                    uint64_t inode_num = ext2_get_inode_number_at_path(fs, &s_block, remaining_path);
+                    if(inode_num == 0){
+                        VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
+                        ret = -1;
+                    }
+                    ret = ext2_get_inode_size(fs, &s_block, inode_num);
                     break;
                 }
 

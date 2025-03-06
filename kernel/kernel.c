@@ -98,7 +98,10 @@ int kmain(void) {
     size_t size = vfs_get_file_size("/mnt/mount1/test/test_file.txt");
 
     void* buff = malloc(size);
-    vfs_read("/mnt/mount1/test/test_file.txt", 0, size, buff);
+    
+    int fd = open("/mnt/mount1/test/test_file.txt", O_RDONLY);
+    read(fd, buff, size);
+    close(fd);
 
     printf("%s", buff);
 
@@ -142,7 +145,7 @@ void user_init() {
     map_memory_range(kpcb.ctx, (void*) (PROC_BIN_ADDR), (void*) (PROC_MEM_SIZE / 2 - 1), (void*) (pcb.entry + PROC_BIN_ADDR));
 
     // Read binary into process memory
-    read(0, 0, PROC_BIN_SIZE, (void*) (PROC_BIN_ADDR));
+    read_disk(0, 0, PROC_BIN_SIZE, (void*) (PROC_BIN_ADDR));
 
     // PML4T
     kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)pcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;

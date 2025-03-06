@@ -7,6 +7,7 @@
 #include <types.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <file_op.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -64,6 +65,11 @@ enum SYSCALL_NR {
     sys_memset,
     sys_memcpy,
     sys_fgets,
+    sys_open,
+    sys_close,
+    sys_read,
+    sys_write,
+    sys_lseek
 };
 
 #if defined(__is_libk)
@@ -91,6 +97,11 @@ static const syscall_t SYSCALL_TABLE[] = {
     [sys_memset] = memset,
     [sys_memcpy] = memcpy,
     [sys_fgets] = fgets,
+    [sys_open] = open,
+    [sys_close] = close,
+    [sys_write] = write,
+    [sys_read] = read,
+    [sys_lseek] = lseek
 };
 
 #pragma GCC diagnostic pop

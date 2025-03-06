@@ -100,8 +100,8 @@ CFLAGS :=  -O0 -mno-red-zone -mno-mmx -mno-sse -msoft-float -ffreestanding -m64 
 NASMFLAGS := -f elf64 -g -DUSER_LOAD_ADDR=$(USER_LOAD_ADDR)
 LDFLAGS_KERNEL := -T $(KERNEL_LD) $(INCLUDES)
 LDFLAGS_USER := -T $(USER_LD) $(INCLUDES)
-LIBC_FLAGS := $(CFLAGS) -D__is_libc
-LIBK_FLAGS := $(CFLAGS) -D__is_libk
+LIBC_FLAGS := $(CFLAGS) -D __is_libc
+LIBK_FLAGS := $(CFLAGS) -D __is_libk
 
 # -----------------------------------------------
 
