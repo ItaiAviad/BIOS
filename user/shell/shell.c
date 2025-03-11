@@ -120,8 +120,9 @@ void traverse_cache(int offset) {
     tty0.tci %= MAX_CMDS_CACHE;
 
     if (tty0.tci == tty0.ci || // back to current command - not allowed
-        (!tty0.cache[tty0.tci] || !tty0.cache[tty0.tci][0])) // invalid cache entry
+        (!tty0.cache[tty0.tci] || !tty0.cache[tty0.tci][0])) { // invalid cache entry
         return (void) (tty0.tci = tmptci);
+    }
     
     // show cache
     // clear current buffer
@@ -129,6 +130,7 @@ void traverse_cache(int offset) {
 
     // insert current cache
     char *dst = malloc(BUFFER_SIZE);
-    stdin_insert(strjoin(dst, tty0.cargc[tty0.tci], tty0.cache[tty0.tci], ARGV_DELIM));
+    strjoin(dst, tty0.cargc[tty0.tci], tty0.cache[tty0.tci], ARGV_DELIM);
+    stdin_insert(dst);
     free(dst);
 }

@@ -42,7 +42,7 @@ typedef struct Context {
 } Context;
 
 __attribute__((unused))
-void* heap_malloc_state_base;
+void* g_heap_malloc_state_base;
 // ----------------------------------------------
 
 // Page Frame Allocator

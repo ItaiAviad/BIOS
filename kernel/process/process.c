@@ -23,7 +23,7 @@ void init_kernel_process(void) {
 
     // Kernel Heap - Manage Kernel Dynamic Memory
     init_heap(kpcb.ctx, KERNEL_HEAP_START, KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE, true);
-    kpcb.heap = heap_malloc_state_base;
+    kpcb.heap = g_heap_malloc_state_base;
     printf("%s Heap: %p\n", LOG_SYM_SUC, kpcb.heap);
 
     // Map boot memory (bootloader set memory. i.e. GDT, TSS)

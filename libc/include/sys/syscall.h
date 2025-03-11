@@ -70,6 +70,7 @@ enum SYSCALL_NR {
     sys_read,
     sys_write,
     sys_lseek
+    sys_send_dns_request,
 };
 
 #if defined(__is_libk)
@@ -102,6 +103,7 @@ static const syscall_t SYSCALL_TABLE[] = {
     [sys_write] = write,
     [sys_read] = read,
     [sys_lseek] = lseek
+    [sys_send_dns_request] = send_dns_request,
 };
 
 #pragma GCC diagnostic pop

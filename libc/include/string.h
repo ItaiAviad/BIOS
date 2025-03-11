@@ -17,7 +17,7 @@ extern "C" {
  * 
  * @return int 
  */
-int memcmp(const void*, const void*, size_t);
+int memcmp(const unsigned char* a, const unsigned char *b, size_t size);
 /**
  * @brief Copy memory from src to dst
  * 

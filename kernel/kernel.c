@@ -76,6 +76,7 @@ int kmain(void) {
     enumerate_pci();
 
     printf("%s PCI\n", LOG_SYM_SUC);
+    print_pci_devices();
 
     // Setup AHCI and enumerate Disks
     enumerate_disks();
@@ -177,7 +178,7 @@ void user_init() {
     while (heap_slot < PROC_SLOTS_OFFSET || abs(stack_slot - heap_slot) <= 1)
         heap_slot = rand() % (PROC_SLOTS) + (PROC_SLOTS_OFFSET);
     pcb.heap = (void*) (heap_slot * PROC_SLOT_SIZE);
-    // TODO: Update heap_malloc_state_base so kernel mallocs in process's heap
+    // TODO: Update g_heap_malloc_state_base so kernel mallocs in process's heap
     // map_memory_range(pcb.ctx, (void*) (pcb.heap), (void*) (pcb.heap + PROC_STACK_SIZE - 1), (void*) ((uint64_t) pcb.entry + (uint64_t) pcb.heap));
     // pcb.heap += (uint64_t) pcb.entry; // if heap relative to kernel's VAS
     // Init heap
@@ -210,5 +211,7 @@ void user_init() {
     invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
     set_pml4_address((uint64_t *) pcb.ctx.pml4);
 
+    // printf("123\n");
     jump_usermode((void*)PROC_BIN_ADDR, (void*)(pcb.stack));
+    while (1) {}
 }

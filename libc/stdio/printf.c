@@ -79,7 +79,26 @@ int printf(const char* format, ...) {
 			written += len;
         } else if (*format == 'd') {
             format++;
-            int64_t i = va_arg(parameters, int64_t);
+            // int64_t i = va_arg(parameters, int64_t);
+            int i = va_arg(parameters, int);
+            if (!maxrem) {
+                // TODO: Set errno to EOVERFLOW.
+                return -1;
+            }
+            char str[64 + 1];
+            memset(str, 0, 64 + 1);
+            itoa(i, str, 10);
+            size_t len = strlen(str);
+            if (maxrem < len) {
+				// TODO: Set errno to EOVERFLOW.
+				return -1;
+			}
+            if (!print(str, len))
+				return -1;
+			written += len;
+        } else if (*format == 'u') {
+            format++;
+            uint32_t i = va_arg(parameters, uint32_t);
             if (!maxrem) {
                 // TODO: Set errno to EOVERFLOW.
                 return -1;

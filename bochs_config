@@ -1,6 +1,0 @@
-megs: 128
-ata0-master: type=disk, path=$(FLOPPY_BIN), mode=flat
-boot: disk
-mouse: enabled=0
-display_library: x, options="gui_debug"
-magic_break: enabled=1

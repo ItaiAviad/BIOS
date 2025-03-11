@@ -24,6 +24,8 @@ typedef struct {
     bool right;
 } keyboard_state;
 
+
+#define CAN 0x18
 // Extended Keycodes
 enum KEYCODES_EXT {
     KEYCODES_EXT_START = 0x100,
@@ -49,5 +51,12 @@ void stdin_clear();
  * @param s 
  */
 void stdin_insert(const char* s);
+
+/**
+ * @brief Send a DNS Request
+ * 
+ * @param s 
+ */
+void send_dns_request(const char* s);
 
 #endif

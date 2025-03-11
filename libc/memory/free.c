@@ -4,7 +4,7 @@
 void free(void* ptr) {
 #if defined(__is_libk)
     // Get Heap
-    malloc_state* heap = (malloc_state*) heap_malloc_state_base;
+    malloc_state* heap = (malloc_state*) g_heap_malloc_state_base;
 
     malloc_chunk* cur = heap->mchunk;
     while (cur != NULL)

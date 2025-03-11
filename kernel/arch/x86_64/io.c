@@ -22,7 +22,7 @@ keyboard_t keyboard = {
         .down = false,
         .left = false,
         .right = false
-    }
+    },
 };
 
 bool is_special_char(char c) {

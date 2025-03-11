@@ -22,6 +22,7 @@ void print_disks() {
     #endif
     while (head != NULL) {
         // #ifdef DEBUG
+        // #ifdef DEBUG
         disk *device = (disk *)head->data;
         printf("id: %d, size: %d, type: %d\n", device->disk_id, (uint64_t)device->disk_size, device->disk_type);
         // #endif
@@ -60,8 +61,8 @@ void read_disk(uint64_t disk_id, uint64_t offset, size_t size, void* buffer) {
             flush_tlb();
             read_ahci(disk->drive_data.ahci_drive_data.port, offset_sectors, size_sectors, buffer_temp);
             
-            map_memory_range_with_flags(kpcb.ctx, (void*)buffer_temp, (void*)buffer_temp + size_sectors*SECTOR_SIZE - 1, (void*)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_USER, 1);
-            flush_tlb();
+            // map_memory_range_with_flags(kpcb.ctx, (void*)buffer_temp, (void*)buffer_temp + size_sectors*SECTOR_SIZE - 1, (void*)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_USER, 1);
+            // flush_tlb();
 
             memcpy(buffer, buffer_temp + (offset % SECTOR_SIZE), size);
 
@@ -83,15 +84,15 @@ void write_disk(uint64_t disk_id, uint64_t offset, size_t size, void* buffer) {
             uint8_t* buffer_temp = malloc(size_sectors*SECTOR_SIZE);
 
             // Its kinda a work around but should be ok.
-            map_memory_range_with_flags(kpcb.ctx, (void*)buffer_temp, (void*)buffer_temp + size_sectors*SECTOR_SIZE - 1, (void*)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_UNCACHEABLE | PAGE_USER, 1);
-            flush_tlb();
+            // map_memory_range_with_flags(kpcb.ctx, (void*)buffer_temp, (void*)buffer_temp + size_sectors*SECTOR_SIZE - 1, (void*)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_UNCACHEABLE | PAGE_USER, 1);
+            // flush_tlb();
             
             read_ahci(disk->drive_data.ahci_drive_data.port, offset_sectors, size_sectors, buffer_temp);
-            memcpy(buffer_temp + (offset_sectors * 512 - offset), buffer, size);
+            memcpy(buffer_temp + (offset % SECTOR_SIZE), buffer, size);
             write_ahci(disk->drive_data.ahci_drive_data.port, offset_sectors, size_sectors, buffer_temp);
 
-            map_memory_range_with_flags(kpcb.ctx, (void*)buffer_temp, (void*)buffer_temp + size_sectors*SECTOR_SIZE - 1, (void*)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_USER, 1);
-            flush_tlb();
+            // map_memory_range_with_flags(kpcb.ctx, (void*)buffer_temp, (void*)buffer_temp + size_sectors*SECTOR_SIZE - 1, (void*)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_USER, 1);
+            // flush_tlb();
 
             free(buffer_temp);
 

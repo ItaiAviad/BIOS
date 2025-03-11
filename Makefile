@@ -1,5 +1,9 @@
 # Main Makefile
 
+# b => Build
+# r => Run
+# n => Network
+
 # Make Makefile Silent (without repeating @ before commands)
 ifndef VERBOSE
 .SILENT:
@@ -105,7 +109,7 @@ LIBK_FLAGS := $(CFLAGS) -D __is_libk
 
 # -----------------------------------------------
 
-.PHONY: all build boot always run clean
+.PHONY: all build boot always clean
 
 all: build
 
@@ -212,6 +216,64 @@ $(OBJ_DIR)/%.libc.o: %.c
 	mkdir -p $(dir $@)
 	$(CC) $(LIBC_FLAGS) -c $< -o $@
 
+# Build Clean
+bclean:
+	rm -rf $(BUILD_DIR)/*
+	rm -f *_tempwhy
+
+# -----------------------------------------------
+# Network
+# See: https://wiki.qemu.org/Documentation/Networking
+#      https://gist.github.com/extremecoders-re/e8fd8a67a515fee0c873dcafc81d811c
+#      https://wiki.osdev.org/RTL8139
+
+NET := biosnet0
+VND := rtl8139# Virtual Network Device
+BRIDGE := br0
+TAP := tap0
+WLAN0 := wlan0
+ETHIF := enp0s20f0u2u1c2 # (ethernet interface)
+# interface:=$(shell ip addr | awk '/state UP/ {print $$2}' | head -n 1 | awk '{print substr($$0, 1, length($$0)-1)}')
+# ETHIF := $(interface) # (ethernet interface)
+
+# Network Setup
+nsetup:
+	sudo brctl addbr $(BRIDGE)
+	-sudo brctl addif $(BRIDGE) $(ETHIF)
+	# -sudo brctl addif $(BRIDGE) $(WLAN0)
+
+	# tap
+	sudo tunctl -t $(TAP) -u root
+	sudo ip link set $(TAP) promisc on
+	sudo brctl addif $(BRIDGE) $(TAP)
+
+	# -sudo ifconfig $(ETHIF) up
+	sudo ifconfig $(TAP) up
+	sudo ifconfig $(BRIDGE) up
+
+	# dhcp
+	sudo dhclient $(BRIDGE)
+
+	brctl show
+
+# Network Clean
+nclean:
+	-sudo ip link set $(ETHIF) promisc off
+	-sudo ip link set $(ETHIF) up
+
+	-sudo brctl delif $(BRIDGE) $(TAP)
+	-sudo tunctl -d $(TAP)
+
+	-sudo brctl delif $(BRIDGE) $(ETHIF)
+	# -sudo brctl delif $(BRIDGE) $(WLAN0)
+
+	-sudo ifconfig $(BRIDGE) down
+
+	-sudo brctl delbr $(BRIDGE)
+
+	# dhcp
+	-sudo dhclient -r $(BRIDGE)
+
 # ------------------------------------------------
 
 always:
@@ -219,14 +281,29 @@ always:
 	mkdir -p $(OBJ_DIR)
 	mkdir -p $(OBJ_DIR)/kernel
 
-run:
-	qemu-system-x86_64 -m 8G \
+# Common QEMU command
+QEMU_CMD = sudo qemu-system-x86_64 -m 8G \
 	-drive file=$(FLOPPY_BIN),format=raw,if=floppy \
 	-drive id=disk,file=$(DISK),format=raw,if=none \
 	-device ahci,id=ahci \
 	-device ide-hd,drive=disk,bus=ahci.0 \
 	-d int,cpu_reset,in_asm \
 	-no-reboot -no-shutdown -D log.txt
+	-machine kernel_irqchip=off
+
+ron:
+	echo "Running online..."
+	$(QEMU_CMD) \
+	-netdev tap,id=$(NET),ifname=$(TAP),script=no,downscript=no \
+	-device $(VND),netdev=$(NET),id=$(VND),mac=de:ad:be:ef:12:34 \
+	-object filter-dump,id=f1,netdev=$(NET),file=dump.dat
+
+	# -d int,cpu_reset,in_asm,guest_errors \
+	# -no-reboot -D log.txt
+
+roff:
+	echo "Running offline..."
+	$(QEMU_CMD)
 
 run_debugger: 
 	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) \
@@ -241,6 +318,4 @@ run_debug_bochs:
 	bochs -qf $(BOCHS_CONFIG)
 	rm -f $(BOCHS_CONFIG)
 
-clean:
-	rm -rf $(BUILD_DIR)/*
-	rm -f *_tempwhy
+clean: bclean nclean
