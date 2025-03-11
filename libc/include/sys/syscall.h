@@ -69,7 +69,7 @@ enum SYSCALL_NR {
     sys_close,
     sys_read,
     sys_write,
-    sys_lseek
+    sys_lseek,
     sys_send_dns_request,
 };
 
@@ -102,7 +102,7 @@ static const syscall_t SYSCALL_TABLE[] = {
     [sys_close] = close,
     [sys_write] = write,
     [sys_read] = read,
-    [sys_lseek] = lseek
+    [sys_lseek] = lseek,
     [sys_send_dns_request] = send_dns_request,
 };
 

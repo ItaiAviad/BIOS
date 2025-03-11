@@ -288,7 +288,7 @@ QEMU_CMD = sudo qemu-system-x86_64 -m 8G \
 	-device ahci,id=ahci \
 	-device ide-hd,drive=disk,bus=ahci.0 \
 	-d int,cpu_reset,in_asm \
-	-no-reboot -no-shutdown -D log.txt
+	-no-reboot -no-shutdown -D log.txt \
 	-machine kernel_irqchip=off
 
 ron:
