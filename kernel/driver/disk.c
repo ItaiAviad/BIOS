@@ -61,7 +61,7 @@ void read_disk(uint64_t disk_id, uint64_t offset, size_t size, void* buffer) {
             flush_tlb();
             read_ahci(disk->drive_data.ahci_drive_data.port, offset_sectors, size_sectors, buffer_temp);
             
-            // map_memory_range_with_flags(kpcb.ctx, (void*)buffer_temp, (void*)buffer_temp + size_sectors*SECTOR_SIZE - 1, (void*)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_USER, 1);
+            map_memory_range_with_flags(kpcb.ctx, (void*)buffer_temp, (void*)buffer_temp + size_sectors*SECTOR_SIZE - 1, (void*)buffer_temp, PAGE_WRITE | PAGE_PRESENT | PAGE_USER, 1);
             // flush_tlb();
 
             memcpy(buffer, buffer_temp + (offset % SECTOR_SIZE), size);
