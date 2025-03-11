@@ -9,8 +9,20 @@
 #include <arch/x86_64/gdt.h>
 #include <arch/x86_64/tss.h>
 #include <memory.h>
+#include <arch/x86_64/isr.h>
+
+typedef struct __attribute__((packed)) {
+    // Define the callee-saved registers
+    uint64_t cr2, r15, r14, r13, r12, rbp, rbx;
+
+    // Define the callee-clobbered registers
+    uint64_t r11, r10, r9, r8, rax, rcx, rdx, rsi, rdi;
+
+    uint64_t rip, cs, eflags, rsp, ss;
+} cpu_state;
 
 typedef struct ProcessControlBlock {
+    uint32_t ppid;                   // Parent process ID
     uint32_t pid;                   // Process ID
     uint32_t state;                 // Process state (e.g., READY, RUNNING, WAITING)
 
@@ -22,7 +34,7 @@ typedef struct ProcessControlBlock {
     void* heap;               // Start address of the heap
     
     uint32_t priority;              // Priority (useful for scheduling later)
-    uint64_t cpu_registers[16];     // Space for saving CPU registers during context switching
+    cpu_state cpu_context;     // CPU state for context switching
 } PCB;
 
 // Kernel ProcessControlBlock

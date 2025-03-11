@@ -130,6 +130,7 @@
   "disk.h": "c",
   "time.h": "c",
   "thread": "c",
-  "vfs.h": "c"
+  "vfs.h": "c",
+  "tss.h": "c"
 }
 }

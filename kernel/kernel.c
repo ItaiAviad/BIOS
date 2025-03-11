@@ -26,6 +26,7 @@
 #include <process.h>
 
 #include <vfs.h>
+#include <sched.h>
 
 
 extern void jump_usermode(void* entry, void* sp);
@@ -140,7 +141,7 @@ void user_init() {
         .heap = 0,
 
         .priority = 0,
-        .cpu_registers[0] = 0
+        .cpu_context = 0
     };
 
     // Map process memory in kernel's PML4T
@@ -213,6 +214,8 @@ void user_init() {
     flush_tlb();
     invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
     set_pml4_address((uint64_t *) pcb.ctx.pml4);
+
+    current_pcb = &pcb;
 
     // printf("123\n");
     jump_usermode((void*)PROC_BIN_ADDR, (void*)(pcb.stack));

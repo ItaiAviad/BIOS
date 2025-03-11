@@ -12,7 +12,7 @@ void init_kernel_process(void) {
         .heap = 0x0,
 
         .priority = 0,
-        .cpu_registers[0] = 0
+        .cpu_context = 0
     };
 
     // Initialize Kernel Paging:
