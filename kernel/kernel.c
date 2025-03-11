@@ -89,7 +89,7 @@ int kmain(void) {
     vfs_mkdir("/mnt/mount1");
     mount_file_system("/mnt/mount1", 0, EXT2_START_OFFSET,FILESYSTEM_TYPE_EXT2);
 
-    linkedListNode* list = vfs_list_dir("/mnt/mount1"); // The test
+    linkedListNode* list = list_dir("/mnt/mount1"); // The test
 
     while(list){
         printf("%s\n",list->data);

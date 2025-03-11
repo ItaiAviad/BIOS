@@ -84,5 +84,7 @@ enum LSEEK_OP{
 
 int lseek(int fd, size_t offset, enum LSEEK_OP whence);
 
+linkedListNode *list_dir(char *path);
+
 
 #endif

@@ -129,6 +129,7 @@
   "chrono": "c",
   "disk.h": "c",
   "time.h": "c",
-  "thread": "c"
+  "thread": "c",
+  "vfs.h": "c"
 }
 }
