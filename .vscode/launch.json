@@ -2,14 +2,28 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "gdb",
+      "request": "attach",
+      "name": "Attach to gdbserver",
+      "executable": "./build/kernel.elf",
+      "target": ":1234",
+      "remote": true,
+      "cwd": "${workspaceRoot}",
+      "valuesFormatting": "prettyPrinters",
+      "preLaunchTask": "start_qemu",
+      "autorun": [
+        ""
+      ]
+    },
+    {
       "name": "C/C++ Runner: Debug Session",
       "type": "cppdbg",
       "request": "launch",
       "args": [],
       "stopAtEntry": false,
       "externalConsole": false,
-      "cwd": "/home/gal/Documents/RiftS-Experiments",
-      "program": "/home/gal/Documents/RiftS-Experiments/build/Debug/outDebug",
+      "cwd": "/home/gal/BIOS/kernel/arch/x86_64/mmu",
+      "program": "/home/gal/BIOS/kernel/arch/x86_64/mmu/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
