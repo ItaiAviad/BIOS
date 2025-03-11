@@ -42,7 +42,7 @@ int close(int fd){
     #endif
 }
 
-int read(int fd, void* buf, size_t cnt){
+int64_t read(int fd, void* buf, size_t cnt){
     #if defined(__is_libk)
         if(!(fdp_arr[fd].flags == O_RDONLY || fdp_arr[fd].flags == O_RDWR)){
             return -3;
@@ -59,7 +59,7 @@ int read(int fd, void* buf, size_t cnt){
     #endif
 }
 
-int write(int fd, void* buf, size_t cnt){
+int64_t write(int fd, void* buf, size_t cnt){
     #if defined(__is_libk)
         if(!(fdp_arr[fd].flags == O_WRONLY || fdp_arr[fd].flags == O_RDWR)){
             return -3;
@@ -75,7 +75,7 @@ int write(int fd, void* buf, size_t cnt){
     #endif
 }
 
-int lseek(int fd, size_t offset, enum LSEEK_OP whence){
+int64_t lseek(int fd, size_t offset, enum LSEEK_OP whence){
     #if defined(__is_libk)
         if(fdp_arr[fd].file_path == NULL){
             return -1;
@@ -113,6 +113,8 @@ int lseek(int fd, size_t offset, enum LSEEK_OP whence){
         default:
             break;
         }
+
+        return fdp_arr[fd].current_offset;
     #else
         return syscall(sys_lseek, fd, offset, whence);
     #endif

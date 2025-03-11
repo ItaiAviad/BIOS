@@ -72,9 +72,9 @@ int open(const char* path, int flags);
 
 int close(int fd);
 
-int read(int fd, void* buf, size_t cnt);
+int64_t read(int fd, void* buf, size_t cnt);
 
-int write(int fd, void* buf, size_t cnt);
+int64_t write(int fd, void* buf, size_t cnt);
 
 enum LSEEK_OP{
     SEEK_SET,
@@ -82,7 +82,7 @@ enum LSEEK_OP{
     SEEK_END
 };
 
-int lseek(int fd, size_t offset, enum LSEEK_OP whence);
+int64_t lseek(int fd, size_t offset, enum LSEEK_OP whence);
 
 linkedListNode *list_dir(char *path);
 

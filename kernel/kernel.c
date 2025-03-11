@@ -96,11 +96,14 @@ int kmain(void) {
         list = list->next;
     }
 
-    size_t size = vfs_get_file_size("/mnt/mount1/test/test_file.txt");
+    int fd = open("/mnt/mount1/test/test_file.txt", O_RDONLY);
+
+    size_t size = lseek(fd, 0 ,SEEK_END)+1;
+
+    lseek(fd, 0 ,SEEK_SET);
 
     void* buff = malloc(size);
     
-    int fd = open("/mnt/mount1/test/test_file.txt", O_RDONLY);
     read(fd, buff, size);
     close(fd);
 
