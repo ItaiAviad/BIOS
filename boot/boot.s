@@ -1,8 +1,10 @@
 ; Bootloader
 ; The SECTOR_SIZE, KERNEL_SIZE_IN_SECTORS, KERNEL_LOAD_ADDR are set in assembly time and provided to nasm via the -D option
 
-%define KERNEL_LOAD_ADDR_SEGMENT KERNEL_LOAD_ADDR / 16
+%define KERNEL_LOAD_ADDR_SEGMENT (KERNEL_LOAD_ADDR + 16 - 1) / 16
 %define KERNEL_LOAD_ADDR_OFFSET KERNEL_LOAD_ADDR & 0x0FFF
+%define KERNEL_LOAD_ADDR_SEGMENT2 (KERNEL_LOAD_ADDR+128*SECTOR_SIZE + 16 - 1) / 16
+%define KERNEL_LOAD_ADDR_OFFSET2 (KERNEL_LOAD_ADDR+128*SECTOR_SIZE)  & 0x0FFF
 
 [org 0x7C00] ; BIOS loads the first 512 bits (boot sector) of the device to address 0x7C00
 
@@ -52,7 +54,7 @@ rm:
     ; mov si, msg_lm_sector
     ; call puts16
 
-; Read Kernel Sectors from disk
+    ; Read Kernel Sectors from disk
     mov [drive_number], dl ; BIOS should set dl to drive number
     mov bx, (KERNEL_LOAD_ADDR_OFFSET) ; Destination address offset
     mov ax, (KERNEL_LOAD_ADDR_SEGMENT) ; Destination address
@@ -68,14 +70,14 @@ rm:
 
     ; Read the remaining sectors
     mov [drive_number], dl ; BIOS should set dl to drive number
-    ; mov bx, (KERNEL_LOAD_ADDR_OFFSET) ; Destination address offset
-    ; add bx, (128 * SECTOR_SIZE) ; Add the offset of the previous read
-    mov bx, 0x0
-    mov ax, ((KERNEL_LOAD_ADDR + 128 * SECTOR_SIZE) / 16) ; Destination address
+    mov bx, (KERNEL_LOAD_ADDR_OFFSET2) ; Destination address offset
+    mov ax, (KERNEL_LOAD_ADDR_SEGMENT2) ; Destination address
     mov es, ax
-    mov ax, ((bootloader_end - _start + 128 * SECTOR_SIZE) + SECTOR_SIZE - 1) / SECTOR_SIZE ; LBA (sector address/offset)
+    mov ax, ((bootloader_end - _start) + SECTOR_SIZE - 1) / SECTOR_SIZE + 128 ; LBA (sector address/offset)
+
     mov cl, TOTAL_SIZE_IN_SECTORS ; # of sectors to read
     sub cl, 128
+
 
     read_less_than_128_sectors:
     call disk_read

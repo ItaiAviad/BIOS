@@ -100,7 +100,7 @@ MISC_FLAGS = -DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) -DKERNEL_STACK_START_ADDR=$(
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
 endif
-CFLAGS :=  -Os -mno-red-zone -mno-mmx -mno-sse -msoft-float -ffreestanding -m64 -fno-stack-protector -march=x86-64 -masm=intel -Wall -g -Wextra $(INCLUDES) $(MISC_FLAGS)
+CFLAGS :=  -O0 -mno-red-zone -mno-mmx -mno-sse -msoft-float -ffreestanding -m64 -fno-stack-protector -march=x86-64 -masm=intel -Wall -g -Wextra $(INCLUDES) $(MISC_FLAGS)
 NASMFLAGS := -f elf64 -g -DUSER_LOAD_ADDR=$(USER_LOAD_ADDR)
 LDFLAGS_KERNEL := -T $(KERNEL_LD) $(INCLUDES)
 LDFLAGS_USER := -T $(USER_LD) $(INCLUDES)
@@ -282,13 +282,12 @@ always:
 	mkdir -p $(OBJ_DIR)/kernel
 
 # Common QEMU command
-QEMU_CMD = sudo qemu-system-x86_64 -m 8G \
-	-drive file=$(FLOPPY_BIN),format=raw,if=floppy \
-	-drive id=disk,file=$(DISK),format=raw,if=none \
-	-device ahci,id=ahci \
-	-device ide-hd,drive=disk,bus=ahci.0 \
-	-d int,cpu_reset,in_asm \
-	-no-reboot -no-shutdown -D log.txt \
+QEMU_CMD = qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) \
+	-drive id=disk,file=$(DISK),if=none \
+	-device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 \
+	-d int,cpu_reset \
+	-no-reboot -D log.txt\
+	-monitor stdio \
 	-machine kernel_irqchip=off
 
 ron:

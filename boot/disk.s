@@ -58,6 +58,20 @@ disk_read:
     ; Save modified registers
     pusha
 
+    push ax
+    push dx
+    push cx
+
+    mov dl, [drive_number]
+    mov ah, 0x08
+    int 0x13
+    mov [sectors_per_track], cl  ; Bits 0-5 = max sector
+    mov [number_heads], dh       ; Max head number
+    
+    pop cx
+    pop dx
+    pop ax
+
     push cx ; Save cx (number of sectors to read)
     call lba_to_chs
     pop ax ; al = number of sectors to read
