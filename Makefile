@@ -100,7 +100,7 @@ MISC_FLAGS = -DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) -DKERNEL_STACK_START_ADDR=$(
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
 endif
-CFLAGS :=  -O0 -mno-red-zone -mno-mmx -mno-sse -msoft-float -ffreestanding -m64 -fno-stack-protector -march=x86-64 -masm=intel -Wall -g -Wextra $(INCLUDES) $(MISC_FLAGS)
+CFLAGS :=  -Os -mno-red-zone -mno-mmx -mno-sse -msoft-float -ffreestanding -m64 -fno-stack-protector -march=x86-64 -masm=intel -Wall -g -Wextra $(INCLUDES) $(MISC_FLAGS)
 NASMFLAGS := -f elf64 -g -DUSER_LOAD_ADDR=$(USER_LOAD_ADDR)
 LDFLAGS_KERNEL := -T $(KERNEL_LD) $(INCLUDES)
 LDFLAGS_USER := -T $(USER_LD) $(INCLUDES)
