@@ -14,13 +14,10 @@
 int umain(void) {
     printf("%s Usermode\n", LOG_SYM_SUC);
 
-    // char str[100];
-    // scanf("%s", str);
-    // printf("%s\n", str);
 
-    // shell_init();
+    shell_init();
 
-    // printf("Now you are stuck here with me forever... :D\n");
+    printf("Now you are stuck here with me forever... :D\n");
 
     while (1) {}
     return 0;
