@@ -81,6 +81,7 @@ USER_OBJ := $(patsubst %, $(OBJ_DIR)/%, $(USER_SRC_S:.s=.o)) \
 
 # Disks
 DISK = disk.img
+DISK2 = disk2.img
 MOUNT_POINT = ./fscreate
 
 ### Constants
@@ -100,12 +101,12 @@ MISC_FLAGS = -DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) -DKERNEL_STACK_START_ADDR=$(
 ifdef DEBUG
 MISC_FLAGS += -DDEBUG=\"DEBUG\"
 endif
-CFLAGS :=  -O0 -mno-red-zone -mno-mmx -mno-sse -msoft-float -ffreestanding -m64 -fno-stack-protector -march=x86-64 -masm=intel -Wall -g -Wextra $(INCLUDES) $(MISC_FLAGS)
+CFLAGS := -ffreestanding -m64 -march=x86-64 -masm=intel -nostdlib -Wall -g -Wextra -O0 -mno-red-zone $(INCLUDES) $(MISC_FLAGS)
 NASMFLAGS := -f elf64 -g -DUSER_LOAD_ADDR=$(USER_LOAD_ADDR)
 LDFLAGS_KERNEL := -T $(KERNEL_LD) $(INCLUDES)
 LDFLAGS_USER := -T $(USER_LD) $(INCLUDES)
-LIBC_FLAGS := $(CFLAGS) -D __is_libc
-LIBK_FLAGS := $(CFLAGS) -D __is_libk
+LIBC_FLAGS := $(CFLAGS) -D__is_libc
+LIBK_FLAGS := $(CFLAGS) -D__is_libk
 
 # -----------------------------------------------
 
@@ -114,8 +115,6 @@ LIBK_FLAGS := $(CFLAGS) -D __is_libk
 all: build
 
 # Build Disk (Floppy Image)
-build: $(FLOPPY_BIN)
-
 build: $(FLOPPY_BIN)
 $(FLOPPY_BIN): kernel boot user
 	# Write zeroes to disk
@@ -130,26 +129,25 @@ $(FLOPPY_BIN): kernel boot user
 	$(DD) if=/dev/zero of=$@ bs=1 seek=$$FILE_SIZE count=$$PADDING conv=notrunc,fsync; \
 	# $(DD) if=/dev/zero of=$@ bs=$(SECTOR_SIZE) seek=$$(($$FILE_SIZE + $$PADDING)) count=2048 conv=notrunc,fsync
 
+	# Write user code to disk
 	$(DD) if=/dev/zero of=$(DISK) count=2048 # 1MB
+# $(DD) if=$(USER_BIN) of=$(DISK) conv=notrunc
+	$(DD) if=build/user.elf of=$(DISK) conv=notrunc # elf
 
-	# # Write user code to disk
-	# $(DD) if=$(USER_BIN) of=$(DISK) conv=notrunc
+	$(DD) if=/dev/zero of=$(DISK2) count=2048
 
-	# Create filesystem on disk
+		# # Create filesystem on disk
 		mkdir -p $(MOUNT_POINT)
 		
-		mkfs.ext2 $(DISK)
+		mkfs.ext2 $(DISK2)
 
-		sudo mount $(DISK) $(MOUNT_POINT)
+		sudo mount $(DISK2) $(MOUNT_POINT)
 
 		sudo chmod 777 $(MOUNT_POINT)
 
-		sudo mkdir $(MOUNT_POINT)/test
-
-		sudo sh -c 'echo "Hi, If you are reading this it means that everything works!!! :)" > $(MOUNT_POINT)/test/test_file.txt'
+		sudo cp $(USER_ELF) $(MOUNT_POINT)/user_prog
 
 		sudo umount $(MOUNT_POINT)
-
 
 # Bootloader
 boot: $(BOOT_BIN)
@@ -157,6 +155,7 @@ $(BOOT_BIN): always kernel
 	$(NASM) $(BOOT_S) -I $(BOOT_DIR)  \
 		-DSECTOR_SIZE=$(SECTOR_SIZE) \
 		-DKERNEL_SIZE_IN_SECTORS=$$(($(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))'))) \
+		-DKERNEL_SIZE=$$( $(SHELL) -c 'stat -c %s $(KERNEL_BIN)' ) \
 		-DTOTAL_SIZE_IN_SECTORS=$(shell $(SHELL) -c 'echo $$(( ( $$(stat -c %s $(KERNEL_BIN)) + $(SECTOR_SIZE) -1 ) / $(SECTOR_SIZE)))')\
 		-DKERNEL_LOAD_ADDR=$(KERNEL_LOAD_ADDR) \
 		-DKERNEL_VBASE=$(KERNEL_VBASE) \
@@ -167,6 +166,7 @@ $(BOOT_BIN): always kernel
 kernel: $(KERNEL_BIN)
 $(KERNEL_BIN): $(KERNEL_ELF)
 	objcopy -O binary $(KERNEL_ELF) $@
+	sync
 
 $(KERNEL_ELF): always $(KERNEL_OBJ)
 	echo "Linking Kernel..."
@@ -284,11 +284,14 @@ always:
 # Common QEMU command
 QEMU_CMD = qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) \
 	-drive id=disk,file=$(DISK),if=none \
+	-drive id=disk2,file=$(DISK2),if=none \
 	-device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 \
+	-device ide-hd,drive=disk2,bus=ahci.1 \
 	-d int,cpu_reset \
 	-no-reboot -D log.txt\
 	-monitor stdio \
 	-machine kernel_irqchip=off
+
 
 ron:
 	echo "Running online..."
@@ -305,12 +308,7 @@ roff:
 	$(QEMU_CMD)
 
 run_debugger: 
-	qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) \
-	-drive id=disk,file=$(DISK),if=none \
-	-device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 \
-	-d int,cpu_reset \
-	-no-reboot -D log_debug.txt -s -S \
-	-monitor stdio
+	sudo $(QEMU_CMD) -s -S
 
 run_debug_bochs:
 	sed 's#$$(FLOPPY_BIN)#$(FLOPPY_BIN)#g' $(BOCHS_CONFIG_ORG) > $(BOCHS_CONFIG) && sync

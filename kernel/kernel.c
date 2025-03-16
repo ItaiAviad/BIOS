@@ -24,30 +24,15 @@
 // process
 #include <elf.h>
 #include <process.h>
-
+// network
+#include <net/if.h>
+#include <net/rtl8139.h>
 #include <vfs.h>
-#include <sched.h>
-
 
 extern void jump_usermode(void* entry, void* sp);
 void user_init();
 
 int interrupts_ready;
-
-void print_hex(void* data, size_t length) {
-    unsigned char* byte_data = (unsigned char*)data;
-    for (size_t i = 0; i < length; i++) {
-        printf("%x ", byte_data[i]);
-        // Add a newline after every 16 bytes for better readability
-        if ((i + 1) % 16 == 0) {
-            printf("\n");
-        }
-    }
-    // If the last line isn't a multiple of 16, print a newline
-    if (length % 16 != 0) {
-        printf("\n");
-    }
-}
 
 int kmain(void) {
 
@@ -59,7 +44,8 @@ int kmain(void) {
     // printf("%s ISRs\n", LOG_SYM_SUC);
 
     // PIC - Programmable Interrupt Controller
-    // IMPORTANT: PIC should be initialized at the end of Kernel's initializations to avoid race conditions!
+    // IMPORTANT: PIC should be initialized at the end of Kernel's initializations
+    // to avoid race conditions!
     pic_init(PIC1_OFFSET, PIC2_OFFSET);
     // printf("%s PIC\n", LOG_SYM_SUC);
 
@@ -67,7 +53,7 @@ int kmain(void) {
     init_kernel_process();
 
     interrupts_ready = true;
-    
+
     sti();
 
     terminal_initialize();
@@ -86,9 +72,20 @@ int kmain(void) {
     init_syscall();
 
     init_vfs();
+
+    // while (1){
+
+    // }
+
+    srand(time());
+
+    rtl8139_init();
+
+    // usermode
+
     vfs_mkdir("/mnt");
     vfs_mkdir("/mnt/mount1");
-    mount_file_system("/mnt/mount1", 0, EXT2_START_OFFSET,FILESYSTEM_TYPE_EXT2);
+    mount_file_system("/mnt/mount1", 1, EXT2_START_OFFSET,FILESYSTEM_TYPE_EXT2);
 
     linkedListNode* list = list_dir("/mnt/mount1"); // The test
 
@@ -96,26 +93,15 @@ int kmain(void) {
         printf("%s\n",list->data);
         list = list->next;
     }
-
-    int fd = open("/mnt/mount1/test/test_file.txt", O_RDONLY);
-
-    size_t size = lseek(fd, 0 ,SEEK_END)+1;
-
-    lseek(fd, 0 ,SEEK_SET);
-
-    void* buff = malloc(size);
-    
-    read(fd, buff, size);
-    close(fd);
-
-    printf("%s", buff);
-
+    user_init();
 
     while (1) {}
+
     return 0;
 }
 
 void user_init() {
+    interrupts_ready = false;
     cli();
 
     struct ProcessControlBlock pcb = {
@@ -150,7 +136,13 @@ void user_init() {
     map_memory_range(kpcb.ctx, (void*) (PROC_BIN_ADDR), (void*) (PROC_MEM_SIZE / 2 - 1), (void*) (pcb.entry + PROC_BIN_ADDR));
 
     // Read binary into process memory
-    read_disk(0, 0, PROC_BIN_SIZE, (void*) (PROC_BIN_ADDR));
+    // read_disk(0, 0, PROC_BIN_SIZE, (void*) (PROC_BIN_ADDR));
+
+    void* elf_bin = readelf((void*) PROC_BIN_ADDR, false);
+    if (!elf_bin) {
+        printf("Error reading elf binary\n");
+        while (1) {}
+    }
 
     // PML4T
     kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)pcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
@@ -215,9 +207,9 @@ void user_init() {
     invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
     set_pml4_address((uint64_t *) pcb.ctx.pml4);
 
-    current_pcb = &pcb;
-
     // printf("123\n");
+    interrupts_ready = true;
+    sti();
     jump_usermode((void*)PROC_BIN_ADDR, (void*)(pcb.stack));
     while (1) {}
 }

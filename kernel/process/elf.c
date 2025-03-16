@@ -37,7 +37,7 @@ void* readelf_header(bool print) {
     if (!elf_ehdr)
         return NULL;
 
-    read(0, 0, sizeof(Elf64_Ehdr), elf_ehdr);
+    read_disk(0, 0, sizeof(Elf64_Ehdr), elf_ehdr);
 
     /* Verify ELF Header  */
 
@@ -85,7 +85,7 @@ void* readelf_header(bool print) {
 
 void* readelf_ps(Elf64_Ehdr *elf_ehdr) {
     Elf64_Phdr* elf_phdr = malloc(elf_ehdr->e_phentsize);
-    read(0, elf_ehdr->e_phoff, elf_ehdr->e_phentsize, elf_phdr);
+    read_disk(0, elf_ehdr->e_phoff, elf_ehdr->e_phentsize, elf_phdr);
     
     // verify program header
     if (elf_phdr->p_type != PT_LOAD)
@@ -94,7 +94,7 @@ void* readelf_ps(Elf64_Ehdr *elf_ehdr) {
     // program header, program segment
     void* elf_ps = malloc(elf_ehdr->e_phentsize + elf_phdr->p_filesz);
     memcpy(elf_ps, elf_phdr, elf_ehdr->e_phentsize); // copy program header
-    read(0, elf_phdr->p_offset, elf_phdr->p_filesz, (void*) ((uint64_t) elf_ps + (uint64_t) elf_ehdr->e_phentsize)); // copy program segment
+    read_disk(0, elf_phdr->p_offset, elf_phdr->p_filesz, (void*) ((uint64_t) elf_ps + (uint64_t) elf_ehdr->e_phentsize)); // copy program segment
 
     free(elf_phdr);
 
