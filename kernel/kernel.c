@@ -108,17 +108,13 @@ void user_init() {
         .pid = 0,
         .state = 0,
 
+
         .entry = (void*) USER_LOAD_ADDR,
-        .pfa = {
-            .bitmap = pcb.entry + PROC_PFA_ADDR,
-            .num_pages = PROC_MEM_SIZE / PAGE_SIZE,
-            .initialized = 1
-        },
         .ctx = {
             .start_addr = (uint64_t) pcb.entry,
             .kernel_addr = (uint64_t) pcb.entry + PROC_KERNEL_ADDR,
             .memory_size_pages = pcb.pfa.num_pages,
-            .allocator = &pcb.pfa,
+            .allocator = kpcb.ctx.allocator,
             .old_pml4 = (uint64_t*) PML4_KERNEL,
             .pml4 = pcb.entry + PROC_PML4T_ADDR
         },
