@@ -108,7 +108,8 @@ void user_init() {
     cli();
 
     struct ProcessControlBlock pcb = {
-        .pid = 0,
+        .pid = allocate_pid(),
+        .ppid = KERNEL_PID,
         .state = 0,
 
 
