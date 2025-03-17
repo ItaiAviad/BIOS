@@ -105,7 +105,8 @@ int kmain(void) {
 
 void user_init() {
     interrupts_ready = false;
-    // uint64_t pml4_user = allocate_and_zero_page(kpcb);
+    uint64_t pml4_user = allocate_page(kpcb);
+    map_page(kpcb, pml4_user, pml4_user, PAGE_MAP_FLAGS);
 
     cli();
 
@@ -122,7 +123,7 @@ void user_init() {
             .memory_size_pages = pcb.pfa.num_pages,
             .allocator = kpcb.ctx.allocator,
             .old_pml4 = (uint64_t*) PML4_KERNEL,
-            .pml4 = pcb.entry + PROC_PML4T_ADDR
+            .pml4 = pml4_user
         },
 
         .stack = 0,
@@ -157,7 +158,7 @@ void user_init() {
     // map_memory_range(pcb.ctx, (void*) (PROC_BIN_ADDR), (void*) (PROC_PML4T_ADDR - 1), (void*) (pcb.entry + PROC_BIN_ADDR));
     map_memory_range(pcb, (void*) (PROC_BIN_ADDR), (void*) ((PROC_MEM_SIZE / 2 - 1)), (void*) (pcb.entry + PROC_BIN_ADDR));
     // Map process PML4T
-    // map_memory_range(pcb.ctx, (void*) (PROC_PML4T_ADDR), (void*) (PROC_PML4T_ADDR + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
+    map_memory_range(pcb, (void*) (PROC_PML4T_ADDR), (void*) (PROC_PML4T_ADDR + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
 
     // Stack - Map Stack pages in process's VAS
     // ASLR stack
