@@ -11,6 +11,14 @@
 #include <memory.h>
 #include <arch/x86_64/isr.h>
 
+#define MAX_NUM_OF_PROCESS 256
+
+#define KERNEL_PID 1
+
+#define BITMASK(n) (1 << (n))
+
+extern uint64_t process_pid_bitmap;
+
 typedef struct __attribute__((packed)) {
     // Define the callee-saved registers
     uint64_t cr2, r15, r14, r13, r12, rbp, rbx;
@@ -41,6 +49,10 @@ typedef struct ProcessControlBlock {
 __attribute__((unused)) struct ProcessControlBlock kpcb;
 
 void init_kernel_process(void);
+
+
+uint64_t allocate_pid();
+void dealloc_pid(uint64_t pid);
 
 
 #endif

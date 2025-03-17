@@ -1,5 +1,21 @@
 #include <process.h>
 
+uint64_t process_pid_bitmap = 0;
+
+uint64_t allocate_pid(){
+    for(int i = 0; i < MAX_NUM_OF_PROCESS; i++){
+        if(!(process_pid_bitmap & BITMASK(i)) && i != 0 && i != KERNEL_PID){
+            process_pid_bitmap |= BITMASK(i);
+            return i;
+        }
+    }
+    return 0;
+}
+
+void deallocate_pid(uint64_t pid){
+        process_pid_bitmap &= ~BITMASK(pid);
+}
+
 void init_kernel_process(void) {
     kpcb = (struct ProcessControlBlock) {
         .pid = 0,
