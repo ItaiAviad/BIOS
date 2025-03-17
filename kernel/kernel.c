@@ -85,7 +85,7 @@ int kmain(void) {
 
     vfs_mkdir("/mnt");
     vfs_mkdir("/mnt/mount1");
-    mount_file_system("/mnt/mount1", 1, EXT2_START_OFFSET,FILESYSTEM_TYPE_EXT2);
+    mount_file_system("/mnt/mount1", 0, EXT2_START_OFFSET,FILESYSTEM_TYPE_EXT2);
 
     linkedListNode* list = list_dir("/mnt/mount1"); // The test
 
@@ -138,7 +138,7 @@ void user_init() {
     // Read binary into process memory
     // read_disk(0, 0, PROC_BIN_SIZE, (void*) (PROC_BIN_ADDR));
 
-    void* elf_bin = readelf((void*) PROC_BIN_ADDR, false);
+    void* elf_bin = readelf((void*) PROC_BIN_ADDR, "/mnt/mount1/user_prog", false);
     if (!elf_bin) {
         printf("Error reading elf binary\n");
         while (1) {}

@@ -4491,11 +4491,12 @@ enum
 
 
 /* ELF parsing functions  */
-void* readelf(void* dst, bool print);
-void* readelf_header(bool print);
+void* readelf(void* dst, char* path, bool print);
+void* readelf_header(int fd, bool print);
 
 // read static elf program segment
-void* readelf_ps(Elf64_Ehdr *elf_ehdr);
+
+void* readelf_ps(Elf64_Ehdr *elf_ehdr, int fd);
 
 #endif	/* elf.h */
 

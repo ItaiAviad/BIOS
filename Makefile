@@ -130,18 +130,15 @@ $(FLOPPY_BIN): kernel boot user
 	# $(DD) if=/dev/zero of=$@ bs=$(SECTOR_SIZE) seek=$$(($$FILE_SIZE + $$PADDING)) count=2048 conv=notrunc,fsync
 
 	# Write user code to disk
-	$(DD) if=/dev/zero of=$(DISK) count=2048 # 1MB
-# $(DD) if=$(USER_BIN) of=$(DISK) conv=notrunc
-	$(DD) if=build/user.elf of=$(DISK) conv=notrunc # elf
 
-	$(DD) if=/dev/zero of=$(DISK2) count=2048
+	$(DD) if=/dev/zero of=$(DISK) count=2048
 
 		# # Create filesystem on disk
 		mkdir -p $(MOUNT_POINT)
 		
-		mkfs.ext2 $(DISK2)
+		mkfs.ext2 $(DISK)
 
-		sudo mount $(DISK2) $(MOUNT_POINT)
+		sudo mount $(DISK) $(MOUNT_POINT)
 
 		sudo chmod 777 $(MOUNT_POINT)
 
@@ -284,9 +281,7 @@ always:
 # Common QEMU command
 QEMU_CMD = qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) \
 	-drive id=disk,file=$(DISK),if=none \
-	-drive id=disk2,file=$(DISK2),if=none \
 	-device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 \
-	-device ide-hd,drive=disk2,bus=ahci.1 \
 	-d int,cpu_reset \
 	-no-reboot -D log.txt\
 	-monitor stdio \

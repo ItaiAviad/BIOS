@@ -158,15 +158,15 @@ size_t ext2_read_inode(filesystem_data* fs_data, ext2_super_block* s_block, uint
     uint64_t curr_read_offset = offset_bytes;
     uint64_t end_offset = MIN(max_read_size, offset_bytes+count_bytes) - 1;
 
-    while (curr_read_offset < end_offset)
+    while (curr_read_offset <= end_offset)
     {
         uint64_t read_start = ext2_get_nth_block_offset_of_inode(fs_data, s_block, inode_num, curr_read_offset / block_size) + (curr_read_offset % block_size);
         uint64_t read_size = MIN(block_size, (end_offset - curr_read_offset) + 1);
         read_disk(fs_data->disk_number, read_start, read_size, out_buffer+(curr_read_offset - offset_bytes));
-        curr_read_offset += read_size - 1;
+        curr_read_offset += read_size;
     }
 
-    return (curr_read_offset - offset_bytes) + 1;
+    return (curr_read_offset - offset_bytes);
 
 }
 

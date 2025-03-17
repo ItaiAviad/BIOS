@@ -8,16 +8,17 @@
 #include <time.h>
 // drivers
 #include <pci.h>
-#include <disk.h>
+#include <file_op.h>
 
-void* readelf(void* dst, bool print) { 
-    Elf64_Ehdr *elf_ehdr = (Elf64_Ehdr*) readelf_header(print);
+void* readelf(void* dst, char* path, bool print) { 
+    int fd = open(path, O_RDONLY);
+    Elf64_Ehdr *elf_ehdr = (Elf64_Ehdr*) readelf_header(fd ,print);
     if (!elf_ehdr) {
         free(elf_ehdr);
         return NULL;
     }
     
-    void *elf_ps = readelf_ps(elf_ehdr);
+    void *elf_ps = readelf_ps(elf_ehdr, fd);
     if (!elf_ps) {
         free(elf_ehdr);
         free(elf_ps);
@@ -26,18 +27,20 @@ void* readelf(void* dst, bool print) {
     Elf64_Phdr *elf_phdr = (Elf64_Phdr*) elf_ps;
     memcpy(dst, elf_ps + elf_ehdr->e_phentsize, elf_phdr->p_filesz); // copy program segment
 
+    close(fd);
     free(elf_ehdr);
     free(elf_ps);
 
     return dst;
 }
 
-void* readelf_header(bool print) {
+void* readelf_header(int fd, bool print) {
     Elf64_Ehdr* elf_ehdr = malloc(sizeof(Elf64_Ehdr));
     if (!elf_ehdr)
         return NULL;
 
-    read_disk(0, 0, sizeof(Elf64_Ehdr), elf_ehdr);
+    lseek(fd, 0, SEEK_SET);
+    read(fd, elf_ehdr, sizeof(Elf64_Ehdr));
 
     /* Verify ELF Header  */
 
@@ -83,9 +86,10 @@ void* readelf_header(bool print) {
     return (void*) elf_ehdr;
 }
 
-void* readelf_ps(Elf64_Ehdr *elf_ehdr) {
+void* readelf_ps(Elf64_Ehdr *elf_ehdr, int fd) {
     Elf64_Phdr* elf_phdr = malloc(elf_ehdr->e_phentsize);
-    read_disk(0, elf_ehdr->e_phoff, elf_ehdr->e_phentsize, elf_phdr);
+    lseek(fd, elf_ehdr->e_phoff, SEEK_SET);
+    read(fd, elf_phdr, elf_ehdr->e_phentsize);
     
     // verify program header
     if (elf_phdr->p_type != PT_LOAD)
@@ -94,7 +98,8 @@ void* readelf_ps(Elf64_Ehdr *elf_ehdr) {
     // program header, program segment
     void* elf_ps = malloc(elf_ehdr->e_phentsize + elf_phdr->p_filesz);
     memcpy(elf_ps, elf_phdr, elf_ehdr->e_phentsize); // copy program header
-    read_disk(0, elf_phdr->p_offset, elf_phdr->p_filesz, (void*) ((uint64_t) elf_ps + (uint64_t) elf_ehdr->e_phentsize)); // copy program segment
+    lseek(fd, elf_phdr->p_offset, SEEK_SET);
+    read(fd, (void*) ((uint64_t) elf_ps + (uint64_t) elf_ehdr->e_phentsize), elf_phdr->p_filesz);
 
     free(elf_phdr);
 
