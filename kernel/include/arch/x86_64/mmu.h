@@ -5,8 +5,6 @@
 #define MMU_H
 
 #include <types.h>
-
-
 #include <stdio.h>
 #include <string.h>
 #include <arch/x86_64/io.h>
@@ -40,6 +38,10 @@ typedef struct Context {
     uint64_t* old_pml4;
     uint64_t* pml4;
 } Context;
+
+typedef struct ProcessControlBlock PCB;
+
+#include <process.h>
 
 __attribute__((unused))
 void* g_heap_malloc_state_base;
@@ -96,7 +98,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
  * 
  * @param ctx 
  */
-void switch_context(Context ctx);
+void switch_context(PCB pcb);
 /**
  * @brief Map reserved paging tables
  * 
@@ -111,10 +113,11 @@ void map_reserved_paging_tables(Context ctx);
  * @param end_address 
  * @param physical_addr
  */
-void map_memory_range(Context ctx, void* start_addr, void* end_addr, void* physical_addr);
+
+void map_memory_range(PCB pcb, void* start_addr, void* end_addr, void* physical_addr);
 
 
-void map_memory_range_with_flags(Context ctx, void* start_addr, void* end_addr, void* physical_addr, uint64_t flags, int set_in_allocator);
+void map_memory_range_with_flags(PCB pcb, void* start_addr, void* end_addr, void* physical_addr, uint64_t flags, int set_in_allocator);
 
 /**
  * @brief Set the PML4 Address in the CR3 reg object (Paging Register)

@@ -204,7 +204,7 @@ void *assign_bar(PCIDevice device, uint8_t bar_num) {
         return NULL;
     }
 
-    map_memory_range_with_flags(kpcb.ctx, (void *)(uint64_t)orig_reg_val, (void *)(uint64_t)orig_reg_val + bar_size - 1, (void *)(uint64_t)orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE | PAGE_USER, 0);
+    map_memory_range_with_flags(kpcb, (void *)(uint64_t)orig_reg_val, (void *)(uint64_t)orig_reg_val + bar_size - 1, (void *)(uint64_t)orig_reg_val, PAGE_PRESENT | PAGE_WRITE | PAGE_UNCACHEABLE | PAGE_USER, 0);
 
     flush_tlb();
 

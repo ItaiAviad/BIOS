@@ -24,21 +24,21 @@ void init_page_frame_allocator(PageFrameAllocator *allocator, size_t memory_size
     sti();
 }
 
-void map_memory_range_with_flags(Context ctx, void* start_addr, void* end_addr, void* physical_addr, uint64_t flags, int set_in_allocator) {
+void map_memory_range_with_flags(PCB pcb, void* start_addr, void* end_addr, void* physical_addr, uint64_t flags, int set_in_allocator) {
     volatile uint64_t start = aalign_down((uint64_t)start_addr, PAGE_SIZE);
     volatile uint64_t end = aalign((uint64_t)end_addr, PAGE_SIZE);
     physical_addr = (void*) aalign_down((uint64_t)physical_addr, PAGE_SIZE);
 
     for (uint64_t addr = start; addr < end; addr += PAGE_SIZE, physical_addr += PAGE_SIZE) {
-        map_page(ctx, (void *)addr, physical_addr, flags);
+        map_page(pcb.ctx, (void *)addr, physical_addr, flags);
         if (set_in_allocator) {
-            ctx.allocator->bitmap[addr / PAGE_SIZE] = 1;
+            pcb.ctx.allocator->bitmap[addr / PAGE_SIZE] = pcb.pid;
         }
     }
 }
 
-void map_memory_range(Context ctx, void* start_addr, void* end_addr, void* physical_addr) {
-    map_memory_range_with_flags(ctx, start_addr, end_addr, physical_addr, PAGE_MAP_FLAGS, 1);
+void map_memory_range(PCB pcb, void* start_addr, void* end_addr, void* physical_addr) {
+    map_memory_range_with_flags(pcb, start_addr, end_addr, physical_addr, PAGE_MAP_FLAGS, 1);
 }
 
 void* allocate_page(Context ctx) {

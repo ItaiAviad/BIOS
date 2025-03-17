@@ -61,7 +61,7 @@ typedef struct __attribute__((__packed__)) malloc_state {
  * @param bool map if to map the heap pages
  * @return void* 
  */
-void* init_heap(Context ctx, uint64_t, uint64_t, bool map);
+void* init_heap(PCB pcb, uint64_t, uint64_t, bool map);
 /**
  * @brief Set the heap address
  * 

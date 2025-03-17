@@ -8,6 +8,10 @@
 #include <string.h>
 #include <time.h>
 // arch/x86_64
+
+#include <process.h>
+
+
 #include <arch/x86_64/gdt.h>
 #include <arch/x86_64/io.h>
 #include <arch/x86_64/isr.h>
@@ -23,7 +27,6 @@
 #include <disk.h>
 // process
 #include <elf.h>
-#include <process.h>
 // network
 #include <net/if.h>
 #include <net/rtl8139.h>
@@ -127,9 +130,9 @@ void user_init() {
     };
 
     // Map process memory in kernel's PML4T
-    map_memory_range(kpcb.ctx, (void*) (pcb.entry + PROC_BIN_ADDR), (void*) (pcb.entry + PROC_MEM_SIZE - PROC_BIN_ADDR), (void*) (pcb.entry + PROC_BIN_ADDR));
+    map_memory_range(kpcb, (void*) (pcb.entry + PROC_BIN_ADDR), (void*) (pcb.entry + PROC_MEM_SIZE - PROC_BIN_ADDR), (void*) (pcb.entry + PROC_BIN_ADDR));
     // Map process memory in kernel's PML4T (identity map for i.e. heap addresses)
-    map_memory_range(kpcb.ctx, (void*) (PROC_BIN_ADDR), (void*) (PROC_MEM_SIZE / 2 - 1), (void*) (pcb.entry + PROC_BIN_ADDR));
+    map_memory_range(kpcb, (void*) (PROC_BIN_ADDR), (void*) (PROC_MEM_SIZE / 2 - 1), (void*) (pcb.entry + PROC_BIN_ADDR));
 
     // Read binary into process memory
     // read_disk(0, 0, PROC_BIN_SIZE, (void*) (PROC_BIN_ADDR));
@@ -149,7 +152,7 @@ void user_init() {
 
     // Map process binary, pfa
     // map_memory_range(pcb.ctx, (void*) (PROC_BIN_ADDR), (void*) (PROC_PML4T_ADDR - 1), (void*) (pcb.entry + PROC_BIN_ADDR));
-    map_memory_range(pcb.ctx, (void*) (PROC_BIN_ADDR), (void*) ((PROC_MEM_SIZE / 2 - 1)), (void*) (pcb.entry + PROC_BIN_ADDR));
+    map_memory_range(pcb, (void*) (PROC_BIN_ADDR), (void*) ((PROC_MEM_SIZE / 2 - 1)), (void*) (pcb.entry + PROC_BIN_ADDR));
     // Map process PML4T
     // map_memory_range(pcb.ctx, (void*) (PROC_PML4T_ADDR), (void*) (PROC_PML4T_ADDR + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
 
@@ -174,7 +177,7 @@ void user_init() {
     // map_memory_range(pcb.ctx, (void*) (pcb.heap), (void*) (pcb.heap + PROC_STACK_SIZE - 1), (void*) ((uint64_t) pcb.entry + (uint64_t) pcb.heap));
     // pcb.heap += (uint64_t) pcb.entry; // if heap relative to kernel's VAS
     // Init heap
-    init_heap(pcb.ctx, (uint64_t) pcb.heap, PROC_HEAP_SIZE, false);
+    init_heap(pcb, (uint64_t) pcb.heap, PROC_HEAP_SIZE, false);
 
     // printf("stack: %d, heap: %d\n", stack_slot, heap_slot);
     // printf("stack: %p, heap: %p\n", pcb.stack, pcb.heap);
@@ -184,7 +187,7 @@ void user_init() {
              This ensures that the kernel in can see its own functions in the same address.
        NOTE: Kernel includes IDT (but not GDT!)
     */
-    map_memory_range(pcb.ctx, (void*) (PROC_KERNEL_ADDR), (void*) (PAGE_FRAME_ALLOCATOR_END), (void*) (KERNEL_VBASE - KERNEL_LOAD_ADDR));
+    map_memory_range(pcb, (void*) (PROC_KERNEL_ADDR), (void*) (PAGE_FRAME_ALLOCATOR_END), (void*) (KERNEL_VBASE - KERNEL_LOAD_ADDR));
 
     // Map kernel boot (Kernel GDT and TSS)
     /* NOTE: For simplicity reasons, the GDT (initialized in Bootloader)
@@ -193,7 +196,7 @@ void user_init() {
              which is reserved for the process's code).
              GDT location is the same in both kernel and process PML4 (see ProcessMemoryLayout.md)
     */
-    map_memory_range(pcb.ctx, (void*)(PAGE_FRAME_ALLOCATOR_END + 1), (void*) (PAGE_FRAME_ALLOCATOR_END + PROC_SLOT_SIZE), (void*)(0x0));
+    map_memory_range(pcb, (void*)(PAGE_FRAME_ALLOCATOR_END + 1), (void*) (PAGE_FRAME_ALLOCATOR_END + PROC_SLOT_SIZE), (void*)(0x0));
 
     // Allow later kernel maps
     init_recursive_paging(kpcb.ctx);

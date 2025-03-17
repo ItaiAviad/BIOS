@@ -91,7 +91,7 @@ void terminal_clear(void) {
 }
 
 void terminal_initialize(void) {
-    map_memory_range(kpcb.ctx, VGA_MEMORY, VGA_MEMORY+VGA_HEIGHT*VGA_WIDTH-1, VGA_MEMORY);
+    map_memory_range(kpcb, VGA_MEMORY, VGA_MEMORY+VGA_HEIGHT*VGA_WIDTH-1, VGA_MEMORY);
     // Cursor Setup
     enable_cursor(0, 0);
 

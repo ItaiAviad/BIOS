@@ -17,6 +17,8 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
         .pml4 = (uint64_t*) PML4_BOOT
     };
 
+    kpcb.pid = KERNEL_PID;
+    kpcb.ppid = 0;
     kpcb.ctx.start_addr = 0x0;
     kpcb.ctx.kernel_addr = 0x0;
     kpcb.ctx.memory_size_pages = memory_size_pages;
@@ -40,7 +42,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 
     // invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
 
-    switch_context(kpcb.ctx);
+    switch_context(kpcb);
 
     cli();
 
@@ -87,7 +89,7 @@ void init_recursive_paging(Context ctx){
     ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)ctx.pml4 | PAGE_MAP_FLAGS;
 }
 
-void switch_context(Context ctx) {
+void switch_context(PCB pcb) {
     cli();
 
     // Map New PML4
@@ -98,15 +100,15 @@ void switch_context(Context ctx) {
     
     // Map Kernel (In new PML4)
     // Map Kernel + Page Frame Allocator + Pagign Tables in new Kernel Context
-    memset(ctx.allocator->bitmap, 1, UPPER_DIVIDE(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
+    memset(pcb.ctx.allocator->bitmap, 1, UPPER_DIVIDE(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
 
     // map_memory_range(ctx, (void*)MBR_LOAD_ADDR, (void*) (MBR_LOAD_ADDR + (1 * MB)), (void*)MBR_LOAD_ADDR);
-    map_memory_range(ctx, (void*)0x0, (void*) (0x0 + (3 * MB) - 1), (void*)0x0);
-    map_memory_range(ctx, (void*)(KERNEL_VBASE - KERNEL_LOAD_ADDR), (void*) PAGE_FRAME_ALLOCATOR_END - 1, (void*)(KERNEL_VBASE - KERNEL_LOAD_ADDR));
-    map_memory_range(ctx, (void*)ctx.pml4, ctx.pml4+PAGE_SIZE-1, (void*)ctx.pml4);
+    map_memory_range(pcb, (void*)0x0, (void*) (0x0 + (3 * MB) - 1), (void*)0x0);
+    map_memory_range(pcb, (void*)(KERNEL_VBASE - KERNEL_LOAD_ADDR), (void*) PAGE_FRAME_ALLOCATOR_END - 1, (void*)(KERNEL_VBASE - KERNEL_LOAD_ADDR));
+    map_memory_range(pcb, (void*)pcb.ctx.pml4, pcb.ctx.pml4+PAGE_SIZE-1, (void*)pcb.ctx.pml4);
     // Switch PML4 to use the (new) s PML4
     cli();
-    set_pml4_address((uint64_t *) ctx.pml4);
+    set_pml4_address((uint64_t *) pcb.ctx.pml4);
     sti();
 }
 
