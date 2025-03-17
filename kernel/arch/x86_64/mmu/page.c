@@ -147,7 +147,7 @@ uint64_t* get_pml4_address() {
 }
 
 
-void map_page(Context ctx, void* virtual_address, void* physical_address, uint64_t flags) {
+void map_page(PCB pcb, void* virtual_address, void* physical_address, uint64_t flags) {
 
     // Calculate indices
     uint64_t pml4_index = ((uint64_t)virtual_address >> 39) & 0x1FF;
@@ -162,7 +162,7 @@ void map_page(Context ctx, void* virtual_address, void* physical_address, uint64
     // Ensure PDPT, PD, and PT entries exist (allocate and zero if necessary)
     uint64_t* pdpt_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, pml4_index);
     if (!(pml4_recursive[pml4_index] & PAGE_PRESENT)) { // Check if PDPT entry exists (in PML4T)
-        pdpt = allocate_page(ctx);
+        pdpt = allocate_page(pcb);
         if(pdpt == NULL){
             printf("Error, couldn't get pdpt from allocator\n");
             return;
@@ -175,7 +175,7 @@ void map_page(Context ctx, void* virtual_address, void* physical_address, uint64
     }
     uint64_t* pd_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, pml4_index, pdpt_index);
     if (!(pdpt_recursive[pdpt_index] & PAGE_PRESENT)) { // Check if PDT entry exists (in PDPT)
-        pd = allocate_page(ctx);
+        pd = allocate_page(pcb);
         if(pd == NULL){
             printf("Error, couldn't get pd from allocator\n");
             return;
@@ -188,7 +188,7 @@ void map_page(Context ctx, void* virtual_address, void* physical_address, uint64
     }
     uint64_t* pt_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, pml4_index, pdpt_index, pd_index);
     if (!(pd_recursive[pd_index] & PAGE_PRESENT)) { // Check if PT entry exists (in PDT)
-        pt = allocate_page(ctx);
+        pt = allocate_page(pcb);
         if(pt == NULL){
             printf("Error, couldn't get pd from allocator\n");
             return;
@@ -205,12 +205,12 @@ void map_page(Context ctx, void* virtual_address, void* physical_address, uint64
     pt_recursive[pt_index] = (uint64_t) physical_address | flags;
 }
 
-void unmap_page(Context ctx, uint64_t virtual_address) {
+void unmap_page(PCB pcb, uint64_t virtual_address) {
     // Calculate PT index
     uint64_t pt_index = (virtual_address >> 12) & 0x1FF;
     int64_t *pt = NULL;
 
-    pt = is_page_mapped(ctx.pml4, virtual_address);
+    pt = is_page_mapped(pcb.ctx.pml4, virtual_address);
     if (pt < (int64_t*) 0x0)
         return;
     

@@ -30,7 +30,7 @@ void map_memory_range_with_flags(PCB pcb, void* start_addr, void* end_addr, void
     physical_addr = (void*) aalign_down((uint64_t)physical_addr, PAGE_SIZE);
 
     for (uint64_t addr = start; addr < end; addr += PAGE_SIZE, physical_addr += PAGE_SIZE) {
-        map_page(pcb.ctx, (void *)addr, physical_addr, flags);
+        map_page(pcb, (void *)addr, physical_addr, flags);
         if (set_in_allocator) {
             pcb.ctx.allocator->bitmap[addr / PAGE_SIZE] = pcb.pid;
         }
@@ -41,10 +41,10 @@ void map_memory_range(PCB pcb, void* start_addr, void* end_addr, void* physical_
     map_memory_range_with_flags(pcb, start_addr, end_addr, physical_addr, PAGE_MAP_FLAGS, 1);
 }
 
-void* allocate_page(Context ctx) {
-    for (uint64_t i = 0; i < (uint64_t)(ctx.allocator->num_pages); i++) {
-        if (!(ctx.allocator->bitmap[i])) { // If not all bits are set
-            ctx.allocator->bitmap[i] = 1;  // Mark as used
+void* allocate_page(PCB pcb) {
+    for (uint64_t i = 0; i < (uint64_t)(pcb.ctx.allocator->num_pages); i++) {
+        if (!(pcb.ctx.allocator->bitmap[i])) { // If not all bits are set
+            pcb.ctx.allocator->bitmap[i] = pcb.pid;  // Mark as used
 #ifdef DEBUG
             printf("%s: Free page found: %x. Is p_struct: %d\n", DEBUG, i, is_p_struct);
 #endif
@@ -54,8 +54,8 @@ void* allocate_page(Context ctx) {
     return NULL; // Out of memory
 }
 
-void *allocate_and_zero_page(Context ctx) {
-    void *page = allocate_page(ctx);
+void *allocate_and_zero_page(PCB pcb) {
+    void *page = allocate_page(pcb);
     if (page != NULL) {
         memset(page, 0, PAGE_SIZE);
     }

@@ -61,8 +61,8 @@ void init_page_frame_allocator(PageFrameAllocator* allocator, size_t memory_size
  * @param Context
  * @return void* - physical memory address
  */
-void* allocate_page(Context ctx);
-void* allocate_and_zero_page(Context ctx);
+void* allocate_page(PCB pcb);
+void* allocate_and_zero_page(PCB pcb);
 /**
  * @brief Free a page from a frame
  * 
@@ -141,14 +141,14 @@ void flush_tlb();
  * @param physical_address 
  * @param flags 
  */
-void map_page(Context ctx, void* virtual_address, void* physical_address, uint64_t flags);
+void map_page(PCB pcb, void* virtual_address, void* physical_address, uint64_t flags);
 /**
  * @brief Unmap a page
  * 
  * @param ctx 
  * @param virtual_address 
  */
-void unmap_page(Context ctx, uint64_t virtual_address);
+void unmap_page(PCB pcb, uint64_t virtual_address);
 
 /**
  * @brief Check if a page is mapped

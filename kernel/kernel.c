@@ -105,6 +105,8 @@ int kmain(void) {
 
 void user_init() {
     interrupts_ready = false;
+    // uint64_t pml4_user = allocate_and_zero_page(kpcb);
+
     cli();
 
     struct ProcessControlBlock pcb = {
