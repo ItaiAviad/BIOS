@@ -68,7 +68,7 @@ void shcmd_cat(int argc, char *argv[]) {
             lseek(fd, 0, SEEK_SET);
             read(fd, buff, size);
             close(fd);
-            printf(buff);
+            printf("%s\n",buff);
             break;
         }
         case 0:{
