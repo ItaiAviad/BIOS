@@ -171,7 +171,6 @@ void user_init() {
     pcb.stack += PROC_STACK_SIZE - 0x100;
 
     // Heap
-    // ASLR heap
     pcb.heap = (void*) KERNEL_HEAP_START;
 
     map_memory_range(pcb, (void*) pcb.heap, pcb.heap + KERNEL_HEAP_SIZE_PAGES * 512 -1, pcb.heap);

@@ -50,8 +50,9 @@ void shcmd_cd(int argc, char *argv[]) {
         path_pre_processed = preprocess_path(argv[1]);
     }
     else{
-        char* joined = malloc(strlen(tty0.curr_wd)+strlen(argv[1])+1);
+        char* joined = malloc(strlen(tty0.curr_wd)+strlen(argv[1])+2);
         memcpy(joined, tty0.curr_wd, strlen(tty0.curr_wd)+1);
+        joined[strlen(tty0.curr_wd)] = '/';
         strcat(joined, argv[1]);
         path_pre_processed = preprocess_path(joined);
         free(joined);
