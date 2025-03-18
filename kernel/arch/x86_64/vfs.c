@@ -107,6 +107,7 @@ int vfs_path_exists(char* path){
                     if(inode_num == 0){
                         VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
                         ret = 0;
+                        goto path_exists_cleanup;
                     }
                     ext2_inode* inode = ext2_read_inode_metadata(fs, &s_block, inode_num);
                     if ((inode->i_mode & EXT2_S_IFMT) == EXT2_S_IFDIR) {
@@ -172,6 +173,7 @@ int64_t vfs_read(char *path, size_t offset_bytes, size_t count_bytes, void* out_
                     if(inode_num == 0){
                         VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
                         ret = -1;
+                        goto list_dir_cleanup;
                     }
                     ret = ext2_read_inode(fs, &s_block, inode_num, offset_bytes, count_bytes, out_buffer);
                     break;
@@ -228,6 +230,7 @@ int64_t vfs_get_file_size(char *path) {
                     if(inode_num == 0){
                         VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
                         ret = -1;
+                        goto list_dir_cleanup;
                     }
                     ret = ext2_get_inode_size(fs, &s_block, inode_num);
                     break;
@@ -473,16 +476,16 @@ vfs_get_node_return_t vfs_get_node(char *path) {
 vfs_node *mount_file_system(char *path, uint64_t disk_number, uint64_t disk_offset, enum file_system_type type) {
     vfs_get_node_return_t vfs_get_node_ret = vfs_get_node(path);
     if (!vfs_get_node_ret.found_node || vfs_get_node_ret.remaining_path != NULL) {
-        VFS_ERR_PRINT("Couldn't mount filesystem, The path doesn't exist!");
+        VFS_ERR_PRINT("Couldn't mount filesystem, The path doesn't exist!\n");
         goto cleanup;
     }
     if (vfs_get_node_ret.found_node->type != VFS_NODE_TYPE_DIR) {
-        VFS_ERR_PRINT("Couldn't mount filesystem, Can't mount in a node which isn't a dir");
+        VFS_ERR_PRINT("Couldn't mount filesystem, Can't mount in a node which isn't a dir\n");
         goto cleanup;
     }
 
     if (vfs_get_node_ret.found_node->data != NULL) {
-        VFS_ERR_PRINT("Couldn't mount filesystem, Can't mount a non empty dir");
+        VFS_ERR_PRINT("Couldn't mount filesystem, Can't mount a non empty dir\n");
         goto cleanup;
     }
 

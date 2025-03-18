@@ -129,7 +129,7 @@ void shcmd_ls(int argc, char *argv[]) {
 
 void shcmd_cd(int argc, char *argv[]) {
     if(argc <= 1){
-        printf("Path to change work directory to wasn't provided");
+        printf("Path to change work directory to wasn't provided\n");
     }
 
     char* path_pre_processed = NULL;
@@ -155,11 +155,11 @@ void shcmd_cd(int argc, char *argv[]) {
             break;
         }
         case 2:{
-            printf("The path exists but isn't a dir");
+            printf("The path exists but isn't a dir\n");
             break;
         }
         default:{
-            printf("The path doesn't exist");
+            printf("The path doesn't exist\n");
             break;
         }
     }
