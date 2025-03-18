@@ -40,6 +40,93 @@ void shcmd_pwd(int argc, char *argv[]) {
         printf("\n");
 }
 
+void shcmd_cat(int argc, char *argv[]) {
+
+    char* path_pre_processed = NULL;
+    if(argc <= 1){
+        printf("Path to cat wasn't provided");
+    }
+    else if(*(argv[1]) == '/' ){
+        path_pre_processed = preprocess_path(argv[1]);
+    }
+    else{
+        char* joined = malloc(strlen(tty0.curr_wd)+strlen(argv[1])+2);
+        memcpy(joined, tty0.curr_wd, strlen(tty0.curr_wd)+1);
+        joined[strlen(tty0.curr_wd)] = '/';
+        strcat(joined, argv[1]);
+        path_pre_processed = preprocess_path(joined);
+        free(joined);
+    }
+
+
+    switch (path_exists(path_pre_processed)) {
+        case 2:
+        {
+            int fd = open(path_pre_processed, O_RDONLY);
+            size_t size = lseek(fd, 0, SEEK_END);
+            char* buff = malloc(size);
+            lseek(fd, 0, SEEK_SET);
+            read(fd, buff, size);
+            close(fd);
+            printf(buff);
+            break;
+        }
+        case 0:{
+            printf("The path doesn't exist\n");
+            break;
+        }
+        default:{
+            printf("The path exists but is a dir, So can't cat this path.\n");
+            break;
+        }
+    }
+    free(path_pre_processed);
+
+}
+
+void shcmd_ls(int argc, char *argv[]) {
+
+    char* path_pre_processed = NULL;
+    if(argc <= 1){
+        path_pre_processed = preprocess_path(tty0.curr_wd);
+    }
+    else if(*(argv[1]) == '/' ){
+        path_pre_processed = preprocess_path(argv[1]);
+    }
+    else{
+        char* joined = malloc(strlen(tty0.curr_wd)+strlen(argv[1])+2);
+        memcpy(joined, tty0.curr_wd, strlen(tty0.curr_wd)+1);
+        joined[strlen(tty0.curr_wd)] = '/';
+        strcat(joined, argv[1]);
+        path_pre_processed = preprocess_path(joined);
+        free(joined);
+    }
+
+
+    switch (path_exists(path_pre_processed)) {
+        case 1:
+        {
+            linkedListNode* list = list_dir(path_pre_processed);
+
+            while(list){
+                printf("%s\n",list->data);
+                list = list->next;
+            }
+            break;
+        }
+        case 0:{
+            printf("The path doesn't exist!\n");
+            break;
+        }
+        default:{
+            printf("The path exists but isn't a dir!\n");
+            break;
+        }
+    }
+    free(path_pre_processed);
+
+}
+
 void shcmd_cd(int argc, char *argv[]) {
     if(argc <= 1){
         printf("Path to change work directory to wasn't provided");

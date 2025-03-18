@@ -87,6 +87,12 @@ void shcmd_nslookup(int argc, char *argv[]);
 // Change dir
 void shcmd_cd(int argc, char *argv[]);
 
+// List
+void shcmd_ls(int argc, char *argv[]);
+
+// Print a file
+void shcmd_cat(int argc, char *argv[]);
+
 typedef void (*shcmd)(int argc, char *argv[]);
 
 // Notice! Indices of shcmd_str eand shcmd_table must match!
@@ -99,7 +105,9 @@ static const char shcmd_str[MAX_CMDS][MAX_CMD_STR] = {
     "bc",
     "clear",
     "nslookup",
-    "cd"
+    "cd",
+    "ls",
+    "cat"
 };
 
 static const shcmd shcmd_table[MAX_CMDS] = {
@@ -111,7 +119,9 @@ static const shcmd shcmd_table[MAX_CMDS] = {
     shcmd_bc,
     shcmd_clear,
     shcmd_nslookup,
-    shcmd_cd
+    shcmd_cd,
+    shcmd_ls,
+    shcmd_cat
 };
 
 

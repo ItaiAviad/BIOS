@@ -111,8 +111,11 @@ int vfs_path_exists(char* path){
                     ext2_inode* inode = ext2_read_inode_metadata(fs, &s_block, inode_num);
                     if ((inode->i_mode & EXT2_S_IFMT) == EXT2_S_IFDIR) {
                         ret = 1;
-                    } else {
+                    } else if((inode->i_mode & EXT2_S_IFMT) == EXT2_S_IFREG){
                         ret = 2;
+                    }
+                    else{
+                        ret = -1;
                     }
                 }
 

@@ -144,6 +144,10 @@ $(FLOPPY_BIN): kernel boot user
 
 		sudo cp $(USER_ELF) $(MOUNT_POINT)/user_prog
 
+		sudo mkdir $(MOUNT_POINT)/test
+
+		sudo sh -c 'echo "Hi, If you are reading this it means that everything works!!! :)" > $(MOUNT_POINT)/test/test_file.txt'
+
 		sudo umount $(MOUNT_POINT)
 
 # Bootloader

@@ -26,6 +26,7 @@
 #endif
 
 #define EXT2_S_IFDIR 0x4000  // Directory
+#define EXT2_S_IFREG 0x8000 
 #define EXT2_S_IFMT  0xF000  // Mask for file type
 
 #include <linkedList.h>
