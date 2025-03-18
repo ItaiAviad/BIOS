@@ -105,8 +105,8 @@ int kmain(void) {
 
 void user_init() {
     interrupts_ready = false;
-    uint64_t pml4_user = allocate_page(kpcb);
-    map_page(kpcb, pml4_user, pml4_user, PAGE_MAP_FLAGS);
+    void* pml4_user = allocate_page(kpcb);
+    map_page(kpcb,  pml4_user, pml4_user, PAGE_MAP_FLAGS);
 
     cli();
 
