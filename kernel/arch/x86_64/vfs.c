@@ -73,6 +73,72 @@ int64_t vfs_write(char *path, size_t offset_bytes, size_t count_bytes, void* out
     return 0;
 }
 
+
+int vfs_path_exists(char* path){
+    size_t ret = 0;
+
+    // Find the parent folder
+    vfs_get_node_return_t vfs_get_node_ret = vfs_get_node(path);
+
+    vfs_node *found = vfs_get_node_ret.found_node;
+    if (!found) {
+        VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
+        ret = 0;
+        goto path_exists_cleanup;
+    }
+
+    switch (found->type) {
+        case VFS_NODE_TYPE_DIR:{
+            if(vfs_get_node_ret.status == OK && vfs_get_node_ret.remaining_path == NULL){
+                ret = 1;
+            }
+            break;
+        }
+        case VFS_NODE_TYPE_FILE_SYSTEM: {
+            filesystem_data *fs = ((filesystem_data *)found->data);
+            char* remaining_path = vfs_get_node_ret.remaining_path;
+            if(!remaining_path){
+                remaining_path = "/";
+            }
+            switch (fs->type) {
+                case FILESYSTEM_TYPE_EXT2: {
+                    ext2_super_block s_block = ext2_read_super_block(fs);
+                    uint64_t inode_num = ext2_get_inode_number_at_path(fs, &s_block, remaining_path);
+                    if(inode_num == 0){
+                        VFS_DEBUG_PRINT("%s couldn't be found!\n", path);
+                        ret = 0;
+                    }
+                    ext2_inode* inode = ext2_read_inode_metadata(fs, &s_block, inode_num);
+                    if ((inode->i_mode & EXT2_S_IFMT) == EXT2_S_IFDIR) {
+                        ret = 1;
+                    } else {
+                        ret = 2;
+                    }
+                }
+
+                default: {
+                    break;
+                }
+            }
+
+            break;
+        }
+
+        default: {
+            if(vfs_get_node_ret.status == OK){
+                ret = 2;
+            }
+            break;
+        }
+    }
+
+path_exists_cleanup:
+    if (vfs_get_node_ret.path_searched) {
+        free(vfs_get_node_ret.path_searched);
+    }
+    return ret;
+}
+
 int64_t vfs_read(char *path, size_t offset_bytes, size_t count_bytes, void* out_buffer) {
     size_t ret = 0;
 
@@ -195,17 +261,29 @@ char *preprocess_path(const char *original_string) {
         return NULL; // Allocation failed
     }
     char *current = ret_str;
+    int last_was_slash = 0;
+
     while (*original_string && !isspace(*original_string)) {
-        *current++ = *original_string++;
+        if (*original_string == '/') {
+            if (!last_was_slash) { // Only add if last wasn't a slash
+                *current++ = '/';
+            }
+            last_was_slash = 1;
+        } else {
+            *current++ = *original_string;
+            last_was_slash = 0;
+        }
+        original_string++;
     }
     *current = '\0'; // Null-terminate
 
-    // Remove trailing separators
+    // Remove trailing separators (but keep root `/` intact)
     while (current > ret_str + 1 && *(current - 1) == '/') {
         *(--current) = '\0';
     }
     return ret_str;
 }
+
 
 vfs_node *find_child_node(vfs_node *parent, const char *segment, size_t segment_length) {
     if (!parent || parent->type != VFS_NODE_TYPE_DIR) {
@@ -307,23 +385,25 @@ cleanup_mkdir:
 
 // Doesn't free path_searched, should be freed afterwards
 vfs_get_node_return_t vfs_get_node(char *path) {
-
     vfs_get_node_return_t ret;
     ret.found_node = NULL;
     ret.status = OK;
     ret.remaining_path = NULL;
-    char *path_preproccesed = preprocess_path(path);
-    ret.path_searched = path_preproccesed;
-    ret.remaining_path = path_preproccesed;
 
+    char *path_preproccesed = preprocess_path(path);
     if (!path_preproccesed) {
         VFS_ERR_PRINT("Memory allocation failed!");
+        ret.status = MEMORY_ERR;
         return ret;
     }
+
+    ret.path_searched = path_preproccesed;
+    ret.remaining_path = path_preproccesed;
 
     if (*path_preproccesed == '\0') {
         ret.status = INVALID_PATH;
         VFS_ERR_PRINT("Invalid Path!\n");
+        free(path_preproccesed);  // Free before returning
         return ret;
     }
 
@@ -344,52 +424,48 @@ vfs_get_node_return_t vfs_get_node(char *path) {
             next_separator_position = strchr(current_path_position, '\0');
         }
 
-                // Ensure the current node is a directory
-        switch (current_node->type)
-        {
+        // Ensure the current node is a directory
+        switch (current_node->type) {
             case VFS_NODE_TYPE_DIR:
                 break;
-            case VFS_NODE_TYPE_FILE_SYSTEM:{
+
+            case VFS_NODE_TYPE_FILE_SYSTEM:
                 ret.found_node = current_node;
                 ret.remaining_path = current_seperator_position;
                 ret.status = CONTINUES_IN_FILE_SYSTEM;
                 VFS_DEBUG_PRINT("Returning last found node: %s\n", current_node->name);
-                return ret;
-            }
-                
+                return ret;  // Caller must free `ret.path_searched`
             
-            default:{
-                    VFS_DEBUG_PRINT("Node type at %s is not a directory!\n", current_node->name);
-                    free(path_preproccesed);
-                    ret.status = NO_DIR;
-                    return ret;
-                }
+            default:
+                VFS_DEBUG_PRINT("Node type at %s is not a directory!\n", current_node->name);
+                free(path_preproccesed); // Free memory before returning
+                ret.status = NO_DIR;
+                return ret;
         }
 
         // Search for the child node directly
-        vfs_node *child_node = NULL;
-
-        child_node = find_child_node(current_node, current_path_position, next_separator_position - current_path_position);
+        vfs_node *child_node = find_child_node(current_node, current_path_position, next_separator_position - current_path_position);
 
         if (!child_node) {
             ret.found_node = current_node;
             ret.remaining_path = current_seperator_position;
             VFS_DEBUG_PRINT("Returning last found node: %s\n", current_node->name);
-            return ret;
+            return ret;  // Caller must free `ret.path_searched`
         }
 
         current_node = child_node;
-
         if (!next_separator_position) {
             break;
         }
         current_seperator_position = next_separator_position;
         current_path_position = current_seperator_position + 1; // Skip separator
     }
+
     ret.found_node = current_node;
     ret.remaining_path = NULL;
-    return ret;
+    return ret;  // Caller must free `ret.path_searched`
 }
+
 
 vfs_node *mount_file_system(char *path, uint64_t disk_number, uint64_t disk_offset, enum file_system_type type) {
     vfs_get_node_return_t vfs_get_node_ret = vfs_get_node(path);

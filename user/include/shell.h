@@ -15,9 +15,9 @@
 #define PROMPT "> "
 
 #define MAX_CMDS_CACHE 0x10
-#define MAX_DIR_NAME 0x20
+#define MAX_PATH_SIZE 0x100
 #define MAX_DIRS 0x20
-#define MAX_CMD_STR 0x10
+#define MAX_CMD_STR 0x40
 #define MAX_CMDS 0x100
 
 #define ARGV_DELIM " "
@@ -30,7 +30,7 @@ struct tty {
 
     int64_t tci; // temp/traverse current index (for traversing cache)
 
-    char cwd[MAX_DIRS][MAX_DIR_NAME];
+    char curr_wd[MAX_PATH_SIZE];
 
     bool alive;
     bool active;
@@ -84,6 +84,9 @@ void shcmd_clear(int argc, char *argv[]);
 // nslookup
 void shcmd_nslookup(int argc, char *argv[]);
 
+// Change dir
+void shcmd_cd(int argc, char *argv[]);
+
 typedef void (*shcmd)(int argc, char *argv[]);
 
 // Notice! Indices of shcmd_str eand shcmd_table must match!
@@ -96,6 +99,7 @@ static const char shcmd_str[MAX_CMDS][MAX_CMD_STR] = {
     "bc",
     "clear",
     "nslookup",
+    "cd"
 };
 
 static const shcmd shcmd_table[MAX_CMDS] = {
@@ -107,6 +111,7 @@ static const shcmd shcmd_table[MAX_CMDS] = {
     shcmd_bc,
     shcmd_clear,
     shcmd_nslookup,
+    shcmd_cd
 };
 
 

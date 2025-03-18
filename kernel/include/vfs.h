@@ -25,6 +25,8 @@
     #define VFS_ERR_PRINT(fmt, ...)
 #endif
 
+#define EXT2_S_IFDIR 0x4000  // Directory
+#define EXT2_S_IFMT  0xF000  // Mask for file type
 
 #include <linkedList.h>
 
@@ -66,6 +68,11 @@ extern vfs_node *vsf_root;
 void create_dir(char* dir_path);
 void init_vfs();
 vfs_get_node_return_t vfs_get_node(char *path);
+
+//returns 0 if the path doesn't exist
+//returns 1 if the path is a dir
+//returns 2 otherwise
+int vfs_path_exists(char* path); 
 vfs_node* vfs_mkdir(char* path);
 vfs_node *vfs_mknode(char *path);
 int64_t vfs_get_file_size(char *path);

@@ -9,8 +9,7 @@ void shell_init(void) {
     tty0.tci = 0;
     tty0.alive = true;
     tty0.active = true;
-
-    memcpy(tty0.cwd[0], "dev", 3);
+    memcpy(tty0.curr_wd, "/", 2);
 
     while (tty0.alive) {
         print_prompt();

@@ -1,17 +1,81 @@
 // Shell File System related functions
 #include <shell.h>
 
-void shcmd_pwd(int argc, char *argv[]) {
-    char cwd[MAX_DIRS * MAX_DIR_NAME];
-    memset(cwd, 0x0, sizeof(cwd));
-
-    // concatenate cwd directories
-    for (int i = 0; i < MAX_DIRS && tty0.cwd[i][0] != '\0'; i++) {
-        memcpy(cwd + strlen(cwd), tty0.cwd[i], MAX_DIR_NAME);
-        memcpy(cwd + strlen(cwd), "/", 1);
+char *preprocess_path(const char *original_string) {
+    if (!original_string || *original_string == '\0') {
+        return NULL; // Invalid input
     }
+    size_t len = strlen(original_string);
+    char *ret_str = malloc(len + 1);
+    if (!ret_str) {
+        return NULL; // Allocation failed
+    }
+    char *current = ret_str;
+    int last_was_slash = 0;
 
-    printf("%s", cwd);
+    while (*original_string && !isspace(*original_string)) {
+        if (*original_string == '/') {
+            if (!last_was_slash) { // Only add if last wasn't a slash
+                *current++ = '/';
+            }
+            last_was_slash = 1;
+        } else {
+            *current++ = *original_string;
+            last_was_slash = 0;
+        }
+        original_string++;
+    }
+    *current = '\0'; // Null-terminate
+
+    // Remove trailing separators (but keep root `/` intact)
+    while (current > ret_str + 1 && *(current - 1) == '/') {
+        *(--current) = '\0';
+    }
+    return ret_str;
+}
+
+void shcmd_pwd(int argc, char *argv[]) {
+    printf("%s", tty0.curr_wd);
     if (argv && argc) // argv exists (pwd command called)
         printf("\n");
 }
+
+void shcmd_cd(int argc, char *argv[]) {
+    if(argc <= 1){
+        printf("Path to change work directory to wasn't provided");
+    }
+
+    char* path_pre_processed = NULL;
+    if(*(argv[1]) == '/' ){
+        path_pre_processed = preprocess_path(argv[1]);
+    }
+    else{
+        char* joined = malloc(strlen(tty0.curr_wd)+strlen(argv[1])+1);
+        memcpy(joined, tty0.curr_wd, strlen(tty0.curr_wd)+1);
+        strcat(joined, argv[1]);
+        path_pre_processed = preprocess_path(joined);
+        free(joined);
+    }
+
+
+    switch (path_exists(path_pre_processed)) {
+        case 1:
+        {
+            size_t length = strlen(path_pre_processed);
+            memcpy(tty0.curr_wd, path_pre_processed, length+1);
+            tty0.curr_wd[length] = 0;
+            break;
+        }
+        case 2:{
+            printf("The path exists but isn't a dir");
+            break;
+        }
+        default:{
+            printf("The path doesn't exist");
+            break;
+        }
+    }
+    free(path_pre_processed);
+
+}
+

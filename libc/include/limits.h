@@ -11,6 +11,6 @@
 #define BUFFER_SIZE 0x100
 
 // Shell
-#define ARG_MAX 0x40
+#define ARG_MAX 0x10
 
 #endif

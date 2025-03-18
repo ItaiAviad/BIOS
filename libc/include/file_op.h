@@ -86,5 +86,6 @@ int64_t lseek(int fd, size_t offset, enum LSEEK_OP whence);
 
 linkedListNode *list_dir(char *path);
 
+int path_exists(char *path);
 
 #endif

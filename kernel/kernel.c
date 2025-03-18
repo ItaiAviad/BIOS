@@ -172,16 +172,15 @@ void user_init() {
 
     // Heap
     // ASLR heap
-    // NOTICE! Heap address after this chunk of code is relative to the **process's VAS**
-    uint64_t heap_slot = rand() % (PROC_SLOTS) + (PROC_SLOTS_OFFSET);
-    while (heap_slot < PROC_SLOTS_OFFSET || abs(stack_slot - heap_slot) <= 1)
-        heap_slot = rand() % (PROC_SLOTS) + (PROC_SLOTS_OFFSET);
-    pcb.heap = (void*) (heap_slot * PROC_SLOT_SIZE);
+    pcb.heap = (void*) KERNEL_HEAP_START;
+
+    map_memory_range(pcb, (void*) pcb.heap, pcb.heap + KERNEL_HEAP_SIZE_PAGES * 512 -1, pcb.heap);
+
     // TODO: Update g_heap_malloc_state_base so kernel mallocs in process's heap
     // map_memory_range(pcb.ctx, (void*) (pcb.heap), (void*) (pcb.heap + PROC_STACK_SIZE - 1), (void*) ((uint64_t) pcb.entry + (uint64_t) pcb.heap));
     // pcb.heap += (uint64_t) pcb.entry; // if heap relative to kernel's VAS
     // Init heap
-    init_heap(pcb, (uint64_t) pcb.heap, PROC_HEAP_SIZE, false);
+    // init_heap(pcb, (uint64_t) pcb.heap, PROC_HEAP_SIZE, false);
 
     // printf("stack: %d, heap: %d\n", stack_slot, heap_slot);
     // printf("stack: %p, heap: %p\n", pcb.stack, pcb.heap);
