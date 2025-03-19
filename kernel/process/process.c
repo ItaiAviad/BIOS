@@ -89,9 +89,16 @@ PCB alloc_proc(uint64_t ppid){
         }
     };
 
+
     pcb.ctx.pml4 = allocate_page(pcb);
 
+    map_memory_range(kpcb, (void*)pcb.ctx.pml4, ((void*)pcb.ctx.pml4 + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
+
+    kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)pcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
+
     init_recursive_paging(pcb.ctx);
+
+    map_memory_range(pcb, (void*) ((void*)pcb.ctx.pml4), (void*) ((void*)pcb.ctx.pml4 + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
 
     map_memory_range(pcb, PROC_MAPPED_START_ADDR, PROC_MAPPED_START_ADDR+PROC_MEM_SIZE-1, pcb.real_mem_addr);
 
