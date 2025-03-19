@@ -34,6 +34,7 @@ typedef struct ProcessControlBlock {
     uint32_t pid;                   // Process ID
     uint32_t state;                 // Process state (e.g., READY, RUNNING, WAITING)
 
+    void* real_mem_addr;
     void* entry;             // Pointer to the process's code segment
     PageFrameAllocator pfa; // Page Frame Allocator
     Context ctx;            // Process Context
@@ -53,6 +54,11 @@ void init_kernel_process(void);
 
 uint64_t allocate_pid();
 void dealloc_pid(uint64_t pid);
+
+
+uint64_t allocate_proc_mem();
+void deallocate_proc_mem(uint64_t addr);
+
 
 
 #endif
