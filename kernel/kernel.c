@@ -96,9 +96,8 @@ int kmain(void) {
         printf("%s\n",list->data);
         list = list->next;
     }
-    // user_init();
 
-    alloc_proc(0);
+    user_init();
 
     while (1) {}
 
@@ -106,45 +105,14 @@ int kmain(void) {
 }
 
 void user_init() {
-    interrupts_ready = false;
-    void* pml4_user = allocate_page(kpcb);
-    map_page(kpcb,  pml4_user, pml4_user, PAGE_MAP_FLAGS);
+    struct ProcessControlBlock pcb = alloc_proc(0);
 
-    cli();
+    void* elf_bin = readelf((void*)USER_LOAD_ADDR, "/mnt/mount1/user_prog", false);
 
-    struct ProcessControlBlock pcb = {
-        .pid = allocate_pid(),
-        .ppid = KERNEL_PID,
-        .state = 0,
+    pcb.stack = USER_LOAD_ADDR - 0x16;
 
-
-        .entry = (void*) USER_LOAD_ADDR,
-        .ctx = {
-            .start_addr = (uint64_t) pcb.entry,
-            .kernel_addr = (uint64_t) pcb.entry + PROC_KERNEL_ADDR,
-            .memory_size_pages = pcb.pfa.num_pages,
-            .allocator = kpcb.ctx.allocator,
-            .old_pml4 = (uint64_t*) PML4_KERNEL,
-            .pml4 = pml4_user
-        },
-
-        .stack = 0,
-        .heap = 0,
-
-        .priority = 0,
-        .cpu_context = 0
-    };
-
-
-    
-    // Switch PML4 to use the (new) PML4
-    flush_tlb();
-    invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
     set_pml4_address((uint64_t *) pcb.ctx.pml4);
 
-    // printf("123\n");
-    interrupts_ready = true;
-    sti();
-    jump_usermode((void*)PROC_BIN_ADDR, (void*)(pcb.stack));
+    jump_usermode((void*)USER_LOAD_ADDR, (void*)(pcb.stack));
     while (1) {}
 }

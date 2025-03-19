@@ -2,6 +2,8 @@
 
 #define INTERRUPTS_H
 
+extern int interrupts_ready;
+
 /**
 * @brief Disable interrupts via the cli instruction
 * @param none

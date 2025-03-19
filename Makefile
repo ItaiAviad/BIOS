@@ -15,7 +15,7 @@ SECTOR_SIZE := 512
 KERNEL_LOAD_ADDR := 0x10000
 KERNEL_STACK_START_ADDR := 0xF000
 KERNEL_VBASE := $(shell echo $$((0x800000 + $(KERNEL_LOAD_ADDR)))) # 4MB - Kernel binary VA
-PROC_BIN_ADDR := 0x400000
+PROC_BIN_ADDR := 0x4000000
 
 ### Directories
 BOOT_DIR := boot
@@ -286,7 +286,7 @@ always:
 QEMU_CMD = qemu-system-x86_64 -m 8G -hda $(FLOPPY_BIN) \
 	-drive id=disk,file=$(DISK),if=none \
 	-device ahci,id=ahci  -device ide-hd,drive=disk,bus=ahci.0 \
-	-d int,cpu_reset \
+	-d int,cpu_reset,in_asm \
 	-no-reboot -D log.txt\
 	-monitor stdio \
 	-machine kernel_irqchip=off

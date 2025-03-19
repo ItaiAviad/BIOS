@@ -1,4 +1,5 @@
 #include <process.h>
+#include <arch/x86_64/interrupts.h>
 
 uint64_t process_pid_bitmap = 0;
 uint64_t process_mem_bitmap = 0;
@@ -74,10 +75,13 @@ void init_kernel_process(void) {
 }
 
 PCB alloc_proc(uint64_t ppid){
+    cli();
+
+    interrupts_ready = false;
 
     PCB pcb = (struct ProcessControlBlock) {
         .pid = allocate_pid(),
-        .ppid = kpcb.pid,
+        .ppid = ppid,
         .state = 0,
         .priority = 0,
         .cpu_context = 0,
@@ -93,17 +97,48 @@ PCB alloc_proc(uint64_t ppid){
     pcb.ctx.pml4 = allocate_page(pcb);
 
     map_memory_range(kpcb, (void*)pcb.ctx.pml4, ((void*)pcb.ctx.pml4 + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
+    map_memory_range(kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb.real_mem_addr);
 
-    kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)pcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
+    // Change recursive paging to allow mapping of other pml4
 
     init_recursive_paging(pcb.ctx);
 
+    kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)pcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
+    flush_tlb();
+
     map_memory_range(pcb, (void*) ((void*)pcb.ctx.pml4), (void*) ((void*)pcb.ctx.pml4 + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
 
-    map_memory_range(pcb, PROC_MAPPED_START_ADDR, PROC_MAPPED_START_ADDR+PROC_MEM_SIZE-1, pcb.real_mem_addr);
+    map_memory_range(pcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb.real_mem_addr);
+    // Map Kernel (higher half)
+    /* NOTE: Kernel is mapped to the same virtual address in both kernel PML4 and process PML4
+             This ensures that the kernel in can see its own functions in the same address.
+       NOTE: Kernel includes IDT (but not GDT!)
+    */
+    map_memory_range(pcb, (void*) (PROC_KERNEL_ADDR), (void*) (PAGE_FRAME_ALLOCATOR_END), (void*) (KERNEL_VBASE - KERNEL_LOAD_ADDR));
+
+    // Map kernel boot (Kernel GDT and TSS)
+    /* NOTE: For simplicity reasons, the GDT (initialized in Bootloader)
+             stays in the same physical space, and thereby needs to be mapped
+             to a different virtual address in the process's PML4 (GDT's address is ~0x8000,
+             which is reserved for the process's code).
+             GDT location is the same in both kernel and process PML4 (see ProcessMemoryLayout.md)
+    */
+    map_memory_range(pcb, (void*)(PAGE_FRAME_ALLOCATOR_END + 1), (void*) (PAGE_FRAME_ALLOCATOR_END + PROC_SLOT_SIZE), (void*)(0x0));
 
 
+    pcb.heap = (void*) KERNEL_HEAP_START;
 
+    map_memory_range(pcb, (void*) pcb.heap, pcb.heap + KERNEL_HEAP_SIZE_PAGES * 512 -1, pcb.heap);
+
+    // Revert kernel pml4 change.
+    kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)kpcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
+    flush_tlb();
+
+    interrupts_ready = true;
+
+    sti();
+
+    return pcb;  
     
 
 }
