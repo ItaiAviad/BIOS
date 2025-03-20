@@ -105,14 +105,12 @@ int kmain(void) {
 }
 
 void user_init() {
-    struct ProcessControlBlock pcb = alloc_proc(0);
+    PCB* pcb = alloc_proc(kpcb.ppid);
 
     void* elf_bin = readelf((void*)USER_LOAD_ADDR, "/mnt/mount1/user_prog", false);
 
-    pcb.stack = USER_LOAD_ADDR - 0x16;
+    set_pml4_address((uint64_t *) pcb->ctx.pml4);
 
-    set_pml4_address((uint64_t *) pcb.ctx.pml4);
-
-    jump_usermode((void*)USER_LOAD_ADDR, (void*)(pcb.stack));
+    jump_usermode((void*)USER_LOAD_ADDR, (void*)(pcb->stack));
     while (1) {}
 }

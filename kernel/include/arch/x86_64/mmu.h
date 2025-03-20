@@ -61,8 +61,8 @@ void init_page_frame_allocator(PageFrameAllocator* allocator, size_t memory_size
  * @param Context
  * @return void* - physical memory address
  */
-void* allocate_page(PCB pcb);
-void* allocate_and_zero_page(PCB pcb);
+void* allocate_page(PCB* pcb);
+void* allocate_and_zero_page(PCB* pcb);
 /**
  * @brief Free a page from a frame
  * 
@@ -98,7 +98,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
  * 
  * @param ctx 
  */
-void switch_context(PCB pcb);
+void switch_context(PCB* pcb);
 /**
  * @brief Map reserved paging tables
  * 
@@ -114,10 +114,11 @@ void map_reserved_paging_tables(Context ctx);
  * @param physical_addr
  */
 
-void map_memory_range(PCB pcb, void* start_addr, void* end_addr, void* physical_addr);
+void map_memory_range(PCB* pcb, void* start_addr, void* end_addr, void* physical_addr);
 
+void map_memory_range_with_flags(PCB* pcb, void* start_addr, void* end_addr, void* physical_addr, uint64_t flags, int set_in_allocator);
 
-void map_memory_range_with_flags(PCB pcb, void* start_addr, void* end_addr, void* physical_addr, uint64_t flags, int set_in_allocator);
+void unmap_memory_range(PCB* pcb, void* start_addr, void* end_addr, int set_in_allocator);
 
 /**
  * @brief Set the PML4 Address in the CR3 reg object (Paging Register)
@@ -141,14 +142,14 @@ void flush_tlb();
  * @param physical_address 
  * @param flags 
  */
-void map_page(PCB pcb, void* virtual_address, void* physical_address, uint64_t flags);
+void map_page(PCB* pcb, void* virtual_address, void* physical_address, uint64_t flags);
 /**
  * @brief Unmap a page
  * 
  * @param ctx 
  * @param virtual_address 
  */
-void unmap_page(PCB pcb, uint64_t virtual_address);
+void unmap_page(uint64_t virtual_address);
 
 /**
  * @brief Check if a page is mapped

@@ -22,8 +22,8 @@ void* init_heap(__attribute__((unused)) PCB pcb, uint64_t base_addr, uint64_t si
     // TODO (IMPORTANT!): Use `kmalloc` (above) as a syscall
     if (map) {
     #if defined(__is_libk)
-        map_memory_range(pcb, g_heap_malloc_state_base, g_heap_malloc_state_base + sizeof(malloc_state), g_heap_malloc_state_base);
-        map_memory_range(pcb, (void*) base_addr, (void*) (base_addr + heap.heap_total_size), (void*) base_addr);
+        map_memory_range(&pcb, g_heap_malloc_state_base, g_heap_malloc_state_base + sizeof(malloc_state), g_heap_malloc_state_base);
+        map_memory_range(&pcb, (void*) base_addr, (void*) (base_addr + heap.heap_total_size), (void*) base_addr);
     #endif
     }
     memset(&heap.padding, 0x0, MALLOC_STATE_PADDING_SIZE);

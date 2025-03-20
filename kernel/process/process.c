@@ -61,7 +61,7 @@ void init_kernel_process(void) {
     printf("%s Heap: %p\n", LOG_SYM_SUC, kpcb.heap);
 
     // Map boot memory (bootloader set memory. i.e. GDT, TSS)
-    map_memory_range(kpcb, (void*)(PAGE_FRAME_ALLOCATOR_END + 1), (void*) (PAGE_FRAME_ALLOCATOR_END + PROC_SLOT_SIZE), (void*)(0x0));
+    map_memory_range(&kpcb, (void*)(PAGE_FRAME_ALLOCATOR_END + 1), (void*) (PAGE_FRAME_ALLOCATOR_END + PROC_SLOT_SIZE), (void*)(0x0));
 
     // Update GDTR (to use new virtual address)
     struct gdtr gdtr;
@@ -74,12 +74,14 @@ void init_kernel_process(void) {
     printf("%s TSS\n", LOG_SYM_SUC);
 }
 
-PCB alloc_proc(uint64_t ppid){
+PCB* alloc_proc(uint64_t ppid){
     cli();
 
     interrupts_ready = false;
 
-    PCB pcb = (struct ProcessControlBlock) {
+    PCB* pcb = malloc(sizeof(PCB));
+
+    *pcb = (struct ProcessControlBlock) {
         .pid = allocate_pid(),
         .ppid = ppid,
         .state = 0,
@@ -94,21 +96,21 @@ PCB alloc_proc(uint64_t ppid){
     };
 
 
-    pcb.ctx.pml4 = allocate_page(pcb);
+    pcb->ctx.pml4 = allocate_page(pcb);
 
-    map_memory_range(kpcb, (void*)pcb.ctx.pml4, ((void*)pcb.ctx.pml4 + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
-    map_memory_range(kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb.real_mem_addr);
+    map_memory_range(&kpcb, (void*)pcb->ctx.pml4, ((void*)pcb->ctx.pml4 + PAGE_SIZE - 1), (void*)pcb->ctx.pml4);
+    map_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr);
 
     // Change recursive paging to allow mapping of other pml4
 
-    init_recursive_paging(pcb.ctx);
+    init_recursive_paging(pcb->ctx);
 
-    kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)pcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
+    kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)(void*)pcb->ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
     flush_tlb();
 
-    map_memory_range(pcb, (void*) ((void*)pcb.ctx.pml4), (void*) ((void*)pcb.ctx.pml4 + PAGE_SIZE - 1), (void*)pcb.ctx.pml4);
+    map_memory_range(pcb, (void*) ((void*)pcb->ctx.pml4), (void*) ((void*)pcb->ctx.pml4 + PAGE_SIZE - 1), (void*)pcb->ctx.pml4);
 
-    map_memory_range(pcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb.real_mem_addr);
+    map_memory_range(pcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr);
     // Map Kernel (higher half)
     /* NOTE: Kernel is mapped to the same virtual address in both kernel PML4 and process PML4
              This ensures that the kernel in can see its own functions in the same address.
@@ -126,13 +128,16 @@ PCB alloc_proc(uint64_t ppid){
     map_memory_range(pcb, (void*)(PAGE_FRAME_ALLOCATOR_END + 1), (void*) (PAGE_FRAME_ALLOCATOR_END + PROC_SLOT_SIZE), (void*)(0x0));
 
 
-    pcb.heap = (void*) KERNEL_HEAP_START;
+    pcb->heap = (void*) KERNEL_HEAP_START;
 
-    map_memory_range(pcb, (void*) pcb.heap, pcb.heap + KERNEL_HEAP_SIZE_PAGES * 512 -1, pcb.heap);
+    map_memory_range(pcb, (void*) pcb->heap, pcb->heap + KERNEL_HEAP_SIZE_PAGES * 512 -1, pcb->heap);
 
     // Revert kernel pml4 change.
     kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)kpcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
+    // unmap_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, false);
     flush_tlb();
+
+    pcb->stack = USER_LOAD_ADDR - 0x16;
 
     interrupts_ready = true;
 

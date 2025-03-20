@@ -42,7 +42,7 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
 
     // invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
 
-    switch_context(kpcb);
+    switch_context(&kpcb);
 
     cli();
 
@@ -89,7 +89,7 @@ void init_recursive_paging(Context ctx){
     ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)ctx.pml4 | PAGE_MAP_FLAGS;
 }
 
-void switch_context(PCB pcb) {
+void switch_context(PCB* pcb) {
     cli();
 
     // Map New PML4
@@ -100,15 +100,15 @@ void switch_context(PCB pcb) {
     
     // Map Kernel (In new PML4)
     // Map Kernel + Page Frame Allocator + Pagign Tables in new Kernel Context
-    memset(pcb.ctx.allocator->bitmap, 1, UPPER_DIVIDE(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
+    memset(pcb->ctx.allocator->bitmap, 1, UPPER_DIVIDE(PAGE_FRAME_ALLOCATOR_END, PAGE_SIZE));
 
     // map_memory_range(ctx, (void*)MBR_LOAD_ADDR, (void*) (MBR_LOAD_ADDR + (1 * MB)), (void*)MBR_LOAD_ADDR);
     map_memory_range(pcb, (void*)0x0, (void*) (0x0 + (3 * MB) - 1), (void*)0x0);
     map_memory_range(pcb, (void*)(KERNEL_VBASE - KERNEL_LOAD_ADDR), (void*) PAGE_FRAME_ALLOCATOR_END - 1, (void*)(KERNEL_VBASE - KERNEL_LOAD_ADDR));
-    map_memory_range(pcb, (void*)pcb.ctx.pml4, pcb.ctx.pml4+PAGE_SIZE-1, (void*)pcb.ctx.pml4);
+    map_memory_range(pcb, (void*)pcb->ctx.pml4, pcb->ctx.pml4+PAGE_SIZE-1, (void*)pcb->ctx.pml4);
     // Switch PML4 to use the (new) s PML4
     cli();
-    set_pml4_address((uint64_t *) pcb.ctx.pml4);
+    set_pml4_address((uint64_t *) pcb->ctx.pml4);
     sti();
 }
 
@@ -147,7 +147,7 @@ uint64_t* get_pml4_address() {
 }
 
 
-void map_page(PCB pcb, void* virtual_address, void* physical_address, uint64_t flags) {
+void map_page(PCB* pcb, void* virtual_address, void* physical_address, uint64_t flags) {
 
     // Calculate indices
     uint64_t pml4_index = ((uint64_t)virtual_address >> 39) & 0x1FF;
@@ -205,17 +205,25 @@ void map_page(PCB pcb, void* virtual_address, void* physical_address, uint64_t f
     pt_recursive[pt_index] = (uint64_t) physical_address | flags;
 }
 
-void unmap_page(PCB pcb, uint64_t virtual_address) {
-    // Calculate PT index
-    uint64_t pt_index = (virtual_address >> 12) & 0x1FF;
-    int64_t *pt = NULL;
+void unmap_page(uint64_t virtual_address) {
+    uint64_t pml4_index = ((uint64_t)virtual_address >> 39) & 0x1FF;
+    uint64_t pdpt_index = ((uint64_t)virtual_address >> 30) & 0x1FF;
+    uint64_t pd_index = ((uint64_t)virtual_address >> 21) & 0x1FF;
+    uint64_t pt_index = ((uint64_t)virtual_address >> 12) & 0x1FF;
 
-    pt = is_page_mapped(pcb.ctx.pml4, virtual_address);
-    if (pt < (int64_t*) 0x0)
-        return;
-    
-    // Unmap the physical address to the virtual address in the page table
-    pt[pt_index] = 0x0;
+    uint64_t* pml4_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM);
+    uint64_t* pdpt_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, pml4_index);
+    uint64_t* pd_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, pml4_index, pdpt_index);
+    uint64_t* pt_recursive = (uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, pml4_index, pdpt_index, pd_index);
+
+    if (!(pml4_recursive[pml4_index] & PAGE_PRESENT)) return; // PDPT not present
+    if (!(pdpt_recursive[pdpt_index] & PAGE_PRESENT)) return; // PD not present
+    if (!(pd_recursive[pd_index] & PAGE_PRESENT)) return; // PT not present
+    if (!(pt_recursive[pt_index] & PAGE_PRESENT)) return; // Page not mapped
+
+    // Clear the page table entry
+    pt_recursive[pt_index] = 0;
+    invlpg(virtual_address);
 }
 
 int64_t* is_page_mapped(uint64_t* pml4, uint64_t virtual_address){
