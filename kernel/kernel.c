@@ -106,11 +106,6 @@ int kmain(void) {
 
 void user_init() {
     PCB* pcb = alloc_proc(kpcb.ppid);
-
-    void* elf_bin = readelf((void*)USER_LOAD_ADDR, "/mnt/mount1/user_prog", false);
-
-    set_pml4_address((uint64_t *) pcb->ctx.pml4);
-
-    jump_usermode((void*)USER_LOAD_ADDR, (void*)(pcb->stack));
+    switch_to_proc(pcb);
     while (1) {}
 }

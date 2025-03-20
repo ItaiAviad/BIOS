@@ -11,6 +11,9 @@
 #include <memory.h>
 #include <arch/x86_64/isr.h>
 
+
+extern PCB* current_pcb;
+
 #define MAX_NUM_OF_PROCESS 256
 
 #define KERNEL_PID 1
@@ -20,13 +23,7 @@
 extern uint64_t process_pid_bitmap;
 
 typedef struct __attribute__((packed)) {
-    // Define the callee-saved registers
-    uint64_t cr2, r15, r14, r13, r12, rbp, rbx;
-
-    // Define the callee-clobbered registers
-    uint64_t r11, r10, r9, r8, rax, rcx, rdx, rsi, rdi;
-
-    uint64_t rip, cs, eflags, rsp, ss;
+    uint64_t r15, r14, r13, r12, rbp, rbx, r11, r10, r9, r8, rax, rcx, rdx, rsi, rdi;
 } cpu_state;
 
 typedef struct ProcessControlBlock {
@@ -48,6 +45,8 @@ typedef struct ProcessControlBlock {
 
 // Kernel ProcessControlBlock
 __attribute__((unused)) struct ProcessControlBlock kpcb;
+
+extern void save_cpu_state(cpu_state* state);
 
 void init_kernel_process(void);
 

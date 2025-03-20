@@ -4,6 +4,8 @@
 uint64_t process_pid_bitmap = 0;
 uint64_t process_mem_bitmap = 0;
 
+PCB* current_pcb = NULL;
+
 uint64_t allocate_pid(){
     for(int i = 0; i < MAX_NUM_OF_PROCESS; i++){
         if(!(process_pid_bitmap & BITMASK(i)) && i != 0 && i != KERNEL_PID){
@@ -134,8 +136,9 @@ PCB* alloc_proc(uint64_t ppid){
 
     // Revert kernel pml4 change.
     kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)kpcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
-    // unmap_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, false);
     flush_tlb();
+
+    unmap_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, false);
 
     pcb->stack = USER_LOAD_ADDR - 0x16;
 
@@ -145,5 +148,22 @@ PCB* alloc_proc(uint64_t ppid){
 
     return pcb;  
     
+
+}
+
+
+int switch_to_proc(PCB* pcb){
+    if(current_pcb){
+        save_cpu_state(&(current_pcb->cpu_context));
+    }
+    current_pcb = pcb;
+    map_memory_range_with_flags(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr, PAGE_MAP_FLAGS, 0);
+    flush_tlb();
+
+    void* elf_bin = readelf((void*)USER_LOAD_ADDR, "/mnt/mount1/user_prog", false);
+
+    set_pml4_address((uint64_t *) pcb->ctx.pml4);
+
+    jump_usermode((void*)USER_LOAD_ADDR, (void*)(pcb->stack));
 
 }

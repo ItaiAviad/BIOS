@@ -4,8 +4,6 @@
 
 #include <process.h>
 
-extern PCB* current_pcb;
-
 
 
 #endif
