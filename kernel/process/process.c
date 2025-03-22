@@ -76,7 +76,7 @@ void init_kernel_process(void) {
     printf("%s TSS\n", LOG_SYM_SUC);
 }
 
-PCB* alloc_proc(uint64_t ppid){
+PCB* alloc_proc(uint64_t ppid, char* path_to_elf){
     cli();
 
     interrupts_ready = false;
@@ -138,6 +138,8 @@ PCB* alloc_proc(uint64_t ppid){
     kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)kpcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
     flush_tlb();
 
+    void* elf_bin = readelf((void*)USER_LOAD_ADDR, path_to_elf, false);
+
     unmap_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, false);
 
     pcb->stack = USER_LOAD_ADDR - 0x16;
@@ -159,8 +161,6 @@ int switch_to_proc(PCB* pcb){
     current_pcb = pcb;
     map_memory_range_with_flags(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr, PAGE_MAP_FLAGS, 0);
     flush_tlb();
-
-    void* elf_bin = readelf((void*)USER_LOAD_ADDR, "/mnt/mount1/user_prog", false);
 
     set_pml4_address((uint64_t *) pcb->ctx.pml4);
 

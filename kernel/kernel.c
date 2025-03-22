@@ -105,7 +105,7 @@ int kmain(void) {
 }
 
 void user_init() {
-    PCB* pcb = alloc_proc(kpcb.ppid);
+    PCB* pcb = alloc_proc(kpcb.pid, "/mnt/mount1/user_prog");
     switch_to_proc(pcb);
     while (1) {}
 }

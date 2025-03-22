@@ -58,7 +58,7 @@ void dealloc_pid(uint64_t pid);
 uint64_t allocate_proc_mem();
 void deallocate_proc_mem(uint64_t addr);
 
-PCB* alloc_proc(uint64_t ppid);
+PCB* alloc_proc(uint64_t ppid, char* path_to_elf);
 
 
 

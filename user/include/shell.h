@@ -107,7 +107,7 @@ static const char shcmd_str[MAX_CMDS][MAX_CMD_STR] = {
     "nslookup",
     "cd",
     "ls",
-    "cat"
+    "cat",
 };
 
 static const shcmd shcmd_table[MAX_CMDS] = {
