@@ -7,8 +7,8 @@ syscall_entry:
     ; cli
 
     ; Switch to kernel stack
-    swapgs
-    mov qword [gs:8], rsp ; save user stack
+    ;swapgs
+    ;mov qword [gs:8], rsp ; save user stack
     ;mov rsp, [gs:0] ; load kernel stack
 
     ; Additional arguments are pushed here (in syscall function)
@@ -73,7 +73,7 @@ syscall_entry:
     pop r15                 ; Restore r15
 
     ;mov rsp, [gs:0x8] ; load user stack
-    swapgs
+    ;swapgs
 
     ; sti
     ; Return to user space
