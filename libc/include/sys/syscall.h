@@ -48,6 +48,7 @@ typedef struct pt_regs {
 } pt_regs;
 
 enum SYSCALL_NR {
+    sys_exit = 0,
     sys_printf,
     sys_getchar,
     sys_time,
@@ -83,6 +84,7 @@ enum SYSCALL_NR {
 // #define __NR_syscalls 256
 typedef int64_t (*syscall_t)();
 static const syscall_t SYSCALL_TABLE[] = {
+    [sys_exit] = NULL; // Todo add sys_exit
     [sys_printf] = printf,
     [sys_getchar] = getchar,
     [sys_time] = time,

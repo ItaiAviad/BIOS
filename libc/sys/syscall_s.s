@@ -3,6 +3,9 @@
 
 section .text
 [global syscall_entry]
+
+%define proc_exit_syscall_num 0
+
 syscall_entry:
     ; cli
 
@@ -10,6 +13,10 @@ syscall_entry:
     swapgs
     mov qword [gs:8], rsp ; save user stack
     mov rsp, [gs:0] ; load kernel stack
+
+    cmp ax, proc_exit_syscall_num
+
+    je syscall_handler ; We don't need to add garbage to the stack if we get the exit syscall
 
     ; Additional arguments are pushed here (in syscall function)
     ; Save all general-purpose registers
