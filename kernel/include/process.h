@@ -2,14 +2,18 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+
+
+
+#include <linkedList.h>
 #include <types.h>
 #include <arch/x86_64/mlayout.h>
 #include <arch/x86_64/interrupts.h>
 #include <arch/x86_64/mmu.h>
 #include <arch/x86_64/gdt.h>
 #include <arch/x86_64/tss.h>
-#include <memory.h>
 #include <arch/x86_64/isr.h>
+
 
 
 extern PCB* current_pcb;
@@ -21,6 +25,8 @@ extern PCB* current_pcb;
 #define BITMASK(n) (1 << (n))
 
 extern uint64_t process_pid_bitmap;
+
+extern struct linkedListNode* pcb_list;
 
 typedef struct __attribute__((packed)) {
     uint64_t r15, r14, r13, r12, rbp, rbx, r11, r10, r9, r8, rax, rcx, rdx, rsi, rdi;
@@ -60,6 +66,6 @@ void deallocate_proc_mem(uint64_t addr);
 
 PCB* alloc_proc(uint64_t ppid, char* path_to_elf);
 
-
+PCB* find_pcb_by_pid(uint64_t pid);
 
 #endif

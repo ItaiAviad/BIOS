@@ -11,7 +11,6 @@
 #include <limits.h>
 
 #include <arch/x86_64/mmu.h>
-#include <process.h>
 
 #ifdef __cplusplus
 extern "C" {

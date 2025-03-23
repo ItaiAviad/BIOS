@@ -4,6 +4,7 @@
 uint64_t process_pid_bitmap = 0;
 uint64_t process_mem_bitmap = 0;
 
+struct linkedListNode* pcb_list = NULL;
 PCB* current_pcb = NULL;
 
 uint64_t allocate_pid(){
@@ -37,9 +38,10 @@ void deallocate_proc_mem(uint64_t addr){
 
 void init_kernel_process(void) {
     kpcb = (struct ProcessControlBlock) {
-        .ppid = 0,
-        .pid = 0,
+        .ppid = KERNEL_PID,
         .state = 0,
+        .pid = KERNEL_PID,
+        
 
         .entry = (void*) KERNEL_VBASE - KERNEL_LOAD_ADDR,
         // .pfa = {}, // initialized in init_kernel_paging()->init_page_frame_allocator()
@@ -74,6 +76,8 @@ void init_kernel_process(void) {
     // Flush TSS - NOTICE! TSS address is HARDCODED in `gdt64.s` file
     flush_tss();
     printf("%s TSS\n", LOG_SYM_SUC);
+
+    append_node(&pcb_list, &kpcb);
 }
 
 PCB* alloc_proc(uint64_t ppid, char* path_to_elf){
@@ -96,6 +100,8 @@ PCB* alloc_proc(uint64_t ppid, char* path_to_elf){
             .allocator = kpcb.ctx.allocator
         }
     };
+
+    append_node(&pcb_list, &pcb);
 
 
     pcb->ctx.pml4 = allocate_page(pcb);

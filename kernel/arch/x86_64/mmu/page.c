@@ -17,8 +17,6 @@ void init_kernel_paging(PageFrameAllocator* allocator, size_t memory_size_pages)
         .pml4 = (uint64_t*) PML4_BOOT
     };
 
-    kpcb.pid = KERNEL_PID;
-    kpcb.ppid = 0;
     kpcb.ctx.start_addr = 0x0;
     kpcb.ctx.kernel_addr = 0x0;
     kpcb.ctx.memory_size_pages = memory_size_pages;
@@ -258,4 +256,15 @@ int64_t* is_page_mapped(uint64_t* pml4, uint64_t virtual_address){
     #endif
 
     return (int64_t*) pt[pt_index];
+}
+
+PCB* find_pcb_by_pid(uint64_t pid){
+    linkedListNode* curr = pcb_list;
+    while(curr){
+        if(((PCB*)curr->data)->pid == pid){
+            return (PCB*)curr->data;
+        }
+        curr = curr->next;
+    }
+    return NULL;
 }

@@ -6,6 +6,8 @@
 #include <memory.h>
 #include <stdio.h>
 
+void* malloc(size_t);
+void free(void*);
 
 // Define a generic linked list node
 typedef struct linkedListNode {
