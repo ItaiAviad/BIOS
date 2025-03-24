@@ -7,6 +7,8 @@
 volatile uint64_t pit_tick_count = 0;
 volatile uint64_t pit_time = 0;
 
+uint64_t pit_time_ms = 0;
+
 void pit_init(void) {
     cli();
 
@@ -57,6 +59,7 @@ void set_pit_count(uint64_t count) {
 
 void pit_handler() {
     pit_tick_count++;
+    pit_time_ms += TIME_DELTA_TICK_MS;
 }
 
 void pit_sleep(uint64_t milliseconds) {

@@ -14,6 +14,9 @@
 #define PIT_CHANNEL_0_DATA_REGISTER 0x40
 #define PIT_FREQUENCY 1193180 // PIT frequency (Hz)
 #define PIT_TIMER_FREQ 1000       // Desired frequency for PIT (1 kHz)
+#define TIME_DELTA_TICK_MS (1000/PIT_TIMER_FREQ)
+
+extern uint64_t pit_time_ms;
 
 void pit_init(void);
 uint64_t read_pit_count(void);

@@ -32,7 +32,7 @@
 #include <net/rtl8139.h>
 #include <vfs.h>
 
-extern void jump_usermode(void* entry, void* sp);
+extern void jump_usermode(cpu_state*);
 void user_init();
 
 int interrupts_ready;
@@ -105,7 +105,9 @@ int kmain(void) {
 }
 
 void user_init() {
-    PCB* pcb = alloc_proc(kpcb.pid, "/mnt/mount1/user_prog");
-    switch_to_proc(pcb);
+    PCB* pcb = alloc_proc();
+    pcb->ppid = kpcb.pid;
+    load_proc_mem(pcb, "/mnt/mount1/user_prog");
+    run_proc(pcb);
     while (1) {}
 }

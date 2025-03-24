@@ -76,11 +76,9 @@ void init_kernel_process(void) {
     // Flush TSS - NOTICE! TSS address is HARDCODED in `gdt64.s` file
     flush_tss();
     printf("%s TSS\n", LOG_SYM_SUC);
-
-    append_node(&pcb_list, &kpcb);
 }
 
-PCB* alloc_proc(uint64_t ppid, char* path_to_elf){
+PCB* alloc_proc(){
     cli();
 
     interrupts_ready = false;
@@ -89,7 +87,6 @@ PCB* alloc_proc(uint64_t ppid, char* path_to_elf){
 
     *pcb = (struct ProcessControlBlock) {
         .pid = allocate_pid(),
-        .ppid = ppid,
         .state = 0,
         .priority = 0,
         .cpu_context = 0,
@@ -98,11 +95,15 @@ PCB* alloc_proc(uint64_t ppid, char* path_to_elf){
         .ctx = {
             .old_pml4 = kpcb.ctx.pml4,
             .allocator = kpcb.ctx.allocator
-        }
+        },
+        .stack = USER_LOAD_ADDR - 0x16
     };
 
-    append_node(&pcb_list, &pcb);
+    pcb->cpu_context.rsp = pcb->stack;
 
+    pcb->cpu_context.rip = USER_LOAD_ADDR;
+
+    pcb->list_node = pcb_list;
 
     pcb->ctx.pml4 = allocate_page(pcb);
 
@@ -144,15 +145,13 @@ PCB* alloc_proc(uint64_t ppid, char* path_to_elf){
     kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)kpcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
     flush_tlb();
 
-    void* elf_bin = readelf((void*)USER_LOAD_ADDR, path_to_elf, false);
-
     unmap_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, false);
-
-    pcb->stack = USER_LOAD_ADDR - 0x16;
 
     interrupts_ready = true;
 
     sti();
+
+    append_node(&pcb_list, &pcb);
 
     return pcb;  
     
@@ -160,16 +159,22 @@ PCB* alloc_proc(uint64_t ppid, char* path_to_elf){
 }
 
 
-int switch_to_proc(PCB* pcb){
-    if(current_pcb){
-        save_cpu_state(&(current_pcb->cpu_context));
-    }
+int run_proc(PCB* pcb){
     current_pcb = pcb;
     map_memory_range_with_flags(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr, PAGE_MAP_FLAGS, 0);
     flush_tlb();
 
     set_pml4_address((uint64_t *) pcb->ctx.pml4);
 
-    jump_usermode((void*)USER_LOAD_ADDR, (void*)(pcb->stack));
+    jump_usermode(&(pcb->cpu_context));
 
+}
+
+int load_proc_mem(PCB* pcb, char* path_to_elf){
+    map_memory_range(&kpcb, (void*)pcb->ctx.pml4, ((void*)pcb->ctx.pml4 + PAGE_SIZE - 1), (void*)pcb->ctx.pml4);
+    map_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr);
+
+    void* elf_bin = readelf((void*)USER_LOAD_ADDR, path_to_elf, false);
+
+    unmap_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, false);
 }
