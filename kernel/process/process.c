@@ -48,6 +48,7 @@ void init_kernel_process(void) {
         // .ctx = {}, // initialized in init_kernel_paging()
         .stack = (void*) ((uint64_t) KERNEL_STACK_TOP),
         .heap = 0x0,
+        .list_node = NULL,
 
         .priority = 0,
         .cpu_context = 0
@@ -103,8 +104,6 @@ PCB* alloc_proc(){
 
     pcb->cpu_context.rip = USER_LOAD_ADDR;
 
-    pcb->list_node = pcb_list;
-
     pcb->ctx.pml4 = allocate_page(pcb);
 
     map_memory_range(&kpcb, (void*)pcb->ctx.pml4, ((void*)pcb->ctx.pml4 + PAGE_SIZE - 1), (void*)pcb->ctx.pml4);
@@ -147,11 +146,13 @@ PCB* alloc_proc(){
 
     unmap_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, false);
 
+    append_node(&pcb_list, pcb);
+
+    pcb->list_node = pcb_list;
+
     interrupts_ready = true;
 
     sti();
-
-    append_node(&pcb_list, &pcb);
 
     return pcb;  
     
@@ -165,7 +166,6 @@ int run_proc(PCB* pcb){
     flush_tlb();
 
     set_pml4_address((uint64_t *) pcb->ctx.pml4);
-
     jump_usermode(&(pcb->cpu_context));
 
 }

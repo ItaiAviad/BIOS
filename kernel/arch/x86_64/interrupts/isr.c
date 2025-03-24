@@ -86,6 +86,8 @@ void init_isr_handlers() {
 
 void isr_handler(const uint64_t isr_num, const uint64_t error_code, registers* regs){
 
+    
+
     // Virtual Address Space
     // Save current VAS
     int cr3_changed = false;
@@ -94,6 +96,7 @@ void isr_handler(const uint64_t isr_num, const uint64_t error_code, registers* r
         "mov %0, cr3"
         : "=r"(prev_cr3) // Output
     );
+    
     // Switch to Kernel Virtual Address Space
     if (prev_cr3 != (uint64_t) (PML4_KERNEL) && prev_cr3 != (uint64_t) (PML4_BOOT)) {
         cr3_changed = true;
@@ -111,6 +114,7 @@ void isr_handler(const uint64_t isr_num, const uint64_t error_code, registers* r
     else if (isr_num >= 32) {
         if (isr_num == IRQ_PIT + PIC1_OFFSET) { // PIT IRQ
             pit_handler();
+            handle_sched_on_pit_tick(regs);
         }
         else if (isr_num == IRQ_KEYBOARD + PIC1_OFFSET) { // Keyboard IRQ
             unsigned char in = inb(PS2_KEYBOARD_PORT_DATA);

@@ -11,7 +11,7 @@
 
 #include <process.h>
 
-
+#include <sched.h>
 #include <arch/x86_64/gdt.h>
 #include <arch/x86_64/io.h>
 #include <arch/x86_64/isr.h>
@@ -99,6 +99,8 @@ int kmain(void) {
 
     user_init();
 
+    can_sched = true;
+
     while (1) {}
 
     return 0;
@@ -108,6 +110,4 @@ void user_init() {
     PCB* pcb = alloc_proc();
     pcb->ppid = kpcb.pid;
     load_proc_mem(pcb, "/mnt/mount1/user_prog");
-    run_proc(pcb);
-    while (1) {}
 }

@@ -147,6 +147,9 @@ uint64_t* get_pml4_address() {
 
 void map_page(PCB* pcb, void* virtual_address, void* physical_address, uint64_t flags) {
 
+    interrupts_ready = false;
+    cli();
+
     // Calculate indices
     uint64_t pml4_index = ((uint64_t)virtual_address >> 39) & 0x1FF;
     uint64_t pdpt_index = ((uint64_t)virtual_address >> 30) & 0x1FF;
@@ -201,9 +204,15 @@ void map_page(PCB* pcb, void* virtual_address, void* physical_address, uint64_t 
 
     // Map the physical address to the virtual address in the page table
     pt_recursive[pt_index] = (uint64_t) physical_address | flags;
+
+    interrupts_ready = true;
+    sti();
 }
 
 void unmap_page(uint64_t virtual_address) {
+    interrupts_ready = false;
+    cli();
+
     uint64_t pml4_index = ((uint64_t)virtual_address >> 39) & 0x1FF;
     uint64_t pdpt_index = ((uint64_t)virtual_address >> 30) & 0x1FF;
     uint64_t pd_index = ((uint64_t)virtual_address >> 21) & 0x1FF;
@@ -222,6 +231,9 @@ void unmap_page(uint64_t virtual_address) {
     // Clear the page table entry
     pt_recursive[pt_index] = 0;
     invlpg(virtual_address);
+
+    interrupts_ready = true;
+    sti();
 }
 
 int64_t* is_page_mapped(uint64_t* pml4, uint64_t virtual_address){

@@ -12,6 +12,7 @@
 #include <kernel.h>
 
 int umain(void) {
+    
     printf("%s Usermode\n", LOG_SYM_SUC);
 
 

@@ -1,4 +1,5 @@
 #include <sys/syscall.h>
+#include <sched.h>
 
 #if defined(__is_libk)
 void enable_syscall() {
@@ -36,6 +37,8 @@ void init_syscall() {
 
 int64_t syscall_handler(pt_regs *regs) {
     long number = regs->rax;
+
+    can_sched = false;
     // printf("syscall number: %p\n", number);
     // printf("rdi: %p\n", regs->rdi);
     // printf("rsi: %p\n", regs->rsi);
@@ -79,6 +82,9 @@ int64_t syscall_handler(pt_regs *regs) {
     flush_tlb();
     invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
     set_pml4_address((uint64_t*) (prev_cr3));
+
+
+    can_sched = true;
 
     return ret;
 }
