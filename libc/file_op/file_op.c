@@ -9,6 +9,9 @@ void init_fdp_arr(){
 
 int open(const char* path, int flags){
     #if defined(__is_libk)
+        if(!path_exists(path)){
+            return -1;
+        }
         for(int i = 0; i < MAX_NUM_OF_FILE_DESCRIPTORS; i++){
             if(fdp_arr[i].file_path == NULL){
                 size_t path_size = strlen(path);

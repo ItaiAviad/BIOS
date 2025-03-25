@@ -74,7 +74,9 @@ int64_t syscall_handler(cpu_state *regs) {
     if (number >= SYS_T_LEN || SYSCALL_TABLE[number] == NULL) {
         return -1;
     }
-    int64_t ret = SYSCALL_TABLE[number](regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9);
+    memcpy(&(current_pcb->cpu_context), regs, sizeof(cpu_state));
+
+    int64_t ret = SYSCALL_TABLE[number](regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9, regs);
     // Switch back to Kernel PML4
     flush_tlb();
     invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
