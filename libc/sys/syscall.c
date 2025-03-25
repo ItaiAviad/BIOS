@@ -35,10 +35,9 @@ void init_syscall() {
     configure_segments();
 }
 
-int64_t syscall_handler(pt_regs *regs) {
+int64_t syscall_handler(cpu_state *regs) {
     long number = regs->rax;
 
-    can_sched = false;
     // printf("syscall number: %p\n", number);
     // printf("rdi: %p\n", regs->rdi);
     // printf("rsi: %p\n", regs->rsi);
@@ -75,17 +74,11 @@ int64_t syscall_handler(pt_regs *regs) {
     if (number >= SYS_T_LEN || SYSCALL_TABLE[number] == NULL) {
         return -1;
     }
-
     int64_t ret = SYSCALL_TABLE[number](regs->rdi, regs->rsi, regs->rdx, regs->r10, regs->r8, regs->r9);
-
     // Switch back to Kernel PML4
     flush_tlb();
     invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
     set_pml4_address((uint64_t*) (prev_cr3));
-
-
-    can_sched = true;
-
     return ret;
 }
 

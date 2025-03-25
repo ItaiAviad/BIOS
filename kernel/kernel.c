@@ -96,10 +96,7 @@ int kmain(void) {
         printf("%s\n",list->data);
         list = list->next;
     }
-
     user_init();
-
-    can_sched = true;
 
     while (1) {}
 
@@ -110,4 +107,5 @@ void user_init() {
     PCB* pcb = alloc_proc();
     pcb->ppid = kpcb.pid;
     load_proc_mem(pcb, "/mnt/mount1/user_prog");
+    run_proc(pcb);
 }

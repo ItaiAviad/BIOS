@@ -5,7 +5,6 @@
 
 #define PROCESS_RUN_TIME 50// In ms
 
-extern int can_sched;
 
 extern uint64_t last_context_switch_time;
 

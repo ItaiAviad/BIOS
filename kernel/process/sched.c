@@ -2,7 +2,7 @@
 
 uint64_t last_context_switch_time = 0;
 PCB* pcb_to_run = NULL;
-int can_sched = false;
+int skipped = false;
 
 void to_cpu_state_from_syscall(cpu_state* cpu_state, registers* syscall_regs) {
     // Save the registers from the syscall into the cpu_state structure
@@ -27,21 +27,17 @@ void to_cpu_state_from_syscall(cpu_state* cpu_state, registers* syscall_regs) {
 }
 
 void run_next_proc(){
+    printf("Did sched! ");
     run_proc(pcb_to_run);
 }
 
 void handle_sched_on_pit_tick(registers* registers){
-    if(!can_sched){
-        return;
-    }
-    if(!pcb_list || (pit_time_ms - last_context_switch_time) < PROCESS_RUN_TIME || pit_time_ms == 0){
+    if(!pcb_list || ((pit_time_ms - last_context_switch_time) < PROCESS_RUN_TIME && !skipped)){
+        skipped = true;
         return;
     }
     last_context_switch_time = pit_time_ms;
-    // if(registers->rip >= KERNEL_VBASE && KERNEL_VBASE + KERNEL_END - KERNEL_LOAD_ADDR){
-    //     return;
-    // }
-    if(current_pcb && !(registers->rip >= KERNEL_VBASE && KERNEL_VBASE + KERNEL_END - KERNEL_LOAD_ADDR)){
+    if(current_pcb){
         to_cpu_state_from_syscall(&(current_pcb->cpu_context), registers);
     }
 
@@ -55,5 +51,6 @@ void handle_sched_on_pit_tick(registers* registers){
 
     if(pcb_to_run->pid != 0  && pcb_to_run->pid != KERNEL_PID){
         registers->rip = run_next_proc;
+        skipped = false;
     }
 }

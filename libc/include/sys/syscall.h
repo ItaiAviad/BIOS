@@ -22,30 +22,6 @@
 
 #define EFER_SCE (1 << 0)  // SCE bit is the lowest bit in MSR_EFER
 
-typedef struct pt_regs {
-    uint64_t rdi;  // First argument
-    uint64_t rsi;  // Second argument
-    uint64_t rdx;  // Third argument
-    uint64_t rcx;
-    uint64_t rax;  // Syscall number
-    uint64_t r8;
-    uint64_t r9;
-    uint64_t r10;
-    uint64_t r11;
-    uint64_t rbx;
-    // uint64_t rsp;
-    // uint64_t rbp;
-    uint64_t r12;
-    uint64_t r13;
-    uint64_t r14;
-    uint64_t r15;
-
-    // uint64_t rip;
-    // uint64_t cs;
-    // uint64_t eflags;
-    // uint64_t rsp;
-    // uint64_t ss;
-} pt_regs;
 
 enum SYSCALL_NR {
     sys_exit = 0,
@@ -129,7 +105,7 @@ void enable_syscall();
 extern void syscall_entry();
 void configure_segments();
 
-int64_t syscall_handler(pt_regs *regs);
+int64_t syscall_handler(cpu_state *regs);
 
 struct kernel_gs_base {
     uint64_t kstack;
@@ -162,10 +138,42 @@ static uint64_t fvsyscall(long number, volatile uint64_t rdi, va_list args) {
 
     // Perform the syscall
     __asm__ volatile(
-        "syscall"
-        : "=a"(ret)
-        : "a"(number), "D"(rdi), "S"(rsi), "d"(rdx), "r"(r8), "r"(r9), "r"(r10) // rdi, rsi, rdx, r8, r9, r10
-        : "memory", "cc"
+        "sub rsp, 24\n\t"   // Reserve 24 bytes for eflags, rip, rsp
+        "push rdi\n\t"
+        "push rsi\n\t"
+        "push rdx\n\t"
+        "push rcx\n\t"
+        "push rax\n\t"
+        "push r8\n\t"
+        "push r9\n\t"
+        "push r10\n\t"
+        "push r11\n\t"
+        "push rbx\n\t"
+        "push rbp\n\t"
+        "push r12\n\t"
+        "push r13\n\t"
+        "push r14\n\t"
+        "push r15\n\t"
+        "mov rbx, rsp \n\t"
+        "syscall\n\t"
+        "pop r15\n\t"
+        "pop r14\n\t"
+        "pop r13\n\t"
+        "pop r12\n\t"
+        "pop rbp\n\t"
+        "pop rbx\n\t"
+        "pop r11\n\t"
+        "pop r10\n\t"
+        "pop r9\n\t"
+        "pop r8\n\t"
+        "pop rcx\n\t" // Can't restore rax beacuse of return val from syscall
+        "pop rcx\n\t"
+        "pop rdx\n\t"
+        "pop rsi\n\t"
+        "pop rdi\n\t"
+        : "=a"(ret)                          // Output: return value in rax
+        : "a"(number), "D"(rdi), "S"(rsi), "d"(rdx), "r"(r8), "r"(r9), "r"(r10) // Inputs
+        : "memory", "cc"                    // Clobbers: memory and condition codes
     );
 
     return ret;

@@ -134,6 +134,7 @@
   "tss.h": "c",
   "isr.h": "c",
   "types.h": "c",
-  "gdt.h": "c"
+  "gdt.h": "c",
+  "functional": "c"
 }
 }
