@@ -99,7 +99,10 @@ int kmain(void) {
         list = list->next;
     }
     // user_init();
-    exec("/mnt/mount1/user_prog");
+    PCB* pcb = alloc_proc();
+    pcb->ppid = kpcb.pid;
+    load_proc_mem(pcb, "/mnt/mount1/user_prog");
+    run_proc(pcb);
 
     while (1) {}
 

@@ -31,14 +31,15 @@ void run_next_proc(){
     run_proc(pcb_to_run);
 }
 
-void handle_sched_on_pit_tick(registers* registers){
-    if(!pcb_list || ((pit_time_ms - last_context_switch_time) < PROCESS_RUN_TIME && !skipped)){
+void handle_sched_on_pit_tick(registers* registers, uint64_t cr3){
+    if(!pcb_list || ((pit_time_ms - last_context_switch_time) < PROCESS_RUN_TIME)){
         skipped = true;
         return;
     }
     last_context_switch_time = pit_time_ms;
     if(current_pcb){
         to_cpu_state_from_syscall(&(current_pcb->cpu_context), registers);
+        current_pcb->ctx.pml4 = (void*)cr3;
     }
 
     pcb_to_run = NULL;
@@ -50,7 +51,11 @@ void handle_sched_on_pit_tick(registers* registers){
     }
 
     if(pcb_to_run->pid != 0  && pcb_to_run->pid != KERNEL_PID){
+        printf("Ordered sched! ");
+        registers->cs = KERNEL_CS_SELECTOR_OFFSET_GDT;
+        registers->ss = KERNEL_SS_SELECTOR_OFFSET_GDT;
         registers->rip = run_next_proc;
+        registers->eflags = 0x002;
         skipped = false;
     }
 }

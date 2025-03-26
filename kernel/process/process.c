@@ -97,8 +97,11 @@ PCB* alloc_proc(){
             .old_pml4 = kpcb.ctx.pml4,
             .allocator = kpcb.ctx.allocator
         },
-        .stack = USER_LOAD_ADDR - 0x16
     };
+
+    pcb->stack = pcb->real_mem_addr + PROC_STACK_SIZE - 0x16;
+
+    pcb->kernel_stack = pcb->real_mem_addr + PROC_STACK_SIZE + PROC_STACK_SIZE - 0x16;
 
     pcb->cpu_context.rsp = pcb->stack;
 
@@ -107,7 +110,9 @@ PCB* alloc_proc(){
     pcb->ctx.pml4 = allocate_page(pcb);
 
     map_memory_range(&kpcb, (void*)pcb->ctx.pml4, ((void*)pcb->ctx.pml4 + PAGE_SIZE - 1), (void*)pcb->ctx.pml4);
-    map_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr);
+    map_memory_range(&kpcb, pcb->real_mem_addr, pcb->real_mem_addr+PROC_STACK_SIZE-1, pcb->real_mem_addr); // Map process stack
+    map_memory_range(&kpcb, pcb->real_mem_addr+PROC_STACK_SIZE, pcb->real_mem_addr+2*PROC_STACK_SIZE-1, pcb->real_mem_addr+PROC_STACK_SIZE); // Map per process kernel stack
+    map_memory_range(&kpcb, PROC_BIN_ADDR, PROC_BIN_ADDR+PROC_MEM_SIZE-2*PROC_STACK_SIZE-1, pcb->real_mem_addr+2*PROC_STACK_SIZE); // Map process memory
 
     // Change recursive paging to allow mapping of other pml4
 
@@ -118,7 +123,9 @@ PCB* alloc_proc(){
 
     map_memory_range(pcb, (void*) ((void*)pcb->ctx.pml4), (void*) ((void*)pcb->ctx.pml4 + PAGE_SIZE - 1), (void*)pcb->ctx.pml4);
 
-    map_memory_range(pcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr);
+    map_memory_range(pcb, pcb->real_mem_addr, pcb->real_mem_addr+PROC_STACK_SIZE-1, pcb->real_mem_addr);
+    map_memory_range(pcb, pcb->real_mem_addr+PROC_STACK_SIZE, pcb->real_mem_addr+2*PROC_STACK_SIZE-1, pcb->real_mem_addr+PROC_STACK_SIZE); // Map per process kernel stack
+    map_memory_range(pcb, PROC_BIN_ADDR, PROC_BIN_ADDR+PROC_MEM_SIZE-2*PROC_STACK_SIZE-1, pcb->real_mem_addr+2*PROC_STACK_SIZE);
     // Map Kernel (higher half)
     /* NOTE: Kernel is mapped to the same virtual address in both kernel PML4 and process PML4
              This ensures that the kernel in can see its own functions in the same address.
@@ -144,7 +151,7 @@ PCB* alloc_proc(){
     kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)kpcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
     flush_tlb();
 
-    unmap_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, false);
+    unmap_memory_range(&kpcb, PROC_BIN_ADDR, PROC_BIN_ADDR+PROC_MEM_SIZE-2*PROC_STACK_SIZE-1, false);
 
     append_node(&pcb_list, pcb);
 
@@ -162,7 +169,7 @@ PCB* alloc_proc(){
 
 int run_proc(PCB* pcb){
     current_pcb = pcb;
-    map_memory_range_with_flags(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr, PAGE_MAP_FLAGS, 0);
+    map_memory_range_with_flags(&kpcb, PROC_BIN_ADDR, PROC_BIN_ADDR+PROC_MEM_SIZE-2*PROC_STACK_SIZE-1,pcb->real_mem_addr+2*PROC_STACK_SIZE, PAGE_MAP_FLAGS, 0);
     flush_tlb();
 
     set_pml4_address((uint64_t *) pcb->ctx.pml4);
@@ -172,9 +179,17 @@ int run_proc(PCB* pcb){
 
 int load_proc_mem(PCB* pcb, char* path_to_elf){
     map_memory_range(&kpcb, (void*)pcb->ctx.pml4, ((void*)pcb->ctx.pml4 + PAGE_SIZE - 1), (void*)pcb->ctx.pml4);
-    map_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr);
+    map_memory_range(&kpcb, PROC_BIN_ADDR, PROC_BIN_ADDR-2*PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr+2*PROC_STACK_SIZE);
 
     void* elf_bin = readelf((void*)USER_LOAD_ADDR, path_to_elf, false);
 
-    unmap_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, false);
+    unmap_memory_range(&kpcb, PROC_BIN_ADDR, PROC_BIN_ADDR-2*PROC_STACK_SIZE+PROC_MEM_SIZE-1, false);
+}
+
+uint64_t get_current_proc_kenrel_addr(){
+    return (uint64_t)current_pcb->kernel_stack;
+}
+
+void set_current_proc_kenrel_addr(uint64_t addr){
+    current_pcb->kernel_stack = (void*) addr;
 }

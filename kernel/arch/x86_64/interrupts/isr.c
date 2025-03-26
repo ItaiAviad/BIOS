@@ -114,7 +114,7 @@ void isr_handler(const uint64_t isr_num, const uint64_t error_code, registers* r
     else if (isr_num >= 32) {
         if (isr_num == IRQ_PIT + PIC1_OFFSET) { // PIT IRQ
             pit_handler();
-            // handle_sched_on_pit_tick(regs);
+            handle_sched_on_pit_tick(regs, prev_cr3);
         }
         else if (isr_num == IRQ_KEYBOARD + PIC1_OFFSET) { // Keyboard IRQ
             unsigned char in = inb(PS2_KEYBOARD_PORT_DATA);

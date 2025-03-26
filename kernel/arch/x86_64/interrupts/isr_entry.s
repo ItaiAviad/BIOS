@@ -61,7 +61,9 @@ QUADWORD_SIZE:          equ 0x08
     mov rdi, [rsp + REGISTER_SIZE]                      ; ISR Number is last on the stack
     mov rsi, [rsp + REGISTER_SIZE + QUADWORD_SIZE]      ; Error Code is first on the stack
     mov rdx, rsp
+
     call %1
+
 
     ; Restore all registers before returning
     POPALL

@@ -179,6 +179,8 @@ static uint64_t fvsyscall(long number, volatile uint64_t rdi, va_list args) {
         : "memory", "cc"                    // Clobbers: memory and condition codes
     );
 
+    
+
     return ret;
 }
 

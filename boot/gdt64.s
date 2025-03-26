@@ -79,11 +79,11 @@ tss_init_gdt64:
     ret
 
 align 0x40
-gdt64_start:
+gdt64_start:; 1-7
     dd 0x0
     dd 0x0
 
-gdt64_kcode:
+gdt64_kcode:;8-15
     ; Base:                 0x00000
     ; Limit:                0xFFFFF
     ; 1st Flags:            0b1001
@@ -109,7 +109,7 @@ gdt64_kcode:
     db 0x00             ; Base  (bits 56-63)
 
 
-gdt64_kdata:
+gdt64_kdata:;16-23
     ; Base:                 0x00000
     ; Limit:                0x00000
     ; 1st Flags:            0b1001
@@ -135,7 +135,7 @@ gdt64_kdata:
     db 0x00             ; Base  (bits 24-31)
 
 
-gdt64_ucode:
+gdt64_ucode:;24-31
     ; Base:                 0x00000
     ; Limit:                0xFFFFF
     ; 1st Flags:            0b1001
@@ -161,7 +161,7 @@ gdt64_ucode:
     db 0x00             ; Base  (bits 24-31)
 
 
-gdt64_udata:
+gdt64_udata:;32-39
     ; Base:                 0x00000
     ; Limit:                0x00000
     ; 1st Flags:            0b1001
@@ -186,11 +186,11 @@ gdt64_udata:
     db 0b10101111       ; 2nd Flags, Limit (bits 16-19)
     db 0x00             ; Base  (bits 24-31)
 
-tss_entry:
+tss_entry:;40-47
     dw 0x0067                   ; Limit (104 bytes - 1)
     dw tss             ; Base (bits 0-15)
     db 0xb0             ; Base (bits 16-23)
-    db 0b10001001               ; Type: 64-bit TSS (available), DPL=3, Present
+    db 0b10001001               ; Type: 64-bit TSS (available), DPL=0, Present
     db 0b00000000               ; Granularity, Limit (bits 16-19)
     db 0            ; Base (bits 24-31)
     dd 0           ; Base (bits 32-63) - Upper 32 bits

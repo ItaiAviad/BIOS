@@ -42,7 +42,7 @@ typedef struct __attribute__((packed)) {
 } cpu_state;
 
 typedef enum proc_state {
-    READY, WAITING, ZOMBIE
+    BUILDING, READY, WAITING, ZOMBIE
 } proc_state;
 
 typedef struct ProcessControlBlock {
@@ -55,6 +55,7 @@ typedef struct ProcessControlBlock {
     PageFrameAllocator pfa; // Page Frame Allocator
     Context ctx;            // Process Context
     
+    void* kernel_stack;            // The current kernel stack for the process
     void* stack;            // Pointer to the top of the process stack
     void* heap;               // Start address of the heap
     
@@ -84,5 +85,9 @@ int load_proc_mem(PCB* pcb, char* path_to_elf);
 PCB* find_pcb_by_pid(uint64_t pid);
 
 int run_proc(PCB* pcb);
+
+uint64_t get_current_proc_kenrel_addr();
+
+void set_current_proc_kenrel_addr(uint64_t addr);
 
 #endif
