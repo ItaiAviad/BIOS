@@ -73,6 +73,9 @@ int kmain(void) {
     // Setup AHCI and enumerate Disks
     enumerate_disks();
 
+    printf("%x", get_tss_addr());
+
+
     // Init Syscall
     init_syscall();
 
@@ -102,7 +105,7 @@ int kmain(void) {
     PCB* pcb = alloc_proc();
     pcb->ppid = kpcb.pid;
     load_proc_mem(pcb, "/mnt/mount1/user_prog");
-    run_proc(pcb);
+    // run_proc(pcb);
 
     while (1) {}
 

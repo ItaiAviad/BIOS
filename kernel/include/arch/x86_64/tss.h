@@ -9,6 +9,8 @@
 #include <arch/x86_64/interrupts.h>
 #include <arch/x86_64/gdt.h>
 
+#define TSS_SIZE 104
+
 // TSS 32bit (Protected Mode):
 // typedef struct __attribute__((packed)) {
 // 	uint32_t prev_tss; // The previous TSS - with hardware task switching these form a kind of backward linked list.
@@ -66,5 +68,6 @@ extern void flush_tss();
 
 void init_tss(gdt_entry_bits *g);
 void set_kernel_stack(uint32_t stack);
+uint64_t get_tss_addr(void);
 
 #endif

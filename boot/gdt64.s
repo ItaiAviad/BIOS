@@ -66,16 +66,14 @@ section .text
 
 [global tss_init_gdt64]
 tss_init_gdt64:
-    ; Initialize GDT and other setup
-
-    ; Calculate base address parts
-    mov eax, tss                ; Load the address of `tss` into rax
-    mov [tss_base_low], ax      ; Store base (bits 0-15)
-    shr eax, 16                 ; Shift right by 16 bits to get the next part
-    mov [tss_base_mid], al      ; Store base (bits 16-23)
-    shr eax, 8                  ; Shift right by 8 bits to get the next part
-    mov [tss_base_high], al     ; Store base (bits 24-31)
-    mov [tss_base_upper], eax   ; Store base (bits 32-63)
+    mov eax, tss
+    mov [tss_entry + 2], ax     ; Base 0-15
+    shr eax, 16
+    mov [tss_entry + 4], al     ; Base 16-23
+    shr eax, 8
+    mov [tss_entry + 7], al     ; Base 24-31
+    shr eax, 8
+    mov [tss_entry + 8], eax    ; Base 32-63
     ret
 
 align 0x40
@@ -186,16 +184,16 @@ gdt64_udata:;32-39
     db 0b10101111       ; 2nd Flags, Limit (bits 16-19)
     db 0x00             ; Base  (bits 24-31)
 
-tss_entry:;40-47
+tss_entry:
     dw 0x0067                   ; Limit (104 bytes - 1)
-    dw tss             ; Base (bits 0-15)
-    db 0xb0             ; Base (bits 16-23)
-    db 0b10001001               ; Type: 64-bit TSS (available), DPL=0, Present
-    db 0b00000000               ; Granularity, Limit (bits 16-19)
-    db 0            ; Base (bits 24-31)
-    dd 0           ; Base (bits 32-63) - Upper 32 bits
-    dw 0x0000                   ; Reserved, must be zero
-    dw 0x0000                   ; Reserved, must be zero
+    dw 0                        ; Base 0-15 (set by tss_init_gdt64)
+    db 0                        ; Base 16-23
+    db 0b10001001               ; Type: TSS available, DPL=0
+    db 0b00000000               ; Flags, Limit 16-19
+    db 0                        ; Base 24-31
+    dd 0                        ; Base 32-63
+    dw 0x0000
+    dw 0x0000
 
 gdt64_end:
 
