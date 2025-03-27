@@ -24,6 +24,8 @@ void to_cpu_state_from_syscall(cpu_state* cpu_state, registers* syscall_regs) {
     cpu_state->rip = syscall_regs->rip;  // Return address
     cpu_state->rsp = syscall_regs->rsp;  // Stack pointer
     cpu_state->eflags = syscall_regs->eflags;
+    cpu_state->cs = syscall_regs->cs;
+    cpu_state->ss = syscall_regs->ss;
 }
 
 void run_next_proc(){

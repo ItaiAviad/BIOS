@@ -38,7 +38,7 @@ typedef struct __attribute__((packed)) {
     // Define the callee-clobbered registers
     uint64_t r11, r10, r9, r8, rax, rcx, rdx, rsi, rdi;
 
-    uint64_t eflags, rip, rsp;
+    uint64_t eflags, rip, rsp, ss, cs;
 } cpu_state;
 
 typedef enum proc_state {

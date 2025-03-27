@@ -110,6 +110,12 @@ PCB* alloc_proc(){
 
     pcb->cpu_context.rip = USER_LOAD_ADDR;
 
+    pcb->cpu_context.cs = USER_CODE_DESCRIPTOR_OFFSET | 3;
+
+    pcb->cpu_context.ss = USER_DATA_DESCRIPTOR_OFFSET | 3;
+
+    pcb->cpu_context.eflags = 0x202;
+
     pcb->ctx.pml4 = allocate_page(pcb);
 
     map_memory_range(&kpcb, (void*)pcb->ctx.pml4, ((void*)pcb->ctx.pml4 + PAGE_SIZE - 1), (void*)pcb->ctx.pml4);
