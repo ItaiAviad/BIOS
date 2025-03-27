@@ -7,7 +7,7 @@ global jump_usermode
 ;   - rsi: Stack pointer for user mode (initial stack)
 jump_usermode:
     ; Set up segment registers for user mode (Ring 3)
-    mov ax, 0x20 | 3         ; Ring 3 data selector with RPL 3
+    mov ax, 0x18 | 3         ; Ring 3 data selector with RPL 3
     mov ds, ax
     mov es, ax
     mov fs, ax
@@ -23,7 +23,7 @@ jump_usermode:
     or qword [rsp], 1 << 9   ; Enable interrupts in the pushed RFLAGS
     or qword [rsp], 0x202
     ; Push CS selector + RPL = 3 (Ring 3)
-    push 0x18 | 3
+    push 0x20 | 3
     ; Push RIP (user mode code entry point, provided in rdi)
     mov rax, [rdi+8*16]             ; Load user mode code entry point
     push rax

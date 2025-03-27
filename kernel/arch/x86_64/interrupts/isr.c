@@ -107,8 +107,8 @@ void isr_handler(const uint64_t isr_num, const uint64_t error_code, registers* r
 
 
     if(regs->ss != 0x10){
-        printf("cs: %x\n", regs->cs);
-        printf("ss: %x\n", regs->ss);
+        // printf("cs: %x\n", regs->cs);
+        // printf("ss: %x\n", regs->ss);
     }
 
     if (isr_num <= 31) {

@@ -15,7 +15,7 @@ section .text
 
 syscall_entry:
 
-    swapgs
+    ; swapgs
     mov [rbx + 120], r11  ; Store eflags (from syscall)
     mov [rbx + 128], rcx  ; Store rip (from syscall)
     mov [rbx + 136], rsp  ; Store original rsp

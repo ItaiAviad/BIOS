@@ -22,6 +22,7 @@
 #define MSR_KERNEL_GS_BASE 0xC0000102
 
 #define EFER_SCE (1 << 0)  // SCE bit is the lowest bit in MSR_EFER
+#define EFER_LME (1ULL << 8)  // Long Mode Enable
 
 
 enum SYSCALL_NR {
@@ -100,8 +101,12 @@ static inline uint64_t read_msr(uint32_t msr) {
     return value;
 }
 
-static inline void write_msr(uint32_t msr, uint32_t lo, uint32_t hi) {
-    __asm__ volatile("wrmsr" : : "a"(lo), "d"(hi), "c"(msr));
+static inline void write_msr(uint32_t msr, uint64_t value) {
+    asm volatile (
+        "wrmsr" 
+        : 
+        : "c"(msr), "a"((uint32_t)value), "d"((uint32_t)(value >> 32))
+    );
 }
 
 void enable_syscall();
@@ -159,6 +164,7 @@ static uint64_t fvsyscall(long number, volatile uint64_t rdi, va_list args) {
         "push r15\n\t"
         "mov rbx, rsp \n\t"
         "syscall\n\t"
+        "mov rsp, rbx \n\t"
         "pop r15\n\t"
         "pop r14\n\t"
         "pop r13\n\t"
@@ -174,6 +180,7 @@ static uint64_t fvsyscall(long number, volatile uint64_t rdi, va_list args) {
         "pop rdx\n\t"
         "pop rsi\n\t"
         "pop rdi\n\t"
+        "add rsp, 24\n\t"
         : "=a"(ret)                          // Output: return value in rax
         : "a"(number), "D"(rdi), "S"(rsi), "d"(rdx), "r"(r8), "r"(r9), "r"(r10) // Inputs
         : "memory", "cc"                    // Clobbers: memory and condition codes

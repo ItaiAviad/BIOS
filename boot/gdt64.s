@@ -133,7 +133,16 @@ gdt64_kdata:;16-23
     db 0x00             ; Base  (bits 24-31)
 
 
-gdt64_ucode:;24-31
+gdt64_udata:;24-31
+    dw 0xFFFF
+    dw 0x0000
+    db 0x00
+    db 0b11110010       ; DPL=3, writable data
+    db 0b11001111       ; G=1, D/B=1, L=0
+    db 0x00
+
+
+gdt64_ucode:;32-39
     ; Base:                 0x00000
     ; Limit:                0xFFFFF
     ; 1st Flags:            0b1001
@@ -157,15 +166,6 @@ gdt64_ucode:;24-31
     db 0b11111010       ; 1st Flags, Type flags
     db 0b10101111       ; 2nd Flags, Limit (bits 16-19)
     db 0x00             ; Base  (bits 24-31)
-
-
-gdt64_udata:
-    dw 0xFFFF
-    dw 0x0000
-    db 0x00
-    db 0b11110010       ; DPL=3, writable data
-    db 0b11001111       ; G=1, D/B=1, L=0
-    db 0x00
 
 tss_entry:;40-47
     dw 0x0067                   ; Limit (104 bytes - 1)

@@ -4,20 +4,22 @@
 #if defined(__is_libk)
 void enable_syscall() {
     uint64_t efer = read_msr(MSR_EFER);
-    uint32_t efer_lo = efer & 0xffffffff;
-    uint32_t efer_hi = efer >> 32;
-    efer_lo |= EFER_SCE; // Set the SCE bit to enable syscall/sysret
+    efer |= (EFER_SCE | EFER_LME); // Set the SCE bit to enable syscall/sysret
 
-    write_msr(MSR_EFER, efer_lo, efer_hi);
+    write_msr(MSR_EFER, EFER_SCE);
 }
 
-void configure_segments(uint16_t kernel_cs, uint16_t kernel_ss, uint16_t user_cs, uint16_t user_ss) {
-    uint64_t star_value = 
-        ((uint64_t)kernel_ss << 48) |   // 0x10
-        ((uint64_t)kernel_cs << 32) |   // 0x08
-        ((uint64_t)(user_ss & 0xFFF8) << 16) | // 0x20 (strip RPL)
-        (uint64_t)(user_cs & 0xFFF8);   // 0x18 (strip RPL)
-    write_msr(MSR_STAR, (uint32_t)(star_value & 0xFFFFFFFF), (uint32_t)(star_value >> 32));
+void set_msr_star(uint32_t syscall_eip, uint16_t kernel_cs, uint16_t user_cs) {
+    uint64_t msr_value = 0;
+    
+    // Set low 32 bits (SYSCALL entry point EIP)
+    msr_value = (uint32_t)syscall_eip;
+    
+    // 🔄 SWAP kernel and user CS assignments
+    msr_value |= (uint64_t)(kernel_cs & 0xFFFF) << 32;
+    msr_value |= (uint64_t)(user_cs & 0xFFFF) << 48;
+
+    write_msr(MSR_STAR, msr_value);
 }
 
 struct kernel_gs_base kgb = {
@@ -27,15 +29,18 @@ struct kernel_gs_base kgb = {
 
 void init_syscall() {
     // Enable syscall/sysret using EFER.SCE
-    enable_syscall();
+
+    set_msr_star(syscall_entry, KERNEL_CS_SELECTOR_OFFSET_GDT, USER_DATA_DESCRIPTOR_OFFSET-8);
 
     // Set up the syscall entry point
-    write_msr(MSR_LSTAR, ((uint64_t)syscall_entry & 0xffffffff), ((uint64_t)syscall_entry >> 32));
+    write_msr(MSR_LSTAR, syscall_entry);
 
     // Set up KernelGSBase
-    write_msr(MSR_KERNEL_GS_BASE, ((uint64_t)&kgb & 0xffffffff), ((uint64_t)&kgb >> 32));
+    write_msr(MSR_KERNEL_GS_BASE, &kgb);
 
-    configure_segments(KERNEL_CS_SELECTOR_OFFSET_GDT, KERNEL_SS_SELECTOR_OFFSET_GDT, USER_CODE_DESCRIPTOR_OFFSET | 0x3, USER_DATA_DESCRIPTOR_OFFSET | 0x3);
+
+    enable_syscall();
+
 }
 
 int64_t syscall_handler(cpu_state *regs) {

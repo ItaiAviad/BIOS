@@ -39,6 +39,35 @@ void user_init();
 
 int interrupts_ready;
 
+static inline uint64_t read_msr(uint32_t msr) {
+    uint32_t low, high;
+    __asm__ volatile (
+        "rdmsr" 
+        : "=a"(low), "=d"(high) 
+        : "c"(msr)
+    );
+    return ((uint64_t)high << 32) | low;
+}
+
+static inline void write_msr(uint32_t msr, uint32_t lo, uint32_t hi) {
+    __asm__ volatile("wrmsr" : : "a"(lo), "d"(hi), "c"(msr));
+}
+
+
+void dump_msr_star(void) {
+    uint64_t star = read_msr(MSR_STAR);
+    uint16_t kernel_ss = (star >> 48) & 0xFFFF;
+    uint16_t kernel_cs = (star >> 32) & 0xFFFF;
+    uint16_t user_ss = (star >> 16) & 0xFFFF;
+    uint16_t user_cs = star & 0xFFFF;
+
+    printf("MSR_STAR: 0x%x\n", star);
+    printf("  Kernel SS: 0x%x\n", kernel_ss);
+    printf("  Kernel CS: 0x%x\n", kernel_cs);
+    printf("  User SS base: 0x%x (sysret SS: 0x%x)\n", user_ss, user_ss + 8);
+    printf("  User CS base: 0x%x (sysret CS: 0x%x)\n", user_cs, user_cs + 8);
+}
+
 int kmain(void) {
 
     interrupts_ready = false;
@@ -101,6 +130,8 @@ int kmain(void) {
         printf("%s\n",list->data);
         list = list->next;
     }
+
+    dump_msr_star();
     // user_init();
     PCB* pcb = alloc_proc();
     pcb->ppid = kpcb.pid;
