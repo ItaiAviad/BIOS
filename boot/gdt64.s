@@ -159,32 +159,15 @@ gdt64_ucode:;24-31
     db 0x00             ; Base  (bits 24-31)
 
 
-gdt64_udata:;32-39
-    ; Base:                 0x00000
-    ; Limit:                0x00000
-    ; 1st Flags:            0b1001
-    ;   P - Present:        1
-    ;   DPL - Privelege:    11
-    ;   S - Descriptor:     1
-    ; Type Flags:           0b0010
-    ;   E - Code:           0
-    ;   DC - Expand Down:   0
-    ;   RW - Writeable:     1
-    ;   A - Accessed:       0
-    ; 2nd Flags:            0b1100
-    ;   G - Granularity:    1
-    ;   DB - 32bit Default: 0
-    ;   L - 64bit Segment:  1
-    ;   Reserved - AVL:     0
+gdt64_udata:
+    dw 0xFFFF
+    dw 0x0000
+    db 0x00
+    db 0b11110010       ; DPL=3, writable data
+    db 0b11001111       ; G=1, D/B=1, L=0
+    db 0x00
 
-    dw 0xFFFF           ; Limit (bits 0-15)
-    dw 0x0000           ; Base  (bits 0-15)
-    db 0x00             ; Base  (bits 16-23)
-    db 0b11110010       ; 1st Flags, Type flags
-    db 0b10101111       ; 2nd Flags, Limit (bits 16-19)
-    db 0x00             ; Base  (bits 24-31)
-
-tss_entry:
+tss_entry:;40-47
     dw 0x0067                   ; Limit (104 bytes - 1)
     dw 0                        ; Base 0-15 (set by tss_init_gdt64)
     db 0                        ; Base 16-23

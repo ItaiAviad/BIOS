@@ -12,14 +12,11 @@ void enable_syscall() {
 }
 
 void configure_segments(uint16_t kernel_cs, uint16_t kernel_ss, uint16_t user_cs, uint16_t user_ss) {
-    // Pack the segment selectors into the MSR_STAR value
     uint64_t star_value = 
-        ((uint64_t)kernel_ss << 48) |   // Kernel SS goes in the upper part
-        ((uint64_t)kernel_cs << 32) |   // Kernel CS goes just below SS
-        ((uint64_t)user_ss << 16) |     // User SS
-        (uint64_t)user_cs;              // User CS goes in the lowest part
-    
-    // Write MSR_STAR
+        ((uint64_t)kernel_ss << 48) |   // 0x10
+        ((uint64_t)kernel_cs << 32) |   // 0x08
+        ((uint64_t)(user_ss & 0xFFF8) << 16) | // 0x20 (strip RPL)
+        (uint64_t)(user_cs & 0xFFF8);   // 0x18 (strip RPL)
     write_msr(MSR_STAR, (uint32_t)(star_value & 0xFFFFFFFF), (uint32_t)(star_value >> 32));
 }
 
@@ -38,7 +35,7 @@ void init_syscall() {
     // Set up KernelGSBase
     write_msr(MSR_KERNEL_GS_BASE, ((uint64_t)&kgb & 0xffffffff), ((uint64_t)&kgb >> 32));
 
-    configure_segments(KERNEL_CS_SELECTOR_OFFSET_GDT, KERNEL_SS_SELECTOR_OFFSET_GDT, USER_CODE_DESCRIPTOR_OFFSET, USER_DATA_DESCRIPTOR_OFFSET);
+    configure_segments(KERNEL_CS_SELECTOR_OFFSET_GDT, KERNEL_SS_SELECTOR_OFFSET_GDT, USER_CODE_DESCRIPTOR_OFFSET | 0x3, USER_DATA_DESCRIPTOR_OFFSET | 0x3);
 }
 
 int64_t syscall_handler(cpu_state *regs) {

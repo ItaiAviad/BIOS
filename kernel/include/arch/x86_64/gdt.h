@@ -8,9 +8,9 @@
 #include <string.h>
 #include <arch/x86_64/interrupts.h>
 
-#define TSS_DESCRIPTOR_OFFSET 28
+#define TSS_DESCRIPTOR_OFFSET 40
 #define USER_CODE_DESCRIPTOR_OFFSET 24
-#define USER_DATA_DESCRIPTOR_OFFSET 32
+#define USER_DATA_DESCRIPTOR_OFFSET 0x20
 
 typedef struct __attribute__((packed)) {
     uint16_t limit;         // 20 bit maximum addressable unit

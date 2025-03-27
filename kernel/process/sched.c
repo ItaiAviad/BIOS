@@ -52,9 +52,6 @@ void handle_sched_on_pit_tick(registers* registers, uint64_t cr3){
 
     if(pcb_to_run->pid != 0  && pcb_to_run->pid != KERNEL_PID){
         printf("Ordered sched! ");
-
-        printf("cs: %x\n", registers->cs);
-        printf("ss: %x\n", registers->ss);
         registers->cs = KERNEL_CS_SELECTOR_OFFSET_GDT;
         registers->ss = KERNEL_SS_SELECTOR_OFFSET_GDT;
         skipped = false;

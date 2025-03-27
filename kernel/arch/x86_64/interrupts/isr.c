@@ -105,6 +105,12 @@ void isr_handler(const uint64_t isr_num, const uint64_t error_code, registers* r
         set_pml4_address((uint64_t*) (PML4_KERNEL));
     }
 
+
+    if(regs->ss != 0x10){
+        printf("cs: %x\n", regs->cs);
+        printf("ss: %x\n", regs->ss);
+    }
+
     if (isr_num <= 31) {
         printf("ISR: %s (%d) called, rip: %x, cr2: %x, rsp: %x, error_code: %x \n", isr_exception_messages[isr_num], isr_num, regs->rip, regs->cr2, regs->rsp, (uint64_t)error_code);
         while(true){

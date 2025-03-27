@@ -14,7 +14,7 @@ jump_usermode:
     mov gs, ax               ; SS is handled by iretq
 
     ; Push SS selector + RPL = 3 (Ring 3)
-    push 0x20 | 3
+    push ax
     ; Push RSP value for the user mode stack (provided in rsi)
     mov rax, [rdi+8*17]             ; Load user mode stack pointer
     push rax
