@@ -49,3 +49,24 @@ int exit(){
         return syscall(sys_exit);
     #endif
 }
+
+int fork(){
+    #if defined(__is_libk)
+        PCB* pcb = alloc_proc();
+        pcb->ppid = current_pcb->pid;
+        // memcpy(&(pcb->cpu_context),&(current_pcb->cpu_context), sizeof(cpu_state));
+        // memcpy(pcb->stack-(PROC_STACK_SIZE - 0x16),current_pcb->stack-(PROC_STACK_SIZE - 0x16), PROC_STACK_SIZE-0x16);
+        // memcpy(pcb->kernel_stack-(PROC_STACK_SIZE - 0x16),current_pcb->kernel_stack-(PROC_STACK_SIZE - 0x16), PROC_STACK_SIZE-0x16);
+
+        map_memory_range(&kpcb, PROC_BIN_ADDR, PROC_BIN_ADDR+PROC_MEM_SIZE-2*PROC_STACK_SIZE-1, current_pcb->real_mem_addr+2*PROC_STACK_SIZE); // Map current process memory
+
+        map_memory_range(&kpcb, PROC_BIN_ADDR, PROC_BIN_ADDR+PROC_MEM_SIZE-2*PROC_STACK_SIZE-1, pcb->real_mem_addr+2*PROC_STACK_SIZE); // Map process memory
+
+
+
+        pcb->state = READY;
+        
+    #else
+        return syscall(sys_fork);
+    #endif
+}
