@@ -106,7 +106,7 @@ static inline void write_msr(uint32_t msr, uint32_t lo, uint32_t hi) {
 
 void enable_syscall();
 extern void syscall_entry();
-void configure_segments();
+void configure_segments(uint16_t kernel_cs, uint16_t kernel_ss, uint16_t user_cs, uint16_t user_ss);
 
 int64_t syscall_handler(cpu_state *regs);
 

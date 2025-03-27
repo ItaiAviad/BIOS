@@ -11,10 +11,16 @@ void enable_syscall() {
     write_msr(MSR_EFER, efer_lo, efer_hi);
 }
 
-void configure_segments() {
-    // Set kernel CS to 0x08 and user CS to 0x1b (these are typical values)
-    uint64_t star_value = ((uint64_t)0x08 << 32) | ((uint64_t)0x18 << 48);
-    write_msr(MSR_STAR, star_value & 0xffffffff, (star_value >> 32));
+void configure_segments(uint16_t kernel_cs, uint16_t kernel_ss, uint16_t user_cs, uint16_t user_ss) {
+    // Pack the segment selectors into the MSR_STAR value
+    uint64_t star_value = 
+        ((uint64_t)kernel_ss << 48) |   // Kernel SS goes in the upper part
+        ((uint64_t)kernel_cs << 32) |   // Kernel CS goes just below SS
+        ((uint64_t)user_ss << 16) |     // User SS
+        (uint64_t)user_cs;              // User CS goes in the lowest part
+    
+    // Write MSR_STAR
+    write_msr(MSR_STAR, (uint32_t)(star_value & 0xFFFFFFFF), (uint32_t)(star_value >> 32));
 }
 
 struct kernel_gs_base kgb = {
@@ -32,7 +38,7 @@ void init_syscall() {
     // Set up KernelGSBase
     write_msr(MSR_KERNEL_GS_BASE, ((uint64_t)&kgb & 0xffffffff), ((uint64_t)&kgb >> 32));
 
-    configure_segments();
+    configure_segments(KERNEL_CS_SELECTOR_OFFSET_GDT, KERNEL_SS_SELECTOR_OFFSET_GDT, USER_CODE_DESCRIPTOR_OFFSET, USER_DATA_DESCRIPTOR_OFFSET);
 }
 
 int64_t syscall_handler(cpu_state *regs) {

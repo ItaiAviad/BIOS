@@ -152,7 +152,7 @@ PCB* alloc_proc(){
 
     pcb->heap = (void*) KERNEL_HEAP_START;
 
-    map_memory_range_with_flags(pcb, (void*) pcb->heap, pcb->heap + KERNEL_HEAP_SIZE_PAGES * 512 -1, pcb->heap, PAGE_MAP_FLAGS, 0);
+    map_memory_range_with_flags(pcb, (void*) pcb->heap, pcb->heap + KERNEL_HEAP_SIZE_PAGES * PAGE_SIZE -1, pcb->heap, PAGE_MAP_FLAGS, 0);
     // Revert kernel pml4 change.
     kpcb.ctx.pml4[PML4_RECURSIVE_ENTRY_NUM] = (uint64_t)kpcb.ctx.pml4 | (uint64_t)PAGE_MAP_FLAGS;
     flush_tlb();
