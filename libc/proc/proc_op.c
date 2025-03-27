@@ -67,6 +67,6 @@ int fork(){
         pcb->state = READY;
         
     #else
-        return syscall(sys_fork);
+        // return syscall(sys_fork);
     #endif
 }

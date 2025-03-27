@@ -183,7 +183,6 @@ static uint64_t fvsyscall(long number, volatile uint64_t rdi, va_list args) {
         "add rsp, 24\n\t"
         : "=a"(ret)                          // Output: return value in rax
         : "a"(number), "D"(rdi), "S"(rsi), "d"(rdx), "r"(r8), "r"(r9), "r"(r10) // Inputs
-        : "memory", "cc"                    // Clobbers: memory and condition codes
     );
 
     

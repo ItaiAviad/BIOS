@@ -36,8 +36,10 @@ syscall_entry:
 
 
     push rdi
+    push rax
     mov rdi, rsp
     call set_current_proc_kenrel_addr
+    pop rax
     pop rdi
 
 
