@@ -5,5 +5,6 @@ int exec(char* path);
 
 int exit();
 
+int fork();
 
 #endif

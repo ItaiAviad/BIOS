@@ -181,6 +181,7 @@ PCB* alloc_proc(){
 
 int run_proc(PCB* pcb){
     current_pcb = pcb;
+    set_pml4_address((uint64_t *) kpcb.ctx.pml4);
     map_memory_range_with_flags(&kpcb, PROC_BIN_ADDR, PROC_BIN_ADDR+PROC_MEM_SIZE-2*PROC_STACK_SIZE-1,pcb->real_mem_addr+2*PROC_STACK_SIZE, PAGE_MAP_FLAGS, 0);
     flush_tlb();
 

@@ -17,6 +17,13 @@ int umain(void) {
     //     printf("%s Usermode\n", LOG_SYM_SUC);
     // }
 
+    if(!fork()){
+        while (1)
+        {
+            printf("Proc 2");
+        }
+        
+    }
     
 
     // exec("/mnt/mount1/user_prog");

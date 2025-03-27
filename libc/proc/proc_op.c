@@ -52,21 +52,40 @@ int exit(){
 
 int fork(){
     #if defined(__is_libk)
+        if(current_pcb == NULL){
+            return -1;
+        }
         PCB* pcb = alloc_proc();
         pcb->ppid = current_pcb->pid;
-        // memcpy(&(pcb->cpu_context),&(current_pcb->cpu_context), sizeof(cpu_state));
+        memcpy(&(pcb->cpu_context),&(current_pcb->cpu_context), sizeof(cpu_state));
+        pcb->cpu_context.rsp = pcb->stack;
+        pcb->cpu_context.rip = USER_LOAD_ADDR;
+        pcb->cpu_context.rax = 0;
         // memcpy(pcb->stack-(PROC_STACK_SIZE - 0x16),current_pcb->stack-(PROC_STACK_SIZE - 0x16), PROC_STACK_SIZE-0x16);
         // memcpy(pcb->kernel_stack-(PROC_STACK_SIZE - 0x16),current_pcb->kernel_stack-(PROC_STACK_SIZE - 0x16), PROC_STACK_SIZE-0x16);
 
-        map_memory_range(&kpcb, PROC_BIN_ADDR, PROC_BIN_ADDR+PROC_MEM_SIZE-2*PROC_STACK_SIZE-1, current_pcb->real_mem_addr+2*PROC_STACK_SIZE); // Map current process memory
+        map_memory_range(&kpcb, current_pcb->real_mem_addr, current_pcb->real_mem_addr+PROC_MEM_SIZE-1, current_pcb->real_mem_addr); // Map current process memory
 
-        map_memory_range(&kpcb, PROC_BIN_ADDR, PROC_BIN_ADDR+PROC_MEM_SIZE-2*PROC_STACK_SIZE-1, pcb->real_mem_addr+2*PROC_STACK_SIZE); // Map process memory
+        map_memory_range(&kpcb, pcb->real_mem_addr, pcb->real_mem_addr+PROC_MEM_SIZE-1, pcb->real_mem_addr); // Map process memory
+
+        map_memory_range(current_pcb, current_pcb->real_mem_addr, current_pcb->real_mem_addr+PROC_MEM_SIZE-1, current_pcb->real_mem_addr); // Map current process memory
+
+        map_memory_range(current_pcb, pcb->real_mem_addr, pcb->real_mem_addr+PROC_MEM_SIZE-1, pcb->real_mem_addr); // Map process memory
+
+        memcpy(pcb->real_mem_addr, current_pcb->real_mem_addr, PROC_MEM_SIZE);
+
+        // unmap_memory_range(&kpcb, current_pcb->real_mem_addr, current_pcb->real_mem_addr+PROC_MEM_SIZE-1, 1);
+        // unmap_memory_range(&kpcb, pcb->real_mem_addr, pcb->real_mem_addr+PROC_MEM_SIZE-1, 1);
+        // unmap_memory_range(current_pcb, current_pcb->real_mem_addr, current_pcb->real_mem_addr+PROC_MEM_SIZE-1, 1);
+        // unmap_memory_range(current_pcb, pcb->real_mem_addr, pcb->real_mem_addr+PROC_MEM_SIZE-1, 1);
 
 
 
         pcb->state = READY;
+
+        return pcb->pid;
         
     #else
-        // return syscall(sys_fork);
+        return syscall(sys_fork);
     #endif
 }

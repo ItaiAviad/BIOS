@@ -15,6 +15,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <kernel.h>
+#include <proc.h>
 
 #define MSR_EFER 0xC0000080
 #define MSR_STAR 0xC0000081
@@ -52,6 +53,7 @@ enum SYSCALL_NR {
     sys_lseek,
     sys_list_dir,
     sys_path_exists,
+    sys_fork,
     sys_send_dns_request,
 };
 
@@ -89,6 +91,7 @@ static const syscall_t SYSCALL_TABLE[] = {
     [sys_lseek] = lseek,
     [sys_list_dir] = list_dir,
     [sys_path_exists] = path_exists,
+    [sys_fork] = fork,
     [sys_send_dns_request] = send_dns_request,
 };
 
