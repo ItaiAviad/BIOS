@@ -136,6 +136,7 @@ int kmain(void) {
     PCB* pcb = alloc_proc();
     pcb->ppid = kpcb.pid;
     load_proc_mem(pcb, "/mnt/mount1/user_prog");
+    pcb->state = READY;
     // run_proc(pcb);
 
     while (1) {}

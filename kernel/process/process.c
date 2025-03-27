@@ -91,7 +91,7 @@ PCB* alloc_proc(){
 
     *pcb = (struct ProcessControlBlock) {
         .pid = allocate_pid(),
-        .state = 0,
+        .state = CREATE,
         .priority = 0,
         .cpu_context = 0,
         .real_mem_addr = allocate_proc_mem(),

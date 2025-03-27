@@ -42,7 +42,7 @@ typedef struct __attribute__((packed)) {
 } cpu_state;
 
 typedef enum proc_state {
-    BUILDING, READY, WAITING, ZOMBIE
+    CREATE, READY, WAITING, ZOMBIE
 } proc_state;
 
 typedef struct ProcessControlBlock {

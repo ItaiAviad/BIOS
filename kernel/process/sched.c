@@ -50,10 +50,32 @@ void handle_sched_on_pit_tick(registers* registers, uint64_t cr3){
         pcb_to_run = pcb_list->data;
     }else{
         pcb_to_run = current_pcb->list_node->next->data;
+        while (pcb_to_run)
+        {
+            if(pcb_to_run->state == READY){
+                break;
+            }
+            pcb_to_run = pcb_to_run->list_node->next->data;
+        }
+        if(!pcb_to_run){
+            pcb_to_run = pcb_list->data;
+            while (pcb_to_run)
+            {
+                if(pcb_to_run->state == READY){
+                    break;
+                }
+                pcb_to_run = pcb_to_run->list_node->next->data;
+            }
+        }
+        
+    }
+
+    if(!pcb_to_run || !(pcb_to_run->state == READY)){
+        return;
     }
 
     if(pcb_to_run->pid != 0  && pcb_to_run->pid != KERNEL_PID){
-        printf("Ordered sched! ");
+        // printf("Ordered sched! ");
         // printf("cs: %x\n", registers->cs);
         // printf("ss: %x\n", registers->ss);
         registers->cs = KERNEL_CS_SELECTOR_OFFSET_GDT;
@@ -62,6 +84,6 @@ void handle_sched_on_pit_tick(registers* registers, uint64_t cr3){
         skipped = false;
 
         registers->rip = run_next_proc;
-        registers->eflags = 0x200;
+        registers->eflags = 0x000;
     }
 }

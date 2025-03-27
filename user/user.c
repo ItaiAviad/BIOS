@@ -12,15 +12,15 @@
 #include <kernel.h>
 
 int umain(void) {
-    while (true)
-    {
-        printf("%s Usermode\n", LOG_SYM_SUC);
-    }
+    // while (true)
+    // {
+    //     printf("%s Usermode\n", LOG_SYM_SUC);
+    // }
 
     
 
     // exec("/mnt/mount1/user_prog");
-    // shell_init();
+    shell_init();
 
     // printf("Now you are stuck here with me forever... :D\n");
 
