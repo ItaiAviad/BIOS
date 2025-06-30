@@ -66,7 +66,7 @@ This project is an educational operating system built from scratch for the x86\_
 ## Demo
 The os loads a shell program as a user program from disk parses the elf and executes it
 The shell program allows to read files from the disk, Using commands: ls, cat, cd, clear, pwd, shutdown, echo, nslookup, bc(Calculator)
-The disk is an ext2 disk which is mounted under /mnt/mount1
+The disk contains an ext2 filesystem which is mounted under /mnt/mount1
 
 ![A run of the demo showing the fs functionality](demo.png)
 
