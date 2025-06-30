@@ -27,7 +27,7 @@ This project is an educational operating system built from scratch for the x86\_
     - VGA
     - PCI
     - AHCI + SATA
-    - EXT2
+    - EXT2 - Only reading is implemented
     - Keyboard
   - **net/**: Networking source code
     - RTL8139 NIC
@@ -67,6 +67,8 @@ This project is an educational operating system built from scratch for the x86\_
 The os loads a shell program as a user program from disk parses the elf and executes it
 The shell program allows to read files from the disk, Using commands: ls, cat, cd, clear, pwd, shutdown, echo, nslookup, bc(Calculator)
 The disk is an ext2 disk which is mounted under /mnt/mount1
+
+![A run of the demo showing the fs functionality](demo_image.png.png)
 
 
 Networking might have some bugs and the communication with nic will stop working after afew minutes from boot
@@ -118,7 +120,7 @@ make clean
 
 ---
 
-## Documentation
+## Documentation - some are under docs folder
 
 - **Conventions.md**: Coding style and conventions used.
 - **DiskMemoryLayout.md**: Disk layout description.
