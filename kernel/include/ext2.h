@@ -1,3 +1,5 @@
+// The ext2 driver was written according to: https://wiki.osdev.org/Ext2#Block_Group_Descriptor
+
 #ifndef EXT2_H
 
 #define EXT2_H
@@ -16,19 +18,19 @@
 #define EXT2_INFO
 
 #ifdef EXT2_DEBUG
-    #define EXT2_DEBUG_PRINT(fmt, ...) printf("%s VFS: " fmt, LOG_SYM_DEBUG, ##__VA_ARGS__)
+    #define EXT2_DEBUG_PRINT(fmt, ...) printf("%s EXT2: " fmt, LOG_SYM_DEBUG, ##__VA_ARGS__)
 #else
     #define EXT2_DEBUG_PRINT(fmt, ...)
 #endif
 
 #ifdef EXT2_INFO
-    #define EXT2_INFO_PRINT(fmt, ...) printf("%s VFS: " fmt, LOG_SYM_INF, ##__VA_ARGS__)
+    #define EXT2_INFO_PRINT(fmt, ...) printf("%s EXT2: " fmt, LOG_SYM_INF, ##__VA_ARGS__)
 #else
     #define EXT2_INFO_PRINT(fmt, ...)
 #endif
 
 #ifdef EXT2_ERR
-    #define EXT2_ERR_PRINT(fmt, ...) printf("%s VFS: " fmt, LOG_SYM_ERR, ##__VA_ARGS__)
+    #define EXT2_ERR_PRINT(fmt, ...) printf("%s EXT2: " fmt, LOG_SYM_ERR, ##__VA_ARGS__)
 #else
     #define EXT2_ERR_PRINT(fmt, ...)
 #endif
@@ -147,26 +149,60 @@ typedef struct  __attribute__((packed)) ext2_dir_entry {
     char name[];
 } ext2_dir_entry;
 
+// Small inline helper which calculates the size of a block from the superblock structure
 static inline size_t s_block_get_block_size(ext2_super_block* s_block){
     return 1024 << s_block->log_block_size;
 }
 
+// Small inline helper which calculates the number of blockgroups from the superblock structure
 static inline size_t get_number_of_block_groups(ext2_super_block* superblock){
     return UPPER_DIVIDE((uint64_t)superblock->inodecount, (uint64_t)superblock->number_of_inodes_per_group);
 }
 
-void ext2_init(filesystem_data* fs_data);
+/**
+ * @brief Reads the superblock from the first block on disk
+ * @param fs_data The data about the filesystem
+ * @return The super block structure, If the superblock is incorrect a 0'd out one
+ */
 ext2_super_block ext2_read_super_block(filesystem_data* fs_data);
+
 ext2_block_group_descriptor ext2_read_block_group_descriptor(filesystem_data* fs_data, ext2_super_block* s_block , uint64_t group_num);
 
-
+/**
+ * @brief gets the n-th block offset on disk for a specific inode
+ * @param fs_data The data about the filesystem
+ * @param s_block The superblock of the filesystem
+ * @param inode_num The inode_num to get the size_for
+ * @param block_index The block num to find the location on disk for
+ * @return The offset on disk
+ */
 uint64_t ext2_get_nth_block_offset_of_inode(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num, uint64_t block_index);
 
+
+/**
+ * @brief Reads the inode structure at an offset according to inode_num
+ * @param fs_data The data about the filesystem
+ * @param s_block The superblock of the filesystem
+ * @param inode_num The inode_num to get the size_for
+ * @return The size of the inode
+ */
 size_t ext2_get_inode_size(filesystem_data* fs_data, ext2_super_block* s_block, uint64_t inode_num);
 
+/**
+ * @brief Reads the inode structure at an offset according to inode_num
+ * @param fs_data The data about the filesystem
+ * @param s_block The superblock of the filesystem
+ * @param inode_num The inode_num to read metadata for
+ * @return 0 on fail, inode num at success 
+ */
 ext2_inode* ext2_read_inode_metadata(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num);
 
-
+/**
+ * @brief Read a range of data by offset and size from an inode(File)
+ * @param fs_data The data about the filesystem
+ * @param s_block The superblock of the filesystem
+ * @param inode_num The inode_num to read metadata for
+ */
 size_t ext2_read_inode(filesystem_data* fs_data, ext2_super_block* s_block, uint64_t inode_num, size_t offset_bytes, size_t count_bytes, void* out_buffer);
 
 /**
@@ -178,8 +214,16 @@ size_t ext2_read_inode(filesystem_data* fs_data, ext2_super_block* s_block, uint
  */
 uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_block* s_block, char* path);
 
-
-ext2_dir_entry ext2_find_inode_in_dir_by_name(filesystem_data* fs_data, ext2_super_block* s_block, int dir_inode_num, char* name, size_t name_size); //Returns 0 on fail
+/**
+ * @brief Finds if there is an entry with a matching name under the dir which is given by inode num
+ * @param fs_data The data about the filesystem
+ * @param s_block The superblock of the filesystem
+ * @param dir_inode_num The inode of the dir
+ * @param name The name of the entry to find
+ * @param name_size The number of chars in the name
+ * @return 0'd struct on fail, struct with matching name on success
+ */
+ext2_dir_entry ext2_find_inode_in_dir_by_name(filesystem_data* fs_data, ext2_super_block* s_block, int dir_inode_num, char* name, size_t name_size);
 
 /**
  * @brief List the content of a dir in path

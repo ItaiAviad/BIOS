@@ -27,6 +27,7 @@ This project is an educational operating system built from scratch for the x86\_
     - VGA
     - PCI
     - AHCI + SATA
+    - EXT2
     - Keyboard
   - **net/**: Networking source code
     - RTL8139 NIC
@@ -40,7 +41,7 @@ This project is an educational operating system built from scratch for the x86\_
     - Static ELF Loader
     - Process context switching
 
-  - **sched/**: Scheduling source code
+  - **sched/**: Scheduling source code - Not finished
 
 - **libc/**: Minimal C standard library
   - **endian/**: Endianness conversions
@@ -63,6 +64,13 @@ This project is an educational operating system built from scratch for the x86\_
 ---
 
 ## Demo
+The os loads a shell program as a user program from disk parses the elf and executes it
+The shell program allows to read files from the disk, Using commands: ls, cat, cd, clear, pwd, shutdown, echo, nslookup, bc(Calculator)
+The disk is an ext2 disk which is mounted under /mnt/mount1
+
+
+Networking might have some bugs and the communication with nic will stop working after afew minutes from boot
+
 
 --- 
 
@@ -83,6 +91,7 @@ This project is an educational operating system built from scratch for the x86\_
 
 
 ## Run
+start by running: ```make build``` followed by ```make ron```
 
 ### Online (includes networking, requires `sudo`)
 1. Setup Networking:

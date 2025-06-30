@@ -3,7 +3,7 @@
 #include <math.h>
  
 
-ext2_super_block ext2_read_super_block(filesystem_data* fs_data){
+ext2_super_block ext2_read_super_block(filesystem_data* fs_data) {
     ext2_super_block super_block;
     read_disk(fs_data->disk_number, fs_data->start_offset, sizeof(ext2_super_block), &super_block);
     if (super_block.magic != 0xEF53) {
@@ -13,16 +13,17 @@ ext2_super_block ext2_read_super_block(filesystem_data* fs_data){
     return super_block;
 }
 
-ext2_block_group_descriptor ext2_read_block_group_descriptor(filesystem_data* fs_data, ext2_super_block* s_block , uint64_t group_num){
+ext2_block_group_descriptor ext2_read_block_group_descriptor(filesystem_data* fs_data, ext2_super_block* s_block , uint64_t group_num) {
     ext2_block_group_descriptor block_group_descriptor;
     uint64_t block_size = s_block_get_block_size(s_block);
-    uint64_t bgdt_offset = fs_data->start_offset + (block_size > 1024 ? block_size : 1024);
-    read_disk(fs_data->disk_number, bgdt_offset + sizeof(ext2_block_group_descriptor) * group_num, sizeof(ext2_block_group_descriptor), &block_group_descriptor);
+    uint64_t bgdt_offset = fs_data->start_offset + (block_size > 1024 ? block_size : 1024); // The block group descriptor table is located one block after the superblock
+    read_disk(fs_data->disk_number, 
+        bgdt_offset + sizeof(ext2_block_group_descriptor) * group_num, 
+        sizeof(ext2_block_group_descriptor), &block_group_descriptor); // Read according to the group_num offset
     return block_group_descriptor;
 }
 
-ext2_inode* ext2_read_inode_metadata(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num){
-    uint64_t num_block_groups = get_number_of_block_groups(super_block);
+ext2_inode* ext2_read_inode_metadata(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num) {
     uint64_t block_group_num = (inode_num - 1) / super_block->number_of_inodes_per_group;
     ext2_block_group_descriptor block_group_descriptor = ext2_read_block_group_descriptor(fs_data, super_block, block_group_num);
     uint64_t inode_table_index = (inode_num - 1) % super_block->number_of_inodes_per_group;
@@ -43,13 +44,13 @@ ext2_dir_entry ext2_find_inode_in_dir_by_name(filesystem_data* fs_data, ext2_sup
 
 
 
-    while((((void*)curr_entry) - data + 1) < size_read){
+    while((((void*)curr_entry) - data + 1) < size_read){ //Go through all entries until a match is found
 
         if(strncmp(inode_name, curr_entry->name, MIN(curr_entry->name_length, name_size)) == 0){
             return *(curr_entry);
         } 
 
-        curr_entry = ((uint64_t) curr_entry) + curr_entry->size_of_entry;
+        curr_entry = ((uint64_t) curr_entry) + curr_entry->size_of_entry; //The entries are stack on after another so the offset of the next one is given by adding the previous ones size to its offset
     }
 
     free(data);
@@ -58,7 +59,7 @@ ext2_dir_entry ext2_find_inode_in_dir_by_name(filesystem_data* fs_data, ext2_sup
 
 }
 
-linkedListNode* ext2_list_dir(filesystem_data* fs_data, char* path){
+linkedListNode* ext2_list_dir(filesystem_data* fs_data, char* path) {
     linkedListNode* ret = NULL;
     ext2_super_block s_block = ext2_read_super_block(fs_data);
     uint64_t dir_inode_num = ext2_get_inode_number_at_path(fs_data, &s_block ,path);
@@ -75,7 +76,7 @@ linkedListNode* ext2_list_dir(filesystem_data* fs_data, char* path){
     uint64_t size_read = ext2_read_inode(fs_data, &s_block, dir_inode_num, 0, size, data);
     ext2_dir_entry* curr_entry = data;
 
-    while((((void*)curr_entry) - data + 1) < size_read){
+    while((((void*)curr_entry) - data + 1) < size_read) {
         char* str = malloc(curr_entry->name_length+1);
         memcpy(str, curr_entry->name, curr_entry->name_length);
         str[curr_entry->name_length] = 0;
@@ -86,12 +87,12 @@ linkedListNode* ext2_list_dir(filesystem_data* fs_data, char* path){
     return ret;
 }
 
-size_t ext2_get_inode_size(filesystem_data* fs_data, ext2_super_block* s_block, uint64_t inode_num){
+size_t ext2_get_inode_size(filesystem_data* fs_data, ext2_super_block* s_block, uint64_t inode_num) {
     ext2_inode* inode_meta = ext2_read_inode_metadata(fs_data, s_block, inode_num);
     return ((uint64_t)inode_meta->i_dir_acl << 32) | inode_meta->i_size;
 }
 
-uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_block* s_block, char* path){
+uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_block* s_block, char* path) {
     uint64_t ret = 0;
     char* path_preproccesed = preprocess_path(path);
     uint64_t current_inode = EXT2_ROOT_INODE;
@@ -116,7 +117,6 @@ uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_bloc
     }
 
     char *current_path_position = path_preproccesed;
-    char *current_seperator_position = path_preproccesed;
 
     // Skip the root `/` explicitly
     if (*current_path_position == PATH_SEPERATOR) {
@@ -152,11 +152,11 @@ uint64_t ext2_get_inode_number_at_path(filesystem_data* fs_data, ext2_super_bloc
 }
 
 
-size_t ext2_read_inode(filesystem_data* fs_data, ext2_super_block* s_block, uint64_t inode_num, size_t offset_bytes, size_t count_bytes, void* out_buffer){
+size_t ext2_read_inode(filesystem_data* fs_data, ext2_super_block* s_block, uint64_t inode_num, size_t offset_bytes, size_t count_bytes, void* out_buffer) {
     size_t max_read_size = ext2_get_inode_size(fs_data, s_block, inode_num);
     uint64_t block_size = s_block_get_block_size(s_block);
     uint64_t curr_read_offset = offset_bytes;
-    uint64_t end_offset = MIN(max_read_size, offset_bytes+count_bytes) - 1;
+    uint64_t end_offset = MIN(max_read_size, offset_bytes+count_bytes) - 1; // Don't read accidently more the the inodes size
 
     while (curr_read_offset <= end_offset)
     {
@@ -176,8 +176,7 @@ size_t ext2_read_inode(filesystem_data* fs_data, ext2_super_block* s_block, uint
  * Returns 0 on success, non-zero on failure (you can adapt this logic).
  * You already have a read(...) function; we wrap it for clarity.
  */
-static int read_full_block(filesystem_data* fs_data, uint32_t block_num, uint64_t block_size, void* buffer)
-{
+static int read_full_block(filesystem_data* fs_data, uint32_t block_num, uint64_t block_size, void* buffer){
     if (block_num == 0) {
         return -1; // invalid block number
     }
@@ -192,11 +191,11 @@ static int read_full_block(filesystem_data* fs_data, uint32_t block_num, uint64_
 }
 
 /**
- * A helper that returns the "index"-th 32-bit block pointer from the indirect
+ * @brief A helper that returns the "index"-th 32-bit block pointer from the indirect
  * block "indirect_block_num". In EXT2, an indirect block is just an array
  * of 32-bit block numbers.
  *
- * If something fails or the index is out of range, returns 0.
+ * @return if something fails or the index is out of range, returns 0, Other wise the num of the block
  */
 static uint32_t get_indirect_block_entry(filesystem_data* fs_data, uint32_t indirect_block_num, uint64_t block_size, uint32_t index){
     if (indirect_block_num == 0) {
@@ -223,17 +222,6 @@ static uint32_t get_indirect_block_entry(filesystem_data* fs_data, uint32_t indi
     return result;
 }
 
-/**
- * ext2_get_nth_block_offset:
- *  Given:
- *    - fs_data:          Your filesystem_data structure (has disk_number, start_offset)
- *    - super_block:      The ext2 superblock (used to get block_size if needed)
- *    - inode:            The inode struct, which has i_block[15] pointers
- *    - block_index:      The logical block index in this file (0-based)
- *
- *  Returns:
- *    The on-disk byte offset where this block is located, or 0 if invalid/unallocated.
- */
 uint64_t ext2_get_nth_block_offset_of_inode(filesystem_data* fs_data, ext2_super_block* super_block, uint64_t inode_num, uint64_t block_index){
     // 1) Get the actual block size
     uint64_t block_size = s_block_get_block_size(super_block);
