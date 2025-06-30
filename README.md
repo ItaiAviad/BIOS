@@ -68,7 +68,7 @@ The os loads a shell program as a user program from disk parses the elf and exec
 The shell program allows to read files from the disk, Using commands: ls, cat, cd, clear, pwd, shutdown, echo, nslookup, bc(Calculator)
 The disk is an ext2 disk which is mounted under /mnt/mount1
 
-![A run of the demo showing the fs functionality](demo_image.png.png)
+![A run of the demo showing the fs functionality](demo.png)
 
 
 Networking might have some bugs and the communication with nic will stop working after afew minutes from boot
