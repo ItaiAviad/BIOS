@@ -38,8 +38,8 @@ lba_to_chs:
 
 ; Disk Read Failure
 disk_read_fail:
-    mov si, msg_disk_read_failed
-    call puts
+    ; mov si, msg_disk_read_failed
+    ; call puts16
 
     ; Wait for a key press
     mov ah, 0x0
@@ -57,6 +57,20 @@ disk_read_fail:
 disk_read:
     ; Save modified registers
     pusha
+
+    push ax
+    push dx
+    push cx
+
+    mov dl, [drive_number]
+    mov ah, 0x08
+    int 0x13
+    mov [sectors_per_track], cl  ; Bits 0-5 = max sector
+    mov [number_heads], dh       ; Max head number
+    
+    pop cx
+    pop dx
+    pop ax
 
     push cx ; Save cx (number of sectors to read)
     call lba_to_chs
@@ -102,4 +116,4 @@ number_heads dw 1
 sectors_per_track dw 16
 drive_number db 0
 
-msg_disk_read_failed: db 'Disk Read Failed!', ENDL, 0
+; msg_disk_read_failed: db 'Disk Read Failed!', ENDL, 0

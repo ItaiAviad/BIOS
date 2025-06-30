@@ -1,5 +1,0 @@
-megs: 128
-floppya: 1_44=build/floppy.img, status=inserted
-boot: floppy
-mouse: enabled=0
-display_library: x, options="gui_debug"

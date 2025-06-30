@@ -10,12 +10,21 @@
 *.userosscache
 *.sln.docstates
 *.ini
+compile_commands.json
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
 # Mono auto generated files
 mono_crash.*
+
+# Custom files
+build/
+*.img
+*_temp
+
+log.txt
+
 
 # Build results
 [Dd]ebug/
@@ -214,16 +223,18 @@ csx/
 # Microsoft Azure Emulator
 ecf/
 rcf/
+bochs_config_temp
 
 # Windows Store app package directories and files
 AppPackages/
 BundleArtifacts/
 Package.StoreAssociation.xml
+temp_files/
 _pkginfo.txt
 *.appx
 *.appxbundle
 *.appxupload
-
+*.img
 # Visual Studio cache files
 # files ending in .cache can be ignored
 *.[Cc]ache
@@ -378,12 +389,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-*.code-workspace
 
 # Local History for Visual Studio Code
 .history/
@@ -397,3 +402,19 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+.gdb_history
+bx_enh_dbg.ini
+nohup.out
+log.txt
+log_debug.txt
+dump.dat
+./bron
+BIOS.drawio
+bochs_config
+.clangd
+.clang-format
+compile_commands.json
+.vscode/*
+.vscode/
+bron
+generate_compile_commands.sh
