@@ -2,6 +2,7 @@
 #include <arch/x86_64/mmu.h>
 #include <net/rtl8139.h>
 #include <unistd.h>
+#include <sched.h>
 
 // An array of strings in which exception_messages[i] specifies the i-th interrupt error code
 char *isr_exception_messages[] = {
@@ -86,7 +87,7 @@ void init_isr_handlers() {
 
 void isr_handler(const uint64_t isr_num, const uint64_t error_code, registers* regs){
 
-    
+    sched_triggered = false;
 
     // Virtual Address Space
     // Save current VAS
@@ -114,7 +115,7 @@ void isr_handler(const uint64_t isr_num, const uint64_t error_code, registers* r
     else if (isr_num >= 32) {
         if (isr_num == IRQ_PIT + PIC1_OFFSET) { // PIT IRQ
             pit_handler();
-            // handle_sched_on_pit_tick(regs);
+            handle_sched_on_pit_tick(regs);
         }
         else if (isr_num == IRQ_KEYBOARD + PIC1_OFFSET) { // Keyboard IRQ
             unsigned char in = inb(PS2_KEYBOARD_PORT_DATA);
@@ -138,7 +139,7 @@ void isr_handler(const uint64_t isr_num, const uint64_t error_code, registers* r
         }
     }
 
-    if(cr3_changed) {
+    if(cr3_changed && !sched_triggered) {
         flush_tlb();
         invlpg((uint64_t*)get_addr_from_table_indexes(PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM, PML4_RECURSIVE_ENTRY_NUM,PML4_RECURSIVE_ENTRY_NUM));
         set_pml4_address((uint64_t*) (prev_cr3));

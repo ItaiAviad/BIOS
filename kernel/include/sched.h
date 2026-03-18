@@ -7,6 +7,7 @@
 
 
 extern uint64_t last_context_switch_time;
+extern int sched_triggered;
 
 #include <process.h>
 

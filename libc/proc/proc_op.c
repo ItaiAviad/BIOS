@@ -27,6 +27,8 @@ int exec(char* path){
             map_memory_range(&kpcb, PROC_BIN_ADDR-PROC_STACK_SIZE, PROC_BIN_ADDR-PROC_STACK_SIZE+PROC_MEM_SIZE-1, pcb->real_mem_addr);
         }else{
             pcb->ppid = kpcb.pid;
+            cli();
+            pcb->state = READY;
             run_proc(pcb);
         }
     #else

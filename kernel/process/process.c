@@ -24,8 +24,8 @@ void deallocate_pid(uint64_t pid){
 
 uint64_t allocate_proc_mem(){
     for(int i = 0; i < MAX_NUM_OF_PROCESS; i++){
-        if(!(process_pid_bitmap & BITMASK(i))){
-            process_pid_bitmap |= BITMASK(i);
+        if(!(process_mem_bitmap & BITMASK(i))){
+            process_mem_bitmap |= BITMASK(i);
             return PROC_ALLOC_START + i * PROC_MEM_SIZE;
         }
     }
@@ -33,7 +33,7 @@ uint64_t allocate_proc_mem(){
 }
 
 void deallocate_proc_mem(uint64_t addr){
-        process_pid_bitmap &= ~BITMASK((addr - PROC_ALLOC_START) / PROC_MEM_SIZE);
+        process_mem_bitmap &= ~BITMASK((addr - PROC_ALLOC_START) / PROC_MEM_SIZE);
 }
 
 void init_kernel_process(void) {
@@ -88,7 +88,7 @@ PCB* alloc_proc(){
 
     *pcb = (struct ProcessControlBlock) {
         .pid = allocate_pid(),
-        .state = 0,
+        .state = WAITING,
         .priority = 0,
         .cpu_context = 0,
         .real_mem_addr = allocate_proc_mem(),
